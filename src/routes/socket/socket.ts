@@ -1,6 +1,8 @@
 import express, { Request, Response } from "express";
 const router = express.Router();
 
+var app = express();
+
 const _map = require("lodash/map");
 const _replace = require("lodash/replace");
 const _split = require("lodash/split");
@@ -25,14 +27,13 @@ const parseParams = (url: string, type: string) => {
 };
 
 router.get("/", (req, res) => {
-  console.log("a", res.locals.io);
   res.send("Socket Manual");
 });
 
 router.get("/manual/:type", function (req, res) {
   const { action, nodeSendArray } = parseParams(req.url, req.params.type);
   res.send(nodeSendArray);
-  // res.locals.io.emit(action, nodeSendArray);
+  res.locals.io.emit(action, nodeSendArray);
 });
 
 export const socket = router;

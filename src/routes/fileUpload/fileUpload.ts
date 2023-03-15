@@ -42,7 +42,7 @@ router.post("/", upload, async (req: Request, res: Response) => {
       })
       .toFile(tempThumb, (err: any, info: any) => {
         if (err) {
-          console.log(38, err);
+          console.log(err);
         } else {
           const fileStream = fs.createReadStream(tempThumb);
           const imgParamsA = {
@@ -73,7 +73,7 @@ router.post("/", upload, async (req: Request, res: Response) => {
         }
       });
   } catch (error) {
-    console.log("111 error", error);
+    console.log(error);
     res.send(error);
   }
 });

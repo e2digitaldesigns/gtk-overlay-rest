@@ -23,12 +23,12 @@ export interface IEpisodeTopic {
   isParent: boolean;
   name: string;
   order: number;
-  parentId: string;
+  parentId: Types.ObjectId | null;
   timer: number;
 }
 
 export interface IEpisode {
-  _id: string;
+  _id: Types.ObjectId;
   userId: Types.ObjectId;
   name: string;
   active: boolean;
@@ -37,7 +37,7 @@ export interface IEpisode {
   hosts: IEpisodeHost[];
   number: string | number;
   socialNetworks: IEpisodeSocials[];
-  templateId: string;
+  templateId: Types.ObjectId;
   ticker: IEpisodeTicker[];
   topics: IEpisodeTopic[];
   contentBoxes: any[];
@@ -56,7 +56,7 @@ const EpisodeTopicSchema = new Schema<IEpisodeTopic>({
   isParent: { type: Boolean, required: true, default: false },
   name: { type: String, required: true, default: " " },
   order: { type: Number, required: true, default: 0 },
-  parentId: { type: String, required: false },
+  parentId: { type: Schema.Types.ObjectId, default: null },
   timer: { type: Number, required: true, default: 0 }
 });
 
@@ -73,7 +73,7 @@ const EpisodeSchema = new Schema<IEpisode>({
   },
   number: { type: Number, required: true, default: 0 },
   socialNetworks: { type: [], required: true, default: [] },
-  templateId: { type: String, required: true, default: " " },
+  templateId: { type: Schema.Types.ObjectId },
   ticker: { type: [], required: true, default: [] },
   topics: { type: [EpisodeTopicSchema], required: true, default: [] },
   contentBoxes: { type: [], required: true, default: [] },

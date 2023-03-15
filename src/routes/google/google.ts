@@ -32,7 +32,7 @@ router.post("/", async (req: Request, res: Response) => {
     ).select({ __v: 0 });
 
     const secretKey = process.env.JWT_SECRET_TOKEN;
-    const options = { expiresIn: "12h" };
+    const options = { expiresIn: "24h" };
     const token = JWT.sign(
       { _id: theUser?._id, name: theUser?.name, picture: theUser?.picture },
       secretKey,

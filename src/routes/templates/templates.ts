@@ -10,13 +10,11 @@ const router = express.Router();
 const MODEL = TemplateModel;
 
 router.get("/", async (req: Request, res: Response) => {
-  console.log(13);
   try {
     const result = await MODEL.find().select({
       name: 1
     });
 
-    console.log(20, result);
     res.status(200).json(result);
   } catch (error) {
     console.log(24, error);

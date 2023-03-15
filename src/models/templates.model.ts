@@ -21,8 +21,8 @@ export interface ITemplateImagesDefault {
   height: number;
 }
 
-interface ITemplate {
-  _id: string;
+export interface ITemplate {
+  _id: Types.ObjectId;
   name: string;
   url: string;
   maxHosts: number;
@@ -35,7 +35,7 @@ interface ITemplate {
 }
 
 const TemplateSchema = new Schema<ITemplate>({
-  _id: "",
+  _id: { type: Schema.Types.ObjectId },
   name: { type: String, required: true, default: " " },
   url: { type: String, required: true, default: " " },
   maxHosts: { type: Number, required: true, default: 1 },
