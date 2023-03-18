@@ -24,7 +24,6 @@ interface IEpisodeResult extends IEpisode {
 }
 
 router.get("/", async (req: Request, res: Response) => {
-  console.log(27, res.locals.userId);
   try {
     const result = await MODEL.aggregate([
       {
@@ -50,8 +49,6 @@ router.get("/", async (req: Request, res: Response) => {
       }
     ]);
 
-    console.log(53, result);
-
     const episodeArray: EpisodeList[] = [];
 
     result.map((item: IEpisodeResult) => {
@@ -63,8 +60,6 @@ router.get("/", async (req: Request, res: Response) => {
         templateName: item.template?.[0]?.name || " "
       });
     });
-
-    console.log(episodeArray);
 
     res.status(200).json(episodeArray);
   } catch (error) {
@@ -95,7 +90,7 @@ router.get("/:_id", async (req: Request, res: Response) => {
     const { template, ...episode } = result[0];
 
     const data = {
-      template: template[0],
+      template: template?.[0],
       episode
     };
 

@@ -23,7 +23,7 @@ export interface IEpisodeTopic {
   isParent: boolean;
   name: string;
   order: number;
-  parentId: Types.ObjectId | null;
+  parentId: string;
   timer: number;
 }
 
@@ -56,7 +56,7 @@ const EpisodeTopicSchema = new Schema<IEpisodeTopic>({
   isParent: { type: Boolean, required: true, default: false },
   name: { type: String, required: true, default: " " },
   order: { type: Number, required: true, default: 0 },
-  parentId: { type: Schema.Types.ObjectId, default: null },
+  parentId: { type: String, required: true, default: " " },
   timer: { type: Number, required: true, default: 0 }
 });
 
