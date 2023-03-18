@@ -14,7 +14,7 @@ const MODEL = EpisodeModel;
 type EpisodeList = {
   _id: string;
   name: string;
-  airData: string;
+  airDate: string;
   current: boolean;
   templateName: string;
 };
@@ -55,7 +55,7 @@ router.get("/", async (req: Request, res: Response) => {
       episodeArray.push({
         _id: String(item._id),
         name: item.name,
-        airData: item.airDate,
+        airDate: item.airDate,
         current: item.current,
         templateName: item.template?.[0]?.name || " "
       });
@@ -122,7 +122,7 @@ router.post("/", async (req: Request, res: Response) => {
           timer: 0,
           isParent: false,
           isChild: false,
-          parentId: null,
+          parentId: " ",
           img: ""
         }
       ],
@@ -145,10 +145,22 @@ router.put("/:_id", async (req: Request, res: Response) => {
   try {
     const result = await MODEL.updateOne(
       {
-        _id: req.params._id
+        _id: req.params._id,
+        userId: new ObjectId(res.locals.userId)
       },
       { $set: { ...req.body } }
     );
+
+    if (result && req.body.current) {
+      await MODEL.updateMany(
+        {
+          _id: { $ne: req.params._id },
+          userId: new ObjectId(res.locals.userId),
+          templateId: new ObjectId(req.body.templateId)
+        },
+        { $set: { current: false } }
+      );
+    }
 
     res.status(200).json(result);
   } catch (error) {
