@@ -42,6 +42,8 @@ export interface IEpisode {
   topics: IEpisodeTopic[];
   contentBoxes: any[];
   sponsorBoxes: any[];
+  sponsorImages: string[];
+  logo: string;
 }
 
 const EpisodeHostSchema = new Schema<IEpisodeHost>({
@@ -77,7 +79,9 @@ const EpisodeSchema = new Schema<IEpisode>({
   ticker: { type: [], required: true, default: [] },
   topics: { type: [EpisodeTopicSchema], required: true, default: [] },
   contentBoxes: { type: [], required: true, default: [] },
-  sponsorBoxes: { type: [], required: true, default: [] }
+  sponsorBoxes: { type: [], required: true, default: [] },
+  sponsorImages: { type: [], required: true, default: [] },
+  logo: { type: String, required: true, default: " " }
 });
 
 export const EpisodeModel = model("episodes", EpisodeSchema);

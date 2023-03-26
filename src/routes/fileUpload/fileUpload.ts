@@ -36,7 +36,10 @@ router.post("/", upload, async (req: Request, res: Response) => {
     if (!process.env.AWS_SECRET_S3_BUCKET) throw new Error("No AWS S3 Bucket");
 
     await sharp(uploadedFile)
-      .resize(Number(req.body.width), Number(req.body.height))
+      .resize(Number(req.body.width), Number(req.body.height), {
+        fit: sharp.fit.cover,
+        position: "right top"
+      })
       .toFormat(path.extname(theFile.originalname).split(".")[1], {
         quality: 100
       })
@@ -72,6 +75,30 @@ router.post("/", upload, async (req: Request, res: Response) => {
           });
         }
       });
+  } catch (error) {
+    console.log(error);
+    res.send(error);
+  }
+});
+
+router.delete("/:_id", async (req: Request, res: Response) => {
+  try {
+    if (!process.env.AWS_SECRET_S3_BUCKET) throw new Error("No AWS S3 Bucket");
+
+    const imgParamsA = {
+      Bucket: process.env.AWS_SECRET_S3_BUCKET || "",
+      Key: `images/user-images/${req.params._id}`
+    };
+
+    s3bucket.deleteObject(imgParamsA, function (err: unknown, data: any) {
+      if (err) {
+        res.json({ err });
+      } else {
+        res.json({
+          success: 1
+        });
+      }
+    });
   } catch (error) {
     console.log(error);
     res.send(error);
