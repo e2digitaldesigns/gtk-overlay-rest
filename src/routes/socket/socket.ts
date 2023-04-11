@@ -21,7 +21,8 @@ const parseParams = (url: string, type: string) => {
   });
 
   return {
-    action: type === "vote" ? "mgVoting" : "mgOverlayActions",
+    // action: type === "vote" ? "mgVoting" : "mgOverlayActions",
+    action: type,
     nodeSendArray
   };
 };
