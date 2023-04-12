@@ -81,7 +81,7 @@ const EpisodeSchema = new Schema<IEpisode>({
   contentBoxes: { type: [], required: true, default: [] },
   sponsorBoxes: { type: [], required: true, default: [] },
   sponsorImages: { type: [], required: true, default: [] },
-  logo: { type: String, required: true, default: " " }
+  logo: { type: String, default: "" }
 });
 
 export const EpisodeModel = model("episodes", EpisodeSchema);

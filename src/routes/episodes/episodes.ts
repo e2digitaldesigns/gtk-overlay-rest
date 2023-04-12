@@ -4,6 +4,7 @@ import { verifyToken } from "../../middleware/verifyToken";
 import { EpisodeModel } from "../../models/episodes.model";
 import { ITemplate } from "../../models/templates.model";
 import { IEpisode } from "./../../models/episodes.model";
+import { s3ObjectCopy } from "../../utils/imageCopy";
 const ObjectId = mongoose.Types.ObjectId;
 
 const router = express.Router();
@@ -102,18 +103,53 @@ router.get("/:_id", async (req: Request, res: Response) => {
 });
 
 router.post("/", async (req: Request, res: Response) => {
+  const templateId = new ObjectId(req.body.templateId);
+
+  const { currentState } = req.body;
+
+  const hasTruthyValue = Object.values(currentState).some(value => value);
+
   try {
+    const lastEpisode = hasTruthyValue
+      ? await MODEL.findOne({
+          templateId,
+          current: true
+        }).select({
+          logo: 1,
+          hosts: 1,
+          number: 1,
+          socialNetworks: 1,
+          sponsorImages: 1,
+          ticker: 1
+        })
+      : null;
+
+    const newSponsorImages: string[] = [];
+    currentState?.sponsors &&
+      lastEpisode?.sponsorImages?.map((item: string) => {
+        const newItem = s3ObjectCopy(item);
+        newItem && newSponsorImages.push(newItem);
+      });
+
     const episode = {
       userId: new ObjectId(res.locals.userId),
       name: req.body.name,
       active: false,
       airDate: " ",
       current: false,
-      hosts: [],
-      number: "1",
-      socialNetworks: [],
-      templateId: new ObjectId(req.body.templateId),
-      ticker: [],
+      hosts: currentState.hosts && lastEpisode?.hosts ? lastEpisode.hosts : [],
+      logo:
+        currentState.logo && lastEpisode?.logo
+          ? s3ObjectCopy(lastEpisode.logo)
+          : "",
+      number: lastEpisode?.number || 1,
+      socialNetworks:
+        currentState.socialNetworks && lastEpisode?.socialNetworks
+          ? lastEpisode?.socialNetworks
+          : [],
+      templateId,
+      ticker:
+        currentState.news && lastEpisode?.ticker ? lastEpisode.ticker : [],
       topics: [
         {
           order: 1,
@@ -127,7 +163,8 @@ router.post("/", async (req: Request, res: Response) => {
         }
       ],
       contentBoxes: [],
-      sponsorBoxes: []
+      sponsorBoxes: [],
+      sponsorImages: newSponsorImages
     };
 
     const result = await MODEL.create({
