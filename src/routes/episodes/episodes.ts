@@ -113,7 +113,8 @@ router.post("/", async (req: Request, res: Response) => {
     const lastEpisode = hasTruthyValue
       ? await MODEL.findOne({
           templateId,
-          current: true
+          current: true,
+          userId: new ObjectId(res.locals.userId)
         }).select({
           logo: 1,
           hosts: 1,

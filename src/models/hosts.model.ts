@@ -1,6 +1,7 @@
 import { model, Schema, Types } from "mongoose";
 
 interface IHostSocials {
+  _id: string;
   username: string;
   site: String;
 }
