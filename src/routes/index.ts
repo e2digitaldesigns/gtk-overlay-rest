@@ -10,6 +10,7 @@ import { socials } from "./socials/socials";
 import { templates } from "./templates/templates";
 
 import { socket } from "./socket/socket";
+import { twitchChat } from "./twitchChat/twitchChat";
 
 export const routing = (app: Express) => {
   const prefix = "/api/v1/";
@@ -22,6 +23,7 @@ export const routing = (app: Express) => {
   app.use(`${prefix}shows`, shows);
   app.use(`${prefix}socials`, socials);
   app.use(`${prefix}templates`, templates);
+  app.use(`${prefix}twitch`, twitchChat);
   app.use(`${prefix}socket`, socket);
   app.use(`${prefix}upload`, fileUpload);
 };

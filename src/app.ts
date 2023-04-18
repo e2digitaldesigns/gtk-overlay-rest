@@ -5,12 +5,14 @@ if (process.env.NODE_ENV !== "production") {
 import express, { NextFunction, Request, Response } from "express";
 import { connectMongo } from "../mongoose";
 import { routing } from "./routes/index";
+import { twitchReConnect } from "./twitch/twitchReConnect";
 
 const app = express();
 app.use(require("cors")());
 app.use(express.json());
 
 connectMongo();
+twitchReConnect();
 
 const PORT = process.env.PORT || 8001;
 const server = app.listen(PORT, () => console.log(`Listening on port ${PORT}`));
