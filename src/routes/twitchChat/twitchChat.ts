@@ -11,11 +11,13 @@ const MODEL = TwitchAuthModel;
 const router = express.Router();
 
 router.post("/initChat", async (req: Request, res: Response) => {
+  console.log(req.body);
+
   try {
     if (!process.env.TWITCH_CLIENT_ID || !process.env.TWITCH_CLIENT_SECRET)
       throw new Error("No Twitch Client ID or Secret");
 
-    console.log(req.body);
+    console.log(20, "made  it here");
 
     const tokenData = {
       accessToken: req.body.access_token,
@@ -27,10 +29,10 @@ router.post("/initChat", async (req: Request, res: Response) => {
 
     twitchConnect(tokenData);
 
-    res.status(200).json(process.env.TWITCH_CLIENT_ID);
+    res.status(200).json({ message: "Twitch Chat Connected" });
   } catch (error) {
     console.log(error);
-    res.status(404).send(error);
+    res.json({ message: "bad", error });
   }
 });
 
