@@ -1,5 +1,5 @@
 import { RefreshingAuthProvider } from "@twurple/auth";
-import { Bot } from "@twurple/easy-bot";
+import { Bot, createBotCommand } from "@twurple/easy-bot";
 import { ApiClient } from "@twurple/api";
 import { promises as fs } from "fs";
 import axios from "axios";
@@ -12,10 +12,7 @@ type TokenData = {
   obtainmentTimestamp: number;
 };
 
-export const twitchConnect = async (
-  tokenData: TokenData,
-  channel: string = "icon33"
-): Promise<void> => {
+export const twitchConnect = async (tokenData: TokenData): Promise<void> => {
   try {
     if (!process.env.TWITCH_CLIENT_ID || !process.env.TWITCH_CLIENT_SECRET)
       throw new Error("No Twitch Client ID or Secret");
@@ -46,11 +43,14 @@ export const twitchConnect = async (
       config
     );
 
-    console.log(38, data.data[0].login);
-
     const bot = new Bot(null, {
       authProvider,
-      channels: [data.data[0].login]
+      channels: [data.data[0].login],
+      commands: [
+        createBotCommand("gtk", (params, { reply }) => {
+          reply("Gamer Tool Kit Baby!!!");
+        })
+      ]
     });
 
     bot.onMessage(async message => {
