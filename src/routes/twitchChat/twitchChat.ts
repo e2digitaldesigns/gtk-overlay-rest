@@ -1,23 +1,14 @@
 import express, { Request, Response } from "express";
-import { RefreshingAuthProvider } from "@twurple/auth";
-import { Bot } from "@twurple/easy-bot";
-import { ApiClient } from "@twurple/api";
-import { promises as fs } from "fs";
-
-import { TwitchAuthModel } from "../../models/twitch.model";
 import { twitchConnect } from "../../twitch/twitchConnect";
-const MODEL = TwitchAuthModel;
+import { verifyToken } from "../../middleware/verifyToken";
 
 const router = express.Router();
+router.use(verifyToken);
 
 router.post("/initChat", async (req: Request, res: Response) => {
-  console.log(req.body);
-
   try {
     if (!process.env.TWITCH_CLIENT_ID || !process.env.TWITCH_CLIENT_SECRET)
       throw new Error("No Twitch Client ID or Secret");
-
-    console.log(20, "made  it here");
 
     const tokenData = {
       accessToken: req.body.access_token,
@@ -27,7 +18,7 @@ router.post("/initChat", async (req: Request, res: Response) => {
       obtainmentTimestamp: 0
     };
 
-    twitchConnect(tokenData);
+    twitchConnect(res.locals.io, tokenData, res.locals.userId);
 
     res.status(200).json({ message: "Twitch Chat Connected" });
   } catch (error) {

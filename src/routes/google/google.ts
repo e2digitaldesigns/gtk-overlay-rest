@@ -33,8 +33,17 @@ router.post("/", async (req: Request, res: Response) => {
 
     const secretKey = process.env.JWT_SECRET_TOKEN;
     const options = { expiresIn: "24h" };
+
+    const twitchName =
+      JSON.parse(theUser?.twitchToken || "{}")?.twitchName || null;
+
     const token = JWT.sign(
-      { _id: theUser?._id, name: theUser?.name, picture: theUser?.picture },
+      {
+        _id: theUser?._id,
+        name: theUser?.name,
+        picture: theUser?.picture,
+        twitchName
+      },
       secretKey,
       options
     );

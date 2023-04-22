@@ -12,7 +12,6 @@ app.use(require("cors")());
 app.use(express.json());
 
 connectMongo();
-twitchReConnect();
 
 const PORT = process.env.PORT || 8001;
 const server = app.listen(PORT, () => console.log(`Listening on port ${PORT}`));
@@ -23,6 +22,8 @@ const io = require("socket.io")(server, {
     methods: ["GET"]
   }
 });
+
+twitchReConnect(io);
 
 app.get("/", async (req: Request, res: Response) => {
   res.send("GTK REST Service");

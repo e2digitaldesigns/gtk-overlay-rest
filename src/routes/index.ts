@@ -8,6 +8,7 @@ import { hosts } from "./hosts/hosts";
 import { shows } from "./show/show";
 import { socials } from "./socials/socials";
 import { templates } from "./templates/templates";
+import { users } from "./users/users";
 
 import { socket } from "./socket/socket";
 import { twitchChat } from "./twitchChat/twitchChat";
@@ -24,6 +25,7 @@ export const routing = (app: Express) => {
   app.use(`${prefix}socials`, socials);
   app.use(`${prefix}templates`, templates);
   app.use(`${prefix}twitch`, twitchChat);
+  app.use(`${prefix}users`, users);
   app.use(`${prefix}socket`, socket);
   app.use(`${prefix}upload`, fileUpload);
 };

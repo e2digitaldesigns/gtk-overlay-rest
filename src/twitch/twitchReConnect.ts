@@ -1,27 +1,33 @@
-import fs from "fs";
 import { twitchConnect } from "./twitchConnect";
+import { UsersModel } from "../models/users.model";
 
-export const twitchReConnect = async () => {
-  console.log("twitchConnect");
-
-  const directoryPath = "./src/twitch/tokens/";
-
+export const twitchReConnect = async (io: any) => {
   try {
     if (!process.env.TWITCH_CLIENT_ID || !process.env.TWITCH_CLIENT_SECRET)
       throw new Error("No Twitch Client ID or Secret");
 
-    const files = await fs.promises.readdir(directoryPath);
+    const users = await UsersModel.find({
+      twitchToken: { $exists: true }
+    }).select({ twitchToken: 1 });
 
-    files.map(async file => {
-      const tokenData = JSON.parse(
-        await fs.promises.readFile(directoryPath + file, "utf8")
-      );
+    users.map(async user => {
+      if (!user.twitchToken) return;
+      const tokenData = JSON.parse(user.twitchToken);
 
-      tokenData?.accessToken && twitchConnect(tokenData);
+      console.log(32, tokenData.expiresIn);
+
+      tokenData?.accessToken &&
+        twitchConnect(io, tokenData, user._id.toString());
     });
-
-    console.log(files);
   } catch (error) {
     console.log(error);
   }
+};
+
+export const twitchRefresh = (io: any) => {
+  twitchReConnect(io);
+
+  setInterval(() => {
+    twitchReConnect(io);
+  }, 1000 * 60 * 60 * 24);
 };

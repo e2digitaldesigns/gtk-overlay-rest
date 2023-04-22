@@ -27,11 +27,11 @@ const parseParams = (url: string, type: string) => {
   };
 };
 
-router.get("/", (req, res) => {
+router.get("/", (req: Request, res: Response) => {
   res.send("Socket Manual");
 });
 
-router.get("/manual/:type", function (req, res) {
+router.get("/manual/:type", function (req: Request, res: Response) {
   const { action, nodeSendArray } = parseParams(req.url, req.params.type);
   res.send(nodeSendArray);
   res.locals.io.emit(action, nodeSendArray);
