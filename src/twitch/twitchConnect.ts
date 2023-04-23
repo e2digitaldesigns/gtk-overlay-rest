@@ -1,4 +1,4 @@
-import { RefreshingAuthProvider } from "@twurple/auth";
+import { AccessToken, RefreshingAuthProvider } from "@twurple/auth";
 import { Bot, createBotCommand } from "@twurple/easy-bot";
 import { ApiClient } from "@twurple/api";
 import axios from "axios";
@@ -12,6 +12,10 @@ type TokenData = {
   expiresIn: number;
   obtainmentTimestamp: number;
 };
+
+interface gtkAccessToken extends AccessToken {
+  twitchUserName: string;
+}
 
 const MODEL = UsersModel;
 
@@ -48,13 +52,18 @@ export const twitchConnect = async (
       onRefresh: async (userId, newTokenData) => {
         console.log(32, "refreshed token:", userId);
 
+        const gtkTokenData: gtkAccessToken = {
+          ...newTokenData,
+          twitchUserName: userData.data[0].login
+        };
+
         await MODEL.updateOne(
           {
             _id: gtkUserId
           },
           {
             $set: {
-              twitchToken: JSON.stringify(newTokenData)
+              twitchToken: JSON.stringify(gtkTokenData)
             }
           }
         );
