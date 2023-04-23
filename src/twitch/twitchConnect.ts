@@ -4,6 +4,10 @@ import { ApiClient } from "@twurple/api";
 import axios from "axios";
 import { v4 } from "uuid";
 import { UsersModel } from "../models/users.model";
+import { TwitchAuthModel } from "../models/twitch.model";
+
+import mongoose from "mongoose";
+const ObjectId = mongoose.Types.ObjectId;
 
 type TokenData = {
   accessToken: string;
@@ -22,7 +26,7 @@ const MODEL = UsersModel;
 export const twitchConnect = async (
   io: any,
   tokenData: TokenData,
-  gtkUserId?: string | null
+  gtkUserId?: string
 ): Promise<void> => {
   try {
     if (!process.env.TWITCH_CLIENT_ID || !process.env.TWITCH_CLIENT_SECRET)
@@ -40,37 +44,36 @@ export const twitchConnect = async (
       TWITCH_CONFIG
     );
 
-    ////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////
-
-    ////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////
-
     const authProvider = new RefreshingAuthProvider({
       clientId: process.env.TWITCH_CLIENT_ID,
       clientSecret: process.env.TWITCH_CLIENT_SECRET,
       onRefresh: async (userId, newTokenData) => {
-        console.log(32, "refreshed token:", userId);
-
-        const gtkTokenData: gtkAccessToken = {
-          ...newTokenData,
-          twitchUserName: userData.data[0].login
-        };
-
-        await MODEL.updateOne(
+        await TwitchAuthModel.findOneAndUpdate(
           {
-            _id: gtkUserId
+            userId: new ObjectId(gtkUserId)
           },
           {
-            $set: {
-              twitchToken: JSON.stringify(gtkTokenData)
-            }
-          }
+            accessToken: newTokenData.accessToken,
+            refreshToken: newTokenData.refreshToken,
+            scope: newTokenData.scope,
+            expiresIn: newTokenData.expiresIn,
+            obtainmentTimestamp: newTokenData.obtainmentTimestamp,
+            twitchUserName: userData.data[0].login,
+            twitchUserId: userId
+          },
+          { upsert: true }
         );
+      },
+
+      onRefreshFailure: async (userId: string) => {
+        await TwitchAuthModel.deleteOne({
+          twitchUserId: userId
+        });
       }
     });
 
     await authProvider.addUserForToken(tokenData, ["chat"]);
+
     const api = new ApiClient({ authProvider });
 
     const bot = new Bot(null, {
@@ -78,7 +81,7 @@ export const twitchConnect = async (
       channels: [userData.data[0].login],
       commands: [
         createBotCommand("gtk", (params, { reply }) => {
-          reply("Gamer Tool Kit Baby!!!");
+          reply(`Gamer Tool Kit`);
         })
       ]
     });
@@ -90,8 +93,6 @@ export const twitchConnect = async (
         `https://api.twitch.tv/helix/chat/color?user_id=${message.userId}`,
         TWITCH_CONFIG
       );
-
-      console.log(68, `${message.userDisplayName}: ${message.text}`);
 
       io.emit("gtkChatRelay", {
         _id: v4(),
