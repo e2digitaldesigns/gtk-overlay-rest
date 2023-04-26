@@ -7,6 +7,7 @@ import { UsersModel } from "../models/users.model";
 import { TwitchAuthModel } from "../models/twitch.model";
 
 import mongoose from "mongoose";
+import { twitchChatParser } from "./messageParser";
 const ObjectId = mongoose.Types.ObjectId;
 
 type TokenData = {
@@ -89,6 +90,9 @@ export const twitchConnect = async (
     bot.onMessage(async message => {
       const user = await api.users.getUserById(message.userId);
 
+      console.log(93, message.emoteOffsets);
+      console.log(94, Array.from(message.emoteOffsets.entries()));
+
       const { data } = await axios.get(
         `https://api.twitch.tv/helix/chat/color?user_id=${message.userId}`,
         TWITCH_CONFIG
@@ -99,8 +103,10 @@ export const twitchConnect = async (
         broadcasterName: message.broadcasterName,
         name: message.userDisplayName,
         msg: message.text,
+        msgEmotes: twitchChatParser(message.text, message.emoteOffsets),
         url: user?.profilePictureUrl,
-        fontColor: data?.data?.[0]?.color
+        fontColor: data?.data?.[0]?.color,
+        emotes: Array.from(message.emoteOffsets.entries()).length
       });
     });
   } catch (error) {
