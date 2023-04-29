@@ -65,6 +65,7 @@ router.get(
 );
 
 router.get("/twitchUsername/:userId", async (req: Request, res: Response) => {
+  console.log(68, req.params.userId);
   try {
     const twitchUser = await TwitchAuthModel.findOne({
       userId: new ObjectId(req.params.userId)

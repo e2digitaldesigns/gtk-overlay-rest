@@ -90,8 +90,7 @@ export const twitchConnect = async (
     bot.onMessage(async message => {
       const user = await api.users.getUserById(message.userId);
 
-      console.log(93, message.emoteOffsets);
-      console.log(94, Array.from(message.emoteOffsets.entries()));
+      console.log(93, message.userDisplayName, message.text);
 
       const { data } = await axios.get(
         `https://api.twitch.tv/helix/chat/color?user_id=${message.userId}`,
