@@ -30,7 +30,11 @@ export const twitchConnect = async (
   gtkUserId?: string
 ): Promise<void> => {
   try {
-    if (!process.env.TWITCH_CLIENT_ID || !process.env.TWITCH_CLIENT_SECRET)
+    if (
+      !process.env.TWITCH_CLIENT_ID ||
+      !process.env.TWITCH_CLIENT_SECRET ||
+      !tokenData.accessToken
+    )
       throw new Error("No Twitch Client ID or Secret");
 
     const TWITCH_CONFIG = {
@@ -92,10 +96,26 @@ export const twitchConnect = async (
 
       console.log(93, message.userDisplayName, message.text);
 
-      const { data } = await axios.get(
-        `https://api.twitch.tv/helix/chat/color?user_id=${message.userId}`,
-        TWITCH_CONFIG
-      );
+      const userApi = `https://api.twitch.tv/helix/chat/color?user_id=${message.userId}`;
+
+      // const { data } = await axios.get(
+      //   `https://api.twitch.tv/helix/chat/color?user_id=${message.userId}`,
+      //   TWITCH_CONFIG
+      // );
+
+      // let data: any;
+
+      // await axios
+      //   .get(userApi)
+      //   .then(response => {
+      //     console.log("success", response);
+      //     data = response.data;
+      //     // return response;
+      //   })
+      //   .catch(error => {
+      //     console.log("error", error);
+      //     // return error;
+      //   });
 
       io.emit("gtkChatRelay", {
         _id: v4(),
@@ -104,7 +124,8 @@ export const twitchConnect = async (
         msg: message.text,
         msgEmotes: twitchChatParser(message.text, message.emoteOffsets),
         url: user?.profilePictureUrl,
-        fontColor: data?.data?.[0]?.color,
+        // fontColor: data?.data?.[0]?.color,
+        fontColor: "#ffffff",
         emotes: Array.from(message.emoteOffsets.entries()).length
       });
     });
