@@ -1,4 +1,4 @@
-import { twitchConnect } from "./twitchConnect";
+import { twitchBotInit } from "./twitchConnect";
 import { TwitchAuthModel } from "../models/twitch.model";
 
 export const twitchReConnect = async (io: any) => {
@@ -9,15 +9,7 @@ export const twitchReConnect = async (io: any) => {
     const twitchUsers = await TwitchAuthModel.find().select({ __v: 0 });
 
     twitchUsers.map(async token => {
-      const tokenData = {
-        accessToken: token.accessToken,
-        refreshToken: token.refreshToken,
-        scope: token.scope,
-        expiresIn: token.expiresIn,
-        obtainmentTimestamp: token.obtainmentTimestamp
-      };
-
-      await twitchConnect(io, tokenData, token.userId.toString());
+      await twitchBotInit(io, token.userId.toString());
     });
   } catch (error) {
     console.log(error);

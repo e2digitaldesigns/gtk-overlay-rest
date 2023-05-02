@@ -5,9 +5,10 @@ type StringReplacement = {
 
 export function twitchChatParser(
   message: string,
-  emotesMap: Map<string, string[]>
+  emotesMap: { [key: string]: string[] } | null
 ) {
-  const emotesArr = Array.from(emotesMap.entries());
+  const emotesArr =
+    typeof emotesMap === "object" && emotesMap ? Object.entries(emotesMap) : [];
   if (!emotesArr.length) return message;
   const stringReplacements: StringReplacement[] = [];
   let messageHTML = "";
@@ -29,7 +30,7 @@ export function twitchChatParser(
 
     messageHTML = stringReplacements.reduce(
       (
-        acc: any,
+        acc: string,
         {
           stringToReplace,
           replacement

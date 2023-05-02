@@ -6,6 +6,10 @@ import express, { NextFunction, Request, Response } from "express";
 import { connectMongo } from "../mongoose";
 import { routing } from "./routes/index";
 import { twitchReConnect } from "./twitch/twitchReConnect";
+import {
+  initTwitchBot,
+  refreshTwitchAccessToken
+} from "./routes/twitchBot/twitchBot";
 
 const app = express();
 app.use(require("cors")());
@@ -23,15 +27,24 @@ const io = require("socket.io")(server, {
   }
 });
 
-twitchReConnect(io);
+// twitchReConnect(io);
+
+let twitchClient: any = null;
+
+refreshTwitchAccessToken();
+setTimeout(async () => {
+  twitchClient = await initTwitchBot(io);
+}, 2000);
 
 app.get("/", async (req: Request, res: Response) => {
   res.send("GTK REST Service");
 });
 
 app.set("socketio", io);
+
 app.use((req: Request, res: Response, next: NextFunction) => {
   res.locals.io = io;
+  res.locals.twitchClient = twitchClient;
   return next();
 });
 
