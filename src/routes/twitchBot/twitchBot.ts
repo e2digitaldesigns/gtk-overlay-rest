@@ -64,8 +64,6 @@ export const initTwitchBot = async (io: any) => {
 
   client.connect().catch(console.error);
 
-  setTimeout(() => {}, 5000);
-
   return client;
 };
 
@@ -145,18 +143,30 @@ const twitchValidate = async (accessToken: string): Promise<boolean> => {
 const getUserProfileImage = async (
   accessToken: string,
   username: string
-): Promise<string> => {
-  const response = await axios.get(
-    `https://api.twitch.tv/helix/users?login=${username}`,
-    {
-      headers: {
-        "Client-ID": process.env.TWITCH_CLIENT_ID,
-        Authorization: `Bearer ${accessToken}`
+): Promise<string | null> => {
+  try {
+    const response = await axios.get(
+      `https://api.twitch.tv/helix/users?login=${username}`,
+      {
+        headers: {
+          "Client-ID": process.env.TWITCH_CLIENT_ID,
+          Authorization: `Bearer ${accessToken}`
+        }
       }
-    }
-  );
+    );
 
-  return response.data.data[0].profile_image_url;
+    return response.data.data[0].profile_image_url;
+  } catch (error: any) {
+    console.log("xxxxx xxxxx xxxxx xxxxx xxxxx xxxxx xxxxx xxxxx ");
+    console.log("xxxxx xxxxx xxxxx xxxxx xxxxx xxxxx xxxxx xxxxx ");
+    console.log("xxxxx xxxxx xxxxx xxxxx xxxxx xxxxx xxxxx xxxxx ");
+    console.log(151, error?.response?.data);
+    console.log("xxxxx xxxxx xxxxx xxxxx xxxxx xxxxx xxxxx xxxxx ");
+    console.log("xxxxx xxxxx xxxxx xxxxx xxxxx xxxxx xxxxx xxxxx ");
+    console.log("xxxxx xxxxx xxxxx xxxxx xxxxx xxxxx xxxxx xxxxx ");
+
+    return null;
+  }
 };
 
 export const isUserConnected = (client: any, username: string): boolean => {
