@@ -9,22 +9,21 @@ import { GtkTwitchBotModel } from "../../models/gtkBot.model";
 import { twitchChatParser } from "../../twitch/messageParser";
 import { TwitchAuthModel } from "../../models/twitch.model";
 
-const TWITCH_EXPIRE_TIME = 5 * 60 * 1000; // 5 minutes
 const TWITCH_BOT_NAME = "iconicbotty";
-const twitchProfileImageCache = new NodeCache();
 let setTimerId: any;
+const twitchProfileImageCache = new NodeCache();
 
 export const initTwitchBot = async (io: any) => {
   try {
     const twitchData = await getTwitchBotData();
-    if (!twitchData) throw new Error("19 initTwitchBot: No Twitch Data");
+    if (!twitchData) throw new Error("19 No Twitch Data");
 
     const client = new tmi.Client({
       identity: {
         username: TWITCH_BOT_NAME,
-        password: twitchData.accessToken
+        password: twitchData?.accessToken
       },
-      channels: [TWITCH_BOT_NAME]
+      channels: [twitchData?.twitchUserName]
     });
 
     client.on(
@@ -33,15 +32,9 @@ export const initTwitchBot = async (io: any) => {
         console.log(tags.username, message);
         if (self) return;
         if (message.toLowerCase() === "!gtk") {
-          client.say(channel, `GTK Baby Remix!, ...${process.env.ENVIROMENT}`);
+          client.say(channel, `GTK Baby!, ...${process.env.ENVIROMENT}`);
         }
-      }
-    );
 
-    client.on(
-      "message",
-      async (channel: string, tags: any, message: string, self: boolean) => {
-        if (self) return;
         io.emit("gtkChatRelay", {
           _id: tags.id,
           broadcasterName: channel.replace("#", "").toLowerCase(),
@@ -61,12 +54,13 @@ export const initTwitchBot = async (io: any) => {
     client.on("connected", async (address: number, port: number) => {
       console.log(`* Connected to ${address}:${port}`);
 
+      //add user from database to channel
       const allUsers = await TwitchAuthModel.find().select({
         twitchUserName: 1
       });
 
       allUsers.forEach(user => {
-        console.log(63, `added ${user.twitchUserName} to twitch channel chat `);
+        console.log(63, user.twitchUserName);
 
         setTimeout(() => {
           client.join(user.twitchUserName);
@@ -75,57 +69,65 @@ export const initTwitchBot = async (io: any) => {
     });
 
     client.connect().catch(console.error);
+
     return client;
-  } catch (error) {}
+  } catch (error) {
+    console.log(75, error);
+    return null;
+  }
 };
 
 export const refreshTwitchAccessToken = async () => {
-  clearTimeout(setTimerId);
-
   try {
     const twitchData = await getTwitchBotData();
-    if (!twitchData)
-      throw new Error("19 refreshTwitchAccessToken: No Twitch Data");
+    if (!twitchData) throw new Error("83 No Twitch Data");
 
-    const response = await axios.post(
-      `https://id.twitch.tv/oauth2/token?grant_type=refresh_token&refresh_token=${twitchData.refreshToken}&client_id=${process.env.TWITCH_CLIENT_ID}&client_secret=${process.env.TWITCH_CLIENT_SECRET}`
-    );
+    const clientId = process.env.TWITCH_CLIENT_ID;
+    const clientSecret = process.env.TWITCH_CLIENT_SECRET;
+    const refreshToken = twitchData.refreshToken;
+    const expiresIn = twitchData.expiresIn;
 
-    if (response.status !== 200)
-      throw new Error("26 refreshTwitchAccessToken: Twitch Refresh Failed");
+    const twitchRefreshUrl = `https://id.twitch.tv/oauth2/token?grant_type=refresh_token&client_id=${clientId}&client_secret=${clientSecret}&refresh_token=${refreshToken}`;
 
-    await GtkTwitchBotModel.findOneAndUpdate(
+    const { data } = await axios.post(twitchRefreshUrl);
+
+    if (!data.access_token) throw new Error("94 No Access Token");
+
+    await GtkTwitchBotModel.updateOne(
       {
         twitchUserName: TWITCH_BOT_NAME
       },
       {
-        $set: {
-          accessToken: response.data.access_token,
-          expiresIn: response.data.expires_in,
-          expirationTime: getExpirationTime(response.data.expires_in)
-        }
+        accessToken: data.access_token,
+        expiresIn: data.expires_in
       },
-      { new: true }
+      { upsert: true }
     );
 
-    setTimerId = setTimeout(() => {
-      refreshTwitchAccessToken();
-    }, (response.data.expires_in - 300) * 1000);
+    console.log(
+      107,
+      `Access token refreshed: new access token expires in ${expiresIn} seconds.`
+    );
 
-    console.log(`Twitch Token is Refreshed: ${response.data.access_token}`);
+    setTimerId = setTimeout(function () {
+      refreshTwitchAccessToken();
+    }, (expiresIn - 60) * 1000);
   } catch (error) {
+    console.log("yyyyy yyyyy yyyyy yyyyy yyyyy yyyyy yyyyy yyyyy ");
     console.log(error);
+    console.log("yyyyy yyyyy yyyyy yyyyy yyyyy yyyyy yyyyy yyyyy ");
   }
 };
 
-async function twitchValidate() {
+const twitchValidate = async (): Promise<boolean> => {
   try {
     const twitchData = await getTwitchBotData();
     if (!twitchData) throw new Error("125 No Twitch Data");
-    console.log(`Twitch Token is Validating: ${twitchData.accessToken}`);
+    console.log(126, "twitchValidate", twitchData.accessToken);
 
     const validate = await axios.get("https://id.twitch.tv/oauth2/validate", {
       headers: {
+        "Client-ID": process.env.TWITCH_CLIENT_ID,
         Authorization: `Bearer ${twitchData.accessToken}`
       }
     });
@@ -139,19 +141,27 @@ async function twitchValidate() {
     console.log(141, error?.response?.data);
     return false;
   }
-}
+};
 
-async function getUserProfileImage(username: string) {
+const getUserProfileImage = async (
+  username: string
+): Promise<string | null> => {
   const cachedImage = twitchProfileImageCache.get(username);
   console.log(150, cachedImage);
   if (cachedImage) return cachedImage;
 
   try {
     const twitchData = await getTwitchBotData();
-    if (!twitchData)
-      throw new Error("19 refreshTwitchAccessToken: No Twitch Data");
+    if (!twitchData) throw new Error("155 No Twitch Data");
+    console.log(156, "gupi accessToken", twitchData.accessToken);
 
-    const { data } = await axios.get(
+    // const validate = await twitchValidate();
+
+    // if (!validate) {
+    //   throw new Error("161 Invalid Twitch Token");
+    // }
+
+    const response = await axios.get(
       `https://api.twitch.tv/helix/users?login=${username}`,
       {
         headers: {
@@ -161,29 +171,28 @@ async function getUserProfileImage(username: string) {
       }
     );
 
-    if (data.status !== 200) {
-      await refreshTwitchAccessToken();
-    }
-
-    const image = data.data[0].profile_image_url;
+    const image = response.data.data[0].profile_image_url;
 
     if (image) {
-      console.log(178, image);
       twitchProfileImageCache.set(username, image);
+      console.log(178, image);
       return image;
     } else {
       return null;
     }
-  } catch (error) {
-    console.log(error);
+  } catch (error: any) {
+    console.log("xxxxx xxxxx xxxxx xxxxx xxxxx xxxxx xxxxx xxxxx ");
+    console.log(185, error);
+    console.log(186, error?.response?.data);
+    console.log("xxxxx xxxxx xxxxx xxxxx xxxxx xxxxx xxxxx xxxxx ");
     return null;
   }
-}
+};
 
-export async function isUserConnected(client: any, username: string) {
+export const isUserConnected = (client: any, username: string): boolean => {
   const channels = client.getChannels();
   return channels.some((channel: any) => channel.slice(1) === username);
-}
+};
 
 async function getTwitchBotData() {
   try {
@@ -191,32 +200,14 @@ async function getTwitchBotData() {
       twitchUserName: TWITCH_BOT_NAME
     }).select({
       accessToken: 1,
-      expirationTime: 1,
       expiresIn: 1,
       refreshToken: 1
     });
 
+    if (!twitchData) throw new Error("207 No Twitch Data");
+    console.log(208, "accessToken", twitchData.accessToken);
     return twitchData;
   } catch (error) {
-    return null;
+    console.log(211, "getTwitchBotData: error:", error);
   }
 }
-
-function getExpirationTime(expiresIn: number) {
-  return Date.now() + expiresIn * 1000;
-}
-
-export async function twitchValidationWatcher() {
-  setInterval(async () => {
-    const isValid = await twitchValidate();
-
-    if (isValid) {
-      console.log("Twitch Token is Valid");
-    } else {
-      console.log("Twitch Token is Refreshing");
-      await refreshTwitchAccessToken();
-    }
-  }, 5 * 60 * 1000);
-}
-
-twitchValidationWatcher();
