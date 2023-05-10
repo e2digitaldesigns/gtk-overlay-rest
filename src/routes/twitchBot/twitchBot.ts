@@ -11,7 +11,7 @@ import { TwitchAuthModel } from "../../models/twitch.model";
 
 const TWITCH_EXPIRE_TIME = 5 * 60 * 1000; // 5 minutes
 const TWITCH_BOT_NAME = "iconicbotty";
-const twitchProfileImageCache = new NodeCache();
+const twitchProfileImageCache = new NodeCache({ stdTTL: 60 * 60 * 1000 });
 let setTimerId: any;
 
 export const initTwitchBot = async (io: any) => {

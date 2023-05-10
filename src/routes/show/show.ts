@@ -8,6 +8,11 @@ import { EpisodeModel } from "../../models/episodes.model";
 import { socialParser } from "./utils/socialParser";
 import { sortTopics } from "./utils/sortTopics";
 import { hostParser } from "./utils/hostParser";
+import {
+  logoImageParser,
+  sponsorImageParser,
+  topicImageParser
+} from "./utils/imageParsers";
 
 const router = express.Router();
 
@@ -45,12 +50,14 @@ router.get(
 
       const result = {
         ...epData,
+        logo: logoImageParser(epData?.logo),
         hosts: hostParser(epData?.availableHosts, epData?.hosts),
+        sponsorImages: sponsorImageParser(epData?.sponsorImages),
         socialNetworks: socialParser(
           epData?.databaseSocials,
           epData?.socialNetworks
         ),
-        topics: sortTopics(epData?.topics)
+        topics: sortTopics(topicImageParser(epData?.topics))
       };
 
       delete result.availableHosts;
@@ -102,7 +109,9 @@ router.get(
 
       const result = {
         ...epData,
+        logo: logoImageParser(epData?.logo),
         hosts: hostParser(epData.availableHosts, epData.hosts),
+        sponsorImages: sponsorImageParser(epData?.sponsorImages),
         socialNetworks: socialParser(
           epData.databaseSocials,
           epData.socialNetworks

@@ -154,13 +154,14 @@ router.post("/", async (req: Request, res: Response) => {
       topics: [
         {
           order: 1,
-          name: "Topic",
-          desc: "Description",
+          name: "New Topic",
+          desc: "Topic Description",
           timer: 0,
           isParent: false,
           isChild: false,
           parentId: " ",
-          img: ""
+          img: "",
+          articles: ""
         }
       ],
       contentBoxes: [],
@@ -202,7 +203,7 @@ router.put("/:_id", async (req: Request, res: Response) => {
 
     res.status(200).json(result);
   } catch (error) {
-    console.log(error);
+    console.log(209, error);
     res.status(404).send(error);
   }
 });
