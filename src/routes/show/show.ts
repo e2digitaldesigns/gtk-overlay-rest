@@ -129,4 +129,20 @@ router.get(
   }
 );
 
+router.get("/showRunner/:_id", async (req: Request, res: Response) => {
+  console.log(1, req.params._id);
+  try {
+    const result = await EpisodeModel.findById(req.params._id)
+      .select({ topics: 1, airDate: 1, number: 1, name: 1 })
+      .exec();
+
+    console.log(result);
+
+    res.status(200).json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(404).send(error);
+  }
+});
+
 export const shows = router;
