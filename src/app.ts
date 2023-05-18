@@ -10,6 +10,7 @@ import {
   initTwitchBot,
   refreshTwitchAccessToken
 } from "./routes/twitchBot/twitchBot";
+import { TwitchBot } from "./routes/twitchBot/twitchBotClass";
 
 const app = express();
 app.use(require("cors")());
@@ -31,10 +32,14 @@ const io = require("socket.io")(server, {
 
 let twitchClient: any = null;
 
-refreshTwitchAccessToken();
-setTimeout(async () => {
-  twitchClient = await initTwitchBot(io);
-}, 2000);
+// refreshTwitchAccessToken();
+// setTimeout(async () => {
+//   twitchClient = await initTwitchBot(io);
+// }, 2000);
+
+const twitchBot = new TwitchBot(io);
+twitchBot.refreshTwitchAccessToken();
+twitchBot.initTwitchBot();
 
 app.get("/", async (req: Request, res: Response) => {
   res.send("GTK REST Service");
