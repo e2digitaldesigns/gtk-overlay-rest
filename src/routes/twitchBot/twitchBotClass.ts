@@ -14,7 +14,6 @@ export class TwitchBot {
   setTimerId: any;
   socket: any;
   twitchProfileImageCache: any;
-  helper: any;
 
   constructor(socket: any) {
     this.socket = socket;
@@ -101,7 +100,10 @@ export class TwitchBot {
           );
 
           setTimeout(() => {
-            client.join(user.twitchUserName);
+            client.join(user.twitchUserName).catch((err: unknown) => {
+              console.log(111, "error joining channel");
+              console.log(112, err);
+            });
           }, 250);
         });
       });
@@ -155,7 +157,6 @@ export class TwitchBot {
 
       this.setTimerId = setTimeout(() => {
         this.refreshTwitchAccessToken();
-        this.initTwitchBot();
       }, (response.data.expires_in - 300) * 1000);
 
       console.log(`Twitch Token is Refreshed: ${response.data.access_token}`);
