@@ -8,18 +8,22 @@ const NodeCache = require("node-cache");
 import { GtkTwitchBotModel } from "../../models/gtkBot.model";
 import { twitchChatParser } from "../../twitch/messageParser";
 import { TwitchAuthModel } from "../../models/twitch.model";
+import { chatCommandParser } from "./utils/chatCommandParser";
+import { ChatLogModel } from "../../models/chatLog.model";
 
 export class TwitchBot {
   botName: string;
   setTimerId: any;
   socket: any;
   twitchProfileImageCache: any;
+  client: any;
 
   constructor(socket: any) {
     this.socket = socket;
     this.botName = "iconicbotty";
     this.twitchProfileImageCache = new NodeCache({ stdTTL: 60 * 60 * 1000 });
     this.setTimerId = null;
+    this.client = null;
   }
 
   private async getTwitchBotData(): Promise<any | null> {
@@ -39,37 +43,47 @@ export class TwitchBot {
     }
   }
 
-  async initTwitchBot(): Promise<any | null> {
+  async initTwitchBot(): Promise<unknown | null> {
     try {
       const twitchData = await this.getTwitchBotData();
       if (!twitchData) throw new Error("43 initTwitchBot: No Twitch Data");
 
-      const client = new tmi.Client({
+      this.client = new tmi.Client({
+        channels: [this.botName],
         identity: {
           username: this.botName,
           password: twitchData.accessToken
-        },
-        channels: [this.botName]
+        }
       });
 
-      client.on(
+      this.client.on(
         "message",
         async (channel: string, tags: any, message: string, self: boolean) => {
-          console.log(tags.username, message);
           if (self) return;
-          if (message.toLowerCase() === "!gtk") {
-            client.say(
-              channel,
-              `GTK Baby Remix!, ...${process.env.ENVIROMENT}`
-            );
-          }
+
+          await ChatLogModel.create({
+            platform: "twitch",
+            channel: channel.replace("#", "").toLowerCase(),
+            username: tags["display-name"] || tags.username
+          });
         }
       );
 
-      client.on(
+      this.client.on(
         "message",
         async (channel: string, tags: any, message: string, self: boolean) => {
           if (self) return;
+
+          if (message.trim().startsWith("!")) {
+            chatCommandParser(
+              this.client,
+              this.socket,
+              message.trim(),
+              channel,
+              tags
+            );
+          }
+
           this.socket.emit("gtkChatRelay", {
             _id: tags.id,
             broadcasterName: channel.replace("#", "").toLowerCase(),
@@ -86,7 +100,7 @@ export class TwitchBot {
         }
       );
 
-      client.on("connected", async (address: number, port: number) => {
+      this.client.on("connected", async (address: number, port: number) => {
         console.log(`* Connected to ${address}:${port}`);
 
         const allUsers = await TwitchAuthModel.find().select({
@@ -100,27 +114,27 @@ export class TwitchBot {
           );
 
           setTimeout(() => {
-            client.join(user.twitchUserName).catch((err: unknown) => {
+            this.client.join(user.twitchUserName).catch((err: unknown) => {
               console.log(111, "error joining channel");
               console.log(112, err);
             });
-          }, 250);
+          }, 100);
         });
       });
 
-      client.on("disconnect", async (reason: unknown) => {
+      this.client.on("disconnect", async (reason: unknown) => {
         console.log(117, reason);
         this.initTwitchBot();
       });
 
       setTimeout(() => {
-        client
+        this.client
           .connect()
           .then(() => this.twitchValidationWatcher())
           .catch(console.error);
       }, 2000);
 
-      return client;
+      return this.client;
     } catch (error) {
       return null;
     }

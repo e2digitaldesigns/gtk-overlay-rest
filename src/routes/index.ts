@@ -12,6 +12,7 @@ import { users } from "./users/users";
 
 import { socket } from "./socket/socket";
 import { twitchChat } from "./twitchChat/twitchChat";
+import { chatTemplate } from "./chatTemplate/chatTemplate";
 
 export const routing = (app: Express) => {
   const prefix = "/api/v1/";
@@ -28,4 +29,6 @@ export const routing = (app: Express) => {
   app.use(`${prefix}users`, users);
   app.use(`${prefix}socket`, socket);
   app.use(`${prefix}upload`, fileUpload);
+
+  app.use(`${prefix}chatTemplate`, chatTemplate);
 };
