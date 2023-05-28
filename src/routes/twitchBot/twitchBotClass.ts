@@ -11,6 +11,13 @@ import { TwitchAuthModel } from "../../models/twitch.model";
 import { chatCommandParser } from "./utils/chatCommandParser";
 import { ChatLogModel } from "../../models/chatLog.model";
 
+type TwitchBotData = {
+  accessToken: string;
+  expirationTime: number;
+  expiresIn: number;
+  refreshToken: string;
+};
+
 export class TwitchBot {
   botName: string;
   setTimerId: any;
@@ -26,7 +33,7 @@ export class TwitchBot {
     this.client = null;
   }
 
-  private async getTwitchBotData(): Promise<any | null> {
+  private async getTwitchBotData(): Promise<TwitchBotData | null> {
     try {
       const twitchData = await GtkTwitchBotModel.findOne({
         twitchUserName: this.botName
@@ -45,14 +52,16 @@ export class TwitchBot {
 
   async initTwitchBot(): Promise<unknown | null> {
     try {
-      const twitchData = await this.getTwitchBotData();
-      if (!twitchData) throw new Error("43 initTwitchBot: No Twitch Data");
+      // const twitchData = await this.getTwitchBotData();
+      // if (!twitchData) throw new Error("43 initTwitchBot: No Twitch Data");
 
       this.client = new tmi.Client({
         channels: [this.botName],
         identity: {
           username: this.botName,
-          password: twitchData.accessToken
+          password: await this.getTwitchBotData().then(
+            data => data?.accessToken || ""
+          )
         },
         reconnect: true
       });
