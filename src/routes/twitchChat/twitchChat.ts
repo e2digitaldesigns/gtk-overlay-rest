@@ -6,10 +6,7 @@ const ObjectId = mongoose.Types.ObjectId;
 
 import { TwitchAuthModel } from "../../models/twitch.model";
 import { verifyToken } from "../../middleware/verifyToken";
-import {
-  isUserConnected,
-  refreshTwitchAccessToken
-} from "../twitchBot/twitchBot";
+import { isUserConnected } from "../twitchBot/twitchBot";
 
 const router = express.Router();
 
