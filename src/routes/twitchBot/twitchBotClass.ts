@@ -65,6 +65,7 @@ export class TwitchBot {
           await ChatLogModel.create({
             platform: "twitch",
             channel: channel.replace("#", "").toLowerCase(),
+            userId: tags["user-id"],
             username: tags["display-name"] || tags.username
           });
         }
@@ -111,7 +112,7 @@ export class TwitchBot {
         allUsers.forEach(user => {
           setTimeout(() => {
             this.client.join(user.twitchUserName).catch((err: unknown) => {
-              console.log(115, "error joining channel");
+              console.log(115, "error joining channel", user.twitchUserName);
               console.log(116, err);
             });
           }, 100);
@@ -175,8 +176,6 @@ export class TwitchBot {
       this.setTimerId = setTimeout(() => {
         this.refreshTwitchAccessToken();
       }, (response.data.expires_in - 300) * 1000);
-
-      console.log(`Twitch Token is Refreshed: ${response.data.access_token}`);
     } catch (error) {
       console.log(error);
     }
@@ -190,10 +189,7 @@ export class TwitchBot {
     setInterval(async () => {
       const isValid = await this.twitchValidate();
 
-      if (isValid) {
-        console.log("Twitch Token is Valid");
-      } else {
-        console.log("Twitch Token is Refreshing");
+      if (!isValid) {
         await this.refreshTwitchAccessToken();
       }
     }, 5 * 60 * 1000);
