@@ -5,11 +5,6 @@ if (process.env.NODE_ENV !== "production") {
 import express, { NextFunction, Request, Response } from "express";
 import { connectMongo } from "../mongoose";
 import { routing } from "./routes/index";
-import { twitchReConnect } from "./twitch/twitchReConnect";
-import {
-  initTwitchBot,
-  refreshTwitchAccessToken
-} from "./routes/twitchBot/twitchBot";
 import { TwitchBot } from "./routes/twitchBot/twitchBotClass";
 
 const app = express();
@@ -28,14 +23,7 @@ const io = require("socket.io")(server, {
   }
 });
 
-// twitchReConnect(io);
-
 let twitchClient: any = null;
-
-// refreshTwitchAccessToken();
-// setTimeout(async () => {
-//   twitchClient = await initTwitchBot(io);
-// }, 2000);
 
 const twitchBot = new TwitchBot(io);
 twitchBot.refreshTwitchAccessToken();

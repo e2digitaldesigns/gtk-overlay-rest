@@ -53,7 +53,8 @@ export class TwitchBot {
         identity: {
           username: this.botName,
           password: twitchData.accessToken
-        }
+        },
+        reconnect: true
       });
 
       this.client.on(
@@ -101,30 +102,32 @@ export class TwitchBot {
       );
 
       this.client.on("connected", async (address: number, port: number) => {
-        console.log(`* Connected to ${address}:${port}`);
+        console.log(`104, Connected to ${address}:${port}`);
 
         const allUsers = await TwitchAuthModel.find().select({
           twitchUserName: 1
         });
 
         allUsers.forEach(user => {
-          console.log(
-            63,
-            `added ${user.twitchUserName} to twitch channel chat `
-          );
-
           setTimeout(() => {
             this.client.join(user.twitchUserName).catch((err: unknown) => {
-              console.log(111, "error joining channel");
-              console.log(112, err);
+              console.log(115, "error joining channel");
+              console.log(116, err);
             });
           }, 100);
         });
       });
 
-      this.client.on("disconnect", async (reason: unknown) => {
-        console.log(117, reason);
-        this.initTwitchBot();
+      this.client.on("disconnect", async (error: unknown) => {
+        console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+        console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+        console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+        console.log("Disconnected from Twitch");
+        console.log(123, error);
+        console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+        console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+        console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+        // this.initTwitchBot();
       });
 
       setTimeout(() => {
@@ -146,7 +149,7 @@ export class TwitchBot {
     try {
       const twitchData = await this.getTwitchBotData();
       if (!twitchData)
-        throw new Error("19 refreshTwitchAccessToken: No Twitch Data");
+        throw new Error("146 refreshTwitchAccessToken: No Twitch Data");
 
       const response = await axios.post(
         `https://id.twitch.tv/oauth2/token?grant_type=refresh_token&refresh_token=${twitchData.refreshToken}&client_id=${process.env.TWITCH_CLIENT_ID}&client_secret=${process.env.TWITCH_CLIENT_SECRET}`
@@ -200,7 +203,6 @@ export class TwitchBot {
     try {
       const twitchData = await this.getTwitchBotData();
       if (!twitchData) throw new Error("125 No Twitch Data");
-      console.log(`Twitch Token is Validating: ${twitchData.accessToken}`);
 
       const validate = await axios.get("https://id.twitch.tv/oauth2/validate", {
         headers: {
@@ -208,20 +210,14 @@ export class TwitchBot {
         }
       });
 
-      if (validate.status !== 200) {
-        console.log(136, "Invalid Twitch Token");
-      }
-
       return validate.status === 200;
     } catch (error: any) {
-      console.log(141, error?.response?.data);
       return false;
     }
   }
 
   private async getUserProfileImage(username: string) {
     const cachedImage = this.twitchProfileImageCache.get(username);
-    console.log(150, cachedImage);
     if (cachedImage) return cachedImage;
 
     try {
@@ -246,7 +242,6 @@ export class TwitchBot {
       const image = data.data[0].profile_image_url;
 
       if (image) {
-        console.log(178, image);
         this.twitchProfileImageCache.set(username, image);
         return image;
       } else {
