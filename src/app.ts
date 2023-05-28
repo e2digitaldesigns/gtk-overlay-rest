@@ -23,11 +23,9 @@ const io = require("socket.io")(server, {
   }
 });
 
-let twitchClient: any = null;
-
 const twitchBot = new TwitchBot(io);
 twitchBot.refreshTwitchAccessToken();
-twitchBot.initTwitchBot();
+const twitchClient = twitchBot.initTwitchBot();
 
 app.get("/", async (req: Request, res: Response) => {
   res.send("GTK REST Service");
