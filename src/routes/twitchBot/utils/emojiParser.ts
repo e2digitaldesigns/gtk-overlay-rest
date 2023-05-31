@@ -19,7 +19,7 @@ export async function emojiParser(
 
   const emojiArray = message.match(regexpEmojiPresentation);
   if (emojiArray?.length) {
-    console.log(emojiArray);
+    console.log(22, emojiArray);
     const _id = v4();
     socket.emit("gtkOverlayEmojis", {
       _id,
