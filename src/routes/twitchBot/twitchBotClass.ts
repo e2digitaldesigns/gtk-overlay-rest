@@ -10,6 +10,7 @@ import { twitchChatParser } from "../../twitch/messageParser";
 import { TwitchAuthModel } from "../../models/twitch.model";
 import { chatCommandParser } from "./utils/chatCommandParser";
 import { ChatLogModel } from "../../models/chatLog.model";
+import { emojiParser } from "./utils/emojiParser";
 
 type TwitchBotData = {
   accessToken: string;
@@ -85,6 +86,8 @@ export class TwitchBot {
         async (channel: string, tags: any, message: string, self: boolean) => {
           if (self) return;
 
+          emojiParser(this.socket, message, channel, tags);
+
           if (message.trim().startsWith("!")) {
             chatCommandParser(
               this.client,
@@ -94,6 +97,21 @@ export class TwitchBot {
               tags
             );
           }
+
+          // const regexpEmojiPresentation = /\p{Emoji_Presentation}/gu;
+          // console.log(message.match(regexpEmojiPresentation));
+
+          // const emojiArray = message.match(regexpEmojiPresentation);
+          // if (emojiArray?.length) {
+          //   console.log(104, "sending");
+
+          //   this.socket.emit("gtkOverlayEmojis", {
+          //     _id: tags.id,
+          //     action: "showEmoji",
+          //     broadcasterName: channel.replace("#", "").toLowerCase(),
+          //     emojis: emojiArray
+          //   });
+          // }
 
           this.socket.emit("gtkChatRelay", {
             _id: tags.id,

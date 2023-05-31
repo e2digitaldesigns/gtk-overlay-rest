@@ -1,38 +1,7 @@
 import { v4 } from "uuid";
 import mongoose from "mongoose";
-import { TwitchAuthModel } from "../../../models/twitch.model";
-import { ChatTemplateModel } from "../../../models/chatTemplate.model";
+import { getGTKTemplateId, getGTKUserId } from "./dbFecthers";
 const ObjectId = mongoose.Types.ObjectId;
-
-const getUserId = async (channel: string): Promise<string | null> => {
-  let value = null;
-
-  const data = await TwitchAuthModel.findOne({
-    twitchUserName: channel
-  }).select({
-    userId: 1
-  });
-
-  if (data?.userId) {
-    value = String(data.userId);
-  }
-  return value;
-};
-
-const getTemplateId = async (userId: string): Promise<string | null> => {
-  let value = null;
-
-  const data = await ChatTemplateModel.findOne({
-    userId: new ObjectId(userId)
-  }).select({
-    templateId: 1
-  });
-
-  if (data?.templateId) {
-    value = String(data.templateId);
-  }
-  return value;
-};
 
 export async function chatCommandParser(
   client: any,
@@ -62,11 +31,8 @@ export async function chatCommandParser(
     case "!v1":
     case "!v2":
     case "!v3":
-      const uid = await getUserId(parsedChannel);
-      const tid = uid ? await getTemplateId(uid) : null;
-
-      console.log(68, uid);
-      console.log(69, tid);
+      const uid = await getGTKUserId(parsedChannel);
+      const tid = uid ? await getGTKTemplateId(uid) : null;
 
       if (!uid || !tid) {
         return;
@@ -90,8 +56,8 @@ export async function chatCommandParser(
         username: tags.username,
         channel: parsedChannel,
         host: "1",
-        tid: await getTemplateId(parsedChannel),
-        uid: await getUserId(parsedChannel)
+        tid: await getGTKTemplateId(parsedChannel),
+        uid: await getGTKUserId(parsedChannel)
       });
       break;
 
