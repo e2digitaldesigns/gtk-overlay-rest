@@ -11,16 +11,43 @@ import { isUserConnected } from "../twitchBot/twitchBot";
 const router = express.Router();
 
 router.get("/connect/:username", async (req: Request, res: Response) => {
+  const username = req.params.username;
+
   try {
-    res.locals.twitchClient.join(res.locals.userId);
+    const twitchClient = req.app.get("twitchClient");
+    const isConnected = await isUserConnected(twitchClient, username);
+
+    if (isConnected) {
+      res.send({
+        success: false,
+        message: "bad",
+        error: `${username} is already connected`
+      });
+      return;
+    }
+
+    if (!isConnected) {
+      twitchClient.join(req.params.username).catch((err: unknown) => {
+        res.send({ success: false, message: "error", err });
+        return;
+      });
+    }
+
     res.send({ success: true, message: "Twitch Chat Connected" });
   } catch (error) {
     res.send({ success: false, message: "bad", error });
   }
 });
 
+router.get("/status", async (req: Request, res: Response) => {
+  const twitchClient = req.app.get("twitchClient");
+  res.send(`TMI state: ${twitchClient.readyState()}`);
+});
+
 router.get("/isConnected", verifyToken, async (req: Request, res: Response) => {
   try {
+    const twitchClient = req.app.get("twitchClient");
+
     const user = await TwitchAuthModel.findOne({
       userId: new ObjectId(res.locals.userId)
     });
@@ -28,7 +55,7 @@ router.get("/isConnected", verifyToken, async (req: Request, res: Response) => {
     if (!user?.twitchUserName) throw new Error("No User Found");
 
     const isConnected = await isUserConnected(
-      res.locals.twitchClient,
+      twitchClient,
       user.twitchUserName
     );
 
@@ -39,15 +66,21 @@ router.get("/isConnected", verifyToken, async (req: Request, res: Response) => {
 });
 
 router.get("/disconnect", verifyToken, async (req: Request, res: Response) => {
-  console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
   try {
+    const twitchClient = req.app.get("twitchClient");
+
     const user = await TwitchAuthModel.findOne({
       userId: new ObjectId(res.locals.userId)
     });
 
     if (!user?.twitchUserName) throw new Error("No User Found");
 
-    res.locals.twitchClient.part(user.twitchUserName);
+    twitchClient.part(user.twitchUserName).catch((err: unknown) => {
+      console.log(79, "error leaving channel", req.params.username);
+      console.log(80, err);
+      res.send({ success: false, message: "bad", err });
+      return;
+    });
 
     res.send({ success: true, message: "Twitch Chat Disconnected" });
   } catch (error) {
@@ -57,6 +90,7 @@ router.get("/disconnect", verifyToken, async (req: Request, res: Response) => {
 
 router.post("/initChat", verifyToken, async (req: Request, res: Response) => {
   try {
+    const twitchClient = req.app.get("twitchClient");
     if (!process.env.TWITCH_CLIENT_ID || !process.env.TWITCH_CLIENT_SECRET)
       throw new Error("No Twitch Client ID or Secret");
 
@@ -92,13 +126,18 @@ router.post("/initChat", verifyToken, async (req: Request, res: Response) => {
 
     // check if user is already connected to chat
     const isConnected = await isUserConnected(
-      res.locals.twitchClient,
+      twitchClient,
       userData.data[0].login
     );
 
     // if not, connect to chat
     if (!isConnected) {
-      res.locals.twitchClient.join(userData.data[0].login);
+      twitchClient.join(userData.data[0].login).catch((err: unknown) => {
+        console.log(136, "error joining channel", req.params.username);
+        console.log(137, err);
+        res.json({ success: false, message: "bad", err });
+        return;
+      });
     }
 
     res.status(200).json({ success: true, message: "Twitch Chat Connected" });

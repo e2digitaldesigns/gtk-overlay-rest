@@ -9,7 +9,6 @@ const router = express.Router();
 const MODEL = ChatTemplateModel;
 
 router.put("/", async (req: Request, res: Response) => {
-  console.log(req.body);
   try {
     if (!req.body.userId || !req.body.templateId) {
       throw new Error("Missing userId or templateId");

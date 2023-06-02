@@ -1,3 +1,5 @@
+import { Express } from "express";
+
 import mongoose from "mongoose";
 const ObjectId = mongoose.Types.ObjectId;
 const tmi = require("tmi.js");
@@ -25,13 +27,17 @@ export class TwitchBot {
   socket: any;
   twitchProfileImageCache: any;
   client: any;
+  expressApp: Express;
 
-  constructor(socket: any) {
+  constructor(expressApp: Express, socket: any) {
     this.socket = socket;
     this.botName = "iconicbotty";
     this.twitchProfileImageCache = new NodeCache({ stdTTL: 60 * 60 * 1000 });
     this.setTimerId = null;
     this.client = null;
+    this.expressApp = expressApp;
+
+    this.twitchValidationWatcher();
   }
 
   private async getTwitchBotData(): Promise<TwitchBotData | null> {
@@ -51,18 +57,15 @@ export class TwitchBot {
     }
   }
 
-  async initTwitchBot(): Promise<unknown | null> {
+  async initTwitchBot(): Promise<void> {
     try {
-      // const twitchData = await this.getTwitchBotData();
-      // if (!twitchData) throw new Error("43 initTwitchBot: No Twitch Data");
-
       this.client = new tmi.Client({
         channels: [this.botName],
         identity: {
           username: this.botName,
-          password: await this.getTwitchBotData().then(
-            data => data?.accessToken || ""
-          )
+          password: await this.getTwitchBotData()
+            .then(data => data?.accessToken || "")
+            .catch(err => "")
         },
         reconnect: true
       });
@@ -98,21 +101,6 @@ export class TwitchBot {
             );
           }
 
-          // const regexpEmojiPresentation = /\p{Emoji_Presentation}/gu;
-          // console.log(message.match(regexpEmojiPresentation));
-
-          // const emojiArray = message.match(regexpEmojiPresentation);
-          // if (emojiArray?.length) {
-          //   console.log(104, "sending");
-
-          //   this.socket.emit("gtkOverlayEmojis", {
-          //     _id: tags.id,
-          //     action: "showEmoji",
-          //     broadcasterName: channel.replace("#", "").toLowerCase(),
-          //     emojis: emojiArray
-          //   });
-          // }
-
           this.socket.emit("gtkChatRelay", {
             _id: tags.id,
             broadcasterName: channel.replace("#", "").toLowerCase(),
@@ -146,28 +134,22 @@ export class TwitchBot {
         });
       });
 
-      this.client.on("disconnect", async (error: unknown) => {
+      this.client.on("disconnected", (error: unknown) => {
         console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
-        console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
-        console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
-        console.log("Disconnected from Twitch");
+        console.log("Disconnected from TMI");
         console.log(123, error);
+        this.initTwitchBot();
         console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
-        console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
-        console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
-        // this.initTwitchBot();
       });
 
       setTimeout(() => {
-        this.client
-          .connect()
-          .then(() => this.twitchValidationWatcher())
-          .catch(console.error);
+        this.client.connect().catch(console.error);
       }, 2000);
 
-      return this.client;
+      this.expressApp.set("twitchClient", this.client);
     } catch (error) {
-      return null;
+      this.expressApp.set("twitchClient", null);
+      console.error(error);
     }
   }
 

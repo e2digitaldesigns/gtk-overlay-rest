@@ -18,7 +18,7 @@ export async function chatCommandParser(
 
   switch (command) {
     case "!gtk":
-      client.action(channel, "GamerToolkit Test Command");
+      client.action(channel, "GamerToolkit Test Command Remote");
       break;
 
     case "!reply":
