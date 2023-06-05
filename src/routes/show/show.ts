@@ -130,7 +130,6 @@ router.get(
 );
 
 router.get("/showRunner/:_id", async (req: Request, res: Response) => {
-  console.log(1, req.params._id);
   try {
     const result = await EpisodeModel.findById(req.params._id)
       .select({

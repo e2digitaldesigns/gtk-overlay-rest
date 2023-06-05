@@ -13,6 +13,11 @@ import { TwitchAuthModel } from "../../models/twitch.model";
 import { chatCommandParser } from "./utils/chatCommandParser";
 import { ChatLogModel } from "../../models/chatLog.model";
 import { emojiParser } from "./utils/emojiParser";
+import { chatRankParser } from "./utils/chatRanks";
+import { chatRelayParser } from "./utils/chatRelay";
+import { getGTKUserId } from "./utils/dbFecthers";
+
+import { ignoreList } from "./utils/ignoreList";
 
 type TwitchBotData = {
   accessToken: string;
@@ -74,13 +79,23 @@ export class TwitchBot {
         "message",
         async (channel: string, tags: any, message: string, self: boolean) => {
           if (self) return;
+          if (ignoreList.includes(tags.username)) return;
+
+          const getId = await getGTKUserId(channel.slice(1));
+          if (!getId) return;
+          const gtkUserId = new ObjectId(getId);
 
           await ChatLogModel.create({
+            gtkUserId,
             platform: "twitch",
             channel: channel.replace("#", "").toLowerCase(),
             userId: tags["user-id"],
-            username: tags["display-name"] || tags.username
+            username: tags["display-name"] || tags.username,
+            message: message,
+            image: await this.getUserProfileImage(tags.username)
           });
+
+          chatRankParser(this.socket, channel);
         }
       );
 
@@ -91,29 +106,21 @@ export class TwitchBot {
 
           emojiParser(this.socket, message, channel, tags);
 
-          if (message.trim().startsWith("!")) {
-            chatCommandParser(
-              this.client,
-              this.socket,
-              message.trim(),
-              channel,
-              tags
-            );
-          }
+          chatCommandParser(
+            this.client,
+            this.socket,
+            message.trim(),
+            channel,
+            tags
+          );
 
-          this.socket.emit("gtkChatRelay", {
-            _id: tags.id,
-            broadcasterName: channel.replace("#", "").toLowerCase(),
-            name: tags["display-name"] || tags.username,
-            msg: message,
-            msgEmotes: twitchChatParser(message, tags.emotes),
-            url: await this.getUserProfileImage(tags.username),
-            fontColor: tags.color || "#ffffff",
-            emotes:
-              typeof tags.emotes === "object" && tags.emotes
-                ? Object.entries(tags.emotes).length
-                : 0
-          });
+          chatRelayParser(
+            this.socket,
+            message,
+            channel,
+            tags,
+            await this.getUserProfileImage(tags.username)
+          );
         }
       );
 
@@ -221,8 +228,8 @@ export class TwitchBot {
     }
   }
 
-  private async getUserProfileImage(username: string) {
-    const cachedImage = this.twitchProfileImageCache.get(username);
+  private async getUserProfileImage(username: string): Promise<string | null> {
+    const cachedImage = this?.twitchProfileImageCache.get(username);
     if (cachedImage) return cachedImage;
 
     try {

@@ -5,6 +5,7 @@ import { EpisodeModel } from "../../models/episodes.model";
 import { ITemplate } from "../../models/templates.model";
 import { IEpisode } from "./../../models/episodes.model";
 import { s3ObjectCopy } from "../../utils/imageCopy";
+import { sponsorImageParser } from "../show/utils/imageParsers";
 const ObjectId = mongoose.Types.ObjectId;
 
 const router = express.Router();

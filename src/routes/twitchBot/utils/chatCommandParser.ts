@@ -10,15 +10,14 @@ export async function chatCommandParser(
   channel: string,
   tags: any
 ) {
+  if (!message.trim().startsWith("!")) return;
   const command = message.toLowerCase().split(" ")[0];
   const target = message.toLowerCase().split(" ").slice(1);
   const parsedChannel = channel.slice(1);
 
-  console.log({ command });
-
   switch (command) {
     case "!gtk":
-      client.action(channel, "GamerToolkit Test Command Remote");
+      client.action(channel, "GamerToolkit Test Command Local");
       break;
 
     case "!reply":
@@ -31,8 +30,8 @@ export async function chatCommandParser(
     case "!v1":
     case "!v2":
     case "!v3":
-      const uid = await getGTKUserId(parsedChannel);
-      const tid = uid ? await getGTKTemplateId(uid) : null;
+      let uid = await getGTKUserId(parsedChannel);
+      let tid = uid ? await getGTKTemplateId(uid) : null;
 
       if (!uid || !tid) {
         return;
@@ -50,14 +49,20 @@ export async function chatCommandParser(
       break;
 
     case "!clearvotes":
+      uid = await getGTKUserId(parsedChannel);
+      tid = uid ? await getGTKTemplateId(uid) : null;
+
+      if (!uid || !tid) {
+        return;
+      }
       socket.emit("gtkVoting", {
         _id: v4(),
         action: "clear",
         username: tags.username,
         channel: parsedChannel,
         host: "1",
-        tid: await getGTKTemplateId(parsedChannel),
-        uid: await getGTKUserId(parsedChannel)
+        tid,
+        uid
       });
       break;
 

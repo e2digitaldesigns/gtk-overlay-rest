@@ -34,10 +34,9 @@ export async function emojiParser(
 }
 
 function parseEmojiArray(_id: string, emojiArray: string[]) {
-  const date = new Date();
   const parsedArray = emojiArray.map(emoji => ({
-    _id,
-    date,
+    _id: v4(),
+    date: new Date(),
     emoji
   }));
 
