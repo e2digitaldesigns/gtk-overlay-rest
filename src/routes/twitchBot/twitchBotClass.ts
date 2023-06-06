@@ -145,7 +145,7 @@ export class TwitchBot {
         console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
         console.log("Disconnected from TMI");
         console.log(123, error);
-        this.initTwitchBot();
+        // this.initTwitchBot();
         console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
       });
 
