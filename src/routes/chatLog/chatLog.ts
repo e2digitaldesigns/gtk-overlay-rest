@@ -9,11 +9,15 @@ const router = express.Router();
 const MODEL = ChatLogModel;
 
 router.get("/:userId/", async (req: Request, res: Response) => {
+  const twentyFourHoursAgo = new Date();
+  twentyFourHoursAgo.setDate(twentyFourHoursAgo.getDate() - 1);
+
   try {
     const result = await MODEL.aggregate([
       {
         $match: {
-          gtkUserId: new ObjectId(req.params.userId)
+          gtkUserId: new ObjectId(req.params.userId),
+          date: { $gte: twentyFourHoursAgo }
         }
       },
       {

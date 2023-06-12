@@ -26,6 +26,7 @@ export interface IEpisodeTopic {
   parentId: string;
   timer: number;
   articles: string;
+  video: string;
 }
 
 export interface IEpisode {

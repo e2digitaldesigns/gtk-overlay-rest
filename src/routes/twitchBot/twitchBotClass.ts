@@ -71,19 +71,23 @@ export class TwitchBot {
           password: await this.getTwitchBotData()
             .then(data => data?.accessToken || "")
             .catch(err => "")
-        },
-        reconnect: true
+        }
+        // reconnect: true
       });
 
       this.client.on(
         "message",
         async (channel: string, tags: any, message: string, self: boolean) => {
           if (self) return;
+
           if (ignoreList.includes(tags.username)) return;
 
           const getId = await getGTKUserId(channel.slice(1));
           if (!getId) return;
+
           const gtkUserId = new ObjectId(getId);
+
+          emojiParser(this.socket, message, channel, tags);
 
           await ChatLogModel.create({
             gtkUserId,
@@ -103,8 +107,6 @@ export class TwitchBot {
         "message",
         async (channel: string, tags: any, message: string, self: boolean) => {
           if (self) return;
-
-          emojiParser(this.socket, message, channel, tags);
 
           chatCommandParser(
             this.client,
@@ -142,11 +144,17 @@ export class TwitchBot {
       });
 
       this.client.on("disconnected", (error: unknown) => {
-        console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+        console.log("xxxxx xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+        console.log("xxxxx xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
         console.log("Disconnected from TMI");
         console.log(123, error);
-        // this.initTwitchBot();
-        console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+
+        setTimeout(() => {
+          this.initTwitchBot();
+        }, 20000);
+
+        console.log("xxxxx xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+        console.log("xxxxx xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
       });
 
       setTimeout(() => {

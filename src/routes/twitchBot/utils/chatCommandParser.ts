@@ -1,6 +1,7 @@
 import { v4 } from "uuid";
 import mongoose from "mongoose";
 import { getGTKTemplateId, getGTKUserId } from "./dbFecthers";
+import { ChatLogModel } from "../../../models/chatLog.model";
 const ObjectId = mongoose.Types.ObjectId;
 
 export async function chatCommandParser(
@@ -14,6 +15,8 @@ export async function chatCommandParser(
   const command = message.toLowerCase().split(" ")[0];
   const target = message.toLowerCase().split(" ").slice(1);
   const parsedChannel = channel.slice(1);
+  const uid = await getGTKUserId(parsedChannel);
+  const tid = uid ? await getGTKTemplateId(uid) : null;
 
   switch (command) {
     case "!gtk":
@@ -30,9 +33,6 @@ export async function chatCommandParser(
     case "!v1":
     case "!v2":
     case "!v3":
-      let uid = await getGTKUserId(parsedChannel);
-      let tid = uid ? await getGTKTemplateId(uid) : null;
-
       if (!uid || !tid) {
         return;
       }
@@ -49,9 +49,6 @@ export async function chatCommandParser(
       break;
 
     case "!clearvotes":
-      uid = await getGTKUserId(parsedChannel);
-      tid = uid ? await getGTKTemplateId(uid) : null;
-
       if (!uid || !tid) {
         return;
       }
@@ -66,7 +63,48 @@ export async function chatCommandParser(
       });
       break;
 
+    case "!rank":
+      if (!uid) return;
+
+      const rank = await getRankByUser(uid, tags.username);
+
+      rank && client.action(channel, `@${tags.username}, ${rank}`);
+      break;
+
     default:
       break;
   }
+}
+
+async function getRankByUser(uid: string, username: string) {
+  const twentyFourHoursAgo = new Date();
+  twentyFourHoursAgo.setDate(twentyFourHoursAgo.getDate() - 1);
+
+  const result = await ChatLogModel.aggregate([
+    {
+      $match: {
+        gtkUserId: new ObjectId(uid),
+        date: { $gte: twentyFourHoursAgo }
+      }
+    },
+    {
+      $group: {
+        _id: "$username",
+        username: { $last: "$username" },
+        image: { $last: "$image" },
+        messageCount: { $sum: 1 }
+      }
+    },
+    { $sort: { messageCount: -1, date: 1 } },
+    { $limit: 99999 }
+  ]);
+
+  const userRank =
+    result.findIndex(user => user.username.toLowerCase() === username) + 1;
+
+  if (userRank === 0) return "Get good, noob!";
+
+  return `you are currently ranked #${userRank} out of ${result.length}, with ${
+    result[userRank - 1].messageCount
+  } messages.`;
 }

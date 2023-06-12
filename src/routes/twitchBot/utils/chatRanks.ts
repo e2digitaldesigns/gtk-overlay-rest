@@ -13,10 +13,14 @@ export async function chatRankParser(socket: any, channel: string) {
     return;
   }
 
+  const twentyFourHoursAgo = new Date();
+  twentyFourHoursAgo.setDate(twentyFourHoursAgo.getDate() - 1);
+
   const result = await ChatLogModel.aggregate([
     {
       $match: {
-        gtkUserId: new ObjectId(uid)
+        gtkUserId: new ObjectId(uid),
+        date: { $gte: twentyFourHoursAgo }
       }
     },
     {
