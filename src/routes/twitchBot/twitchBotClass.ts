@@ -135,9 +135,17 @@ export class TwitchBot {
 
         allUsers.forEach(user => {
           setTimeout(() => {
+            const channels = this.client.getChannels();
+            const connected = channels.some(
+              (channel: string) => channel.slice(1) === user.twitchUserName
+            );
+
+            console.log(143, "connected", user.twitchUserName, connected);
+
+            if (connected) return;
+
             this.client.join(user.twitchUserName).catch((err: unknown) => {
-              console.log(115, "error joining channel", user.twitchUserName);
-              console.log(116, err);
+              console.log(148, "error joining channel", user.twitchUserName);
             });
           }, 100);
         });
