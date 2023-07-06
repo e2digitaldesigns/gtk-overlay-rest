@@ -1,5 +1,4 @@
 import express, { Request, Response } from "express";
-import { verifyToken } from "../../middleware/verifyToken";
 const mongoose = require("mongoose");
 const ObjectId = mongoose.Types.ObjectId;
 

@@ -62,7 +62,8 @@ const EpisodeTopicSchema = new Schema<IEpisodeTopic>({
   order: { type: Number, required: true, default: 0 },
   parentId: { type: String, required: true, default: " " },
   timer: { type: Number, required: true, default: 0 },
-  articles: { type: String, required: false, default: " " }
+  articles: { type: String, required: false, default: " " },
+  video: { type: String, required: false, default: " " }
 });
 
 const EpisodeSchema = new Schema<IEpisode>({

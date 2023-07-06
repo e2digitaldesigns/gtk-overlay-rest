@@ -17,7 +17,9 @@ const parseParams = (url: string, type: string) => {
 
   _map(rawParams, (m: string) => {
     let pair = _split(m, "=");
-    nodeSendArray[pair[0]] = decodeURIComponent(pair[1]);
+    if (pair[0] !== "type") {
+      nodeSendArray[pair[0]] = decodeURIComponent(pair[1]);
+    }
   });
 
   return {
@@ -33,6 +35,8 @@ router.get("/", (req: Request, res: Response) => {
 
 router.get("/manual/:type", function (req: Request, res: Response) {
   const { action, nodeSendArray } = parseParams(req.url, req.params.type);
+
+  console.log(40, action, nodeSendArray);
   res.send(nodeSendArray);
   res.locals.io.emit(action, nodeSendArray);
 });
