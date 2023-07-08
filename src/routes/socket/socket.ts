@@ -36,7 +36,6 @@ router.get("/", (req: Request, res: Response) => {
 router.get("/manual/:type", function (req: Request, res: Response) {
   const { action, nodeSendArray } = parseParams(req.url, req.params.type);
 
-  console.log(40, action, nodeSendArray);
   res.send(nodeSendArray);
   res.locals.io.emit(action, nodeSendArray);
 });
