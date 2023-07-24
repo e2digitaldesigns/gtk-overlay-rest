@@ -140,7 +140,13 @@ export class TwitchBot {
               (channel: string) => channel.slice(1) === user.twitchUserName
             );
 
-            console.log(143, "connected", user.twitchUserName, connected);
+            console.log(
+              143,
+              "connected",
+              user.twitchUserName,
+              "isConnected:",
+              connected
+            );
 
             if (connected) return;
 
@@ -158,7 +164,8 @@ export class TwitchBot {
         console.log(123, error);
 
         setTimeout(() => {
-          this.initTwitchBot();
+          // this.initTwitchBot();
+          console.log("168, Do not reconnect");
         }, 20000);
 
         console.log("xxxxx xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");

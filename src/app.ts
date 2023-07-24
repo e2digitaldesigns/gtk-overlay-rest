@@ -25,7 +25,10 @@ const io = require("socket.io")(server, {
 
 const twitchBot = new TwitchBot(app, io);
 twitchBot.refreshTwitchAccessToken();
-twitchBot.initTwitchBot();
+
+setTimeout(() => {
+  twitchBot.initTwitchBot();
+}, 15000);
 
 app.get("/", async (req: Request, res: Response) => {
   res.send("GTK REST Service");
