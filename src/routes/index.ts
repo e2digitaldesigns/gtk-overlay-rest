@@ -4,6 +4,9 @@ import { google } from "./google/google";
 import { fileUpload } from "./fileUpload/fileUpload";
 
 import { episodes } from "./episodes/episodes";
+import { episodeTopics } from "./episodes/episodeTopics";
+import { episodeSegments } from "./episodeSegments/episodeSegments";
+
 import { hosts } from "./hosts/hosts";
 import { shows } from "./show/show";
 import { socials } from "./socials/socials";
@@ -15,6 +18,8 @@ import { twitchChat } from "./twitchChat/twitchChat";
 import { chatTemplate } from "./chatTemplate/chatTemplate";
 import { chatLog } from "./chatLog/chatLog";
 
+import { common } from "./common/common";
+
 export const routing = (app: Express) => {
   const prefix = "/api/v1/";
   app.use(express.json());
@@ -22,6 +27,9 @@ export const routing = (app: Express) => {
   app.use(`${prefix}auth/google`, google);
 
   app.use(`${prefix}episodes`, episodes);
+  app.use(`${prefix}episodeTopics`, episodeTopics);
+  app.use(`${prefix}episodeSegments`, episodeSegments);
+
   app.use(`${prefix}hosts`, hosts);
   app.use(`${prefix}shows`, shows);
   app.use(`${prefix}socials`, socials);
@@ -33,4 +41,5 @@ export const routing = (app: Express) => {
 
   app.use(`${prefix}chatTemplate`, chatTemplate);
   app.use(`${prefix}chatlog`, chatLog);
+  app.use(`${prefix}common`, common);
 };

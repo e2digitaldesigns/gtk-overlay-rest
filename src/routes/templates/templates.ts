@@ -22,6 +22,17 @@ router.get("/", async (req: Request, res: Response) => {
   }
 });
 
+router.get("/full", async (req: Request, res: Response) => {
+  try {
+    const result = await MODEL.find();
+
+    res.status(200).json(result);
+  } catch (error) {
+    console.log(24, error);
+    res.status(404).send(error);
+  }
+});
+
 router.get("/:_id", async (req: Request, res: Response) => {
   try {
     const _id = new mongoose.Types.ObjectId(req.params._id);

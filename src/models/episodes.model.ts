@@ -17,6 +17,7 @@ export interface IEpisodeSocials {
 }
 
 export interface IEpisodeTopic {
+  _id: Types.ObjectId;
   desc: string;
   img: string;
   isChild: boolean;
@@ -70,7 +71,17 @@ const EpisodeSchema = new Schema<IEpisode>({
   userId: { type: Schema.Types.ObjectId, required: true },
   name: { type: String, required: true, default: " " },
   active: { type: Boolean, required: true, default: false },
-  airDate: { type: String, required: true, default: " " },
+  airDate: {
+    type: String,
+    required: true,
+    default: () => {
+      const currentDate = new Date();
+      const year = currentDate.getFullYear();
+      const month = String(currentDate.getMonth() + 1).padStart(2, "0");
+      const day = String(currentDate.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    }
+  },
   current: { type: Boolean, required: true, default: false },
   hosts: {
     type: [EpisodeHostSchema],

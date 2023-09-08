@@ -1,11 +1,12 @@
 import express, { Request, Response } from "express";
 import mongoose from "mongoose";
 import { verifyToken } from "../../middleware/verifyToken";
-import { EpisodeModel } from "../../models/episodes.model";
+import { EpisodeModel, IEpisodeTopic } from "../../models/episodes.model";
 import { ITemplate } from "../../models/templates.model";
 import { IEpisode } from "./../../models/episodes.model";
 import { s3ObjectCopy } from "../../utils/imageCopy";
 import { sponsorImageParser } from "../show/utils/imageParsers";
+import { deleteFromS3Multi } from "../fileUpload/s3Delete";
 const ObjectId = mongoose.Types.ObjectId;
 
 const router = express.Router();
@@ -64,6 +65,103 @@ router.get("/", async (req: Request, res: Response) => {
     });
 
     res.status(200).json(episodeArray);
+  } catch (error) {
+    console.log(error);
+    res.status(404).send(error);
+  }
+});
+
+router.get("/:page/:sort/:sortby", async (req: Request, res: Response) => {
+  const { page, sort, sortby } = req.params;
+  const searchTerm = req.query?.st || "";
+
+  const templateId = req.query?.tid
+    ? new ObjectId(req.query.tid as string)
+    : "";
+
+  const documentsPerPage = 10;
+  const skip = (Number(page) - 1) * documentsPerPage;
+
+  let pipeline: any[] = [
+    {
+      $match: {
+        userId: new ObjectId(res.locals.userId)
+      }
+    },
+    {
+      $lookup: {
+        from: "templates",
+        localField: "templateId",
+        foreignField: "_id",
+        as: "template"
+      }
+    },
+    {
+      $project: {
+        name: 1,
+        airDate: 1,
+        current: 1,
+        template: 1,
+        templateId: 1
+      }
+    },
+    {
+      $match: {
+        name: {
+          $regex: searchTerm,
+          $options: "i"
+        }
+      }
+    }
+  ];
+
+  if (templateId) {
+    pipeline.push({
+      $match: {
+        templateId: { $eq: templateId }
+      }
+    });
+  }
+
+  // pipeline.push(
+  //   { $sort: { [sort]: sortby === "asc" ? 1 : -1 } },
+  //   { $skip: skip }
+  // );
+
+  // pipeline.push({ $limit: documentsPerPage });
+
+  try {
+    const totalDocumentCount = await MODEL.aggregate(pipeline).exec();
+    const totalPageCount = Math.ceil(
+      totalDocumentCount.length / documentsPerPage
+    );
+
+    pipeline.push(
+      { $sort: { [sort]: sortby === "asc" ? 1 : -1 } },
+      { $skip: skip },
+      { $limit: documentsPerPage }
+    );
+
+    const result = await MODEL.aggregate(pipeline).exec();
+
+    const episodeArray: EpisodeList[] = [];
+
+    result.map((item: IEpisodeResult) => {
+      episodeArray.push({
+        _id: String(item._id),
+        name: item.name,
+        airDate: item.airDate,
+        current: item.current,
+        templateName: item.template?.[0]?.name || " "
+      });
+    });
+
+    res.status(200).json({
+      totalDocuments: totalDocumentCount.length,
+      currentPage: page,
+      totalPages: totalPageCount,
+      episodes: episodeArray
+    });
   } catch (error) {
     console.log(error);
     res.status(404).send(error);
@@ -137,7 +235,6 @@ router.post("/", async (req: Request, res: Response) => {
       userId: new ObjectId(res.locals.userId),
       name: req.body.name,
       active: false,
-      airDate: " ",
       current: false,
       hosts: currentState.hosts && lastEpisode?.hosts ? lastEpisode.hosts : [],
       logo:
@@ -209,11 +306,59 @@ router.put("/:_id", async (req: Request, res: Response) => {
   }
 });
 
+// router.delete("/:_id", async (req: Request, res: Response) => {
+//   try {
+//     const result = await MODEL.deleteOne({
+//       _id: req.params._id
+//     });
+//     res.status(200).json(result);
+//   } catch (error) {
+//     console.log(error);
+//     res.status(404).send(error);
+//   }
+// });
+
 router.delete("/:_id", async (req: Request, res: Response) => {
   try {
-    const result = await MODEL.deleteOne({
-      _id: req.params._id
+    const episode = await MODEL.findOne({
+      _id: new ObjectId(req.params._id),
+      userId: new ObjectId(res.locals.userId)
+    }).select({
+      logo: 1,
+      sponsorImages: 1,
+      topics: 1,
+      video: 1
     });
+
+    const imageArray: string[] = [];
+    episode?.logo && imageArray.push(episode.logo);
+    episode?.sponsorImages?.map((item: string) => imageArray.push(item));
+
+    episode?.topics?.map(
+      (item: IEpisodeTopic) => item.img && imageArray.push(item.img)
+    );
+
+    if (imageArray.length) {
+      deleteFromS3Multi(imageArray, "images/user-images");
+    }
+
+    const videoArray: string[] = [];
+    episode?.topics?.map((item: IEpisodeTopic) => {
+      if (item.video) {
+        const video = item.video.split("/");
+        videoArray.push(video[video.length - 1]);
+      }
+    });
+
+    if (videoArray.length) {
+      deleteFromS3Multi(videoArray, "videos/user-videos");
+    }
+
+    const result = await MODEL.deleteOne({
+      _id: new ObjectId(req.params._id),
+      userId: new ObjectId(res.locals.userId)
+    });
+
     res.status(200).json(result);
   } catch (error) {
     console.log(error);

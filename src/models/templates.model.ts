@@ -26,6 +26,7 @@ export interface ITemplate {
   name: string;
   url: string;
   maxHosts: number;
+  thumbnail: string;
   tickerType: TemplateTickerType;
   topicType: TemplateTopicType;
   hasSponsor: boolean;
@@ -38,6 +39,7 @@ const TemplateSchema = new Schema<ITemplate>({
   _id: { type: Schema.Types.ObjectId },
   name: { type: String, required: true, default: " " },
   url: { type: String, required: true, default: " " },
+  thumbnail: { type: String },
   maxHosts: { type: Number, required: true, default: 1 },
   tickerType: { type: String, required: true, default: "simple" },
   topicType: { type: String, required: true, default: "multi" },

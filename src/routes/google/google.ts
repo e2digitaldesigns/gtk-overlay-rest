@@ -27,7 +27,7 @@ router.post("/", async (req: Request, res: Response) => {
       {
         email: payload?.email
       },
-      { pictrue: payload?.picture, name: payload?.name },
+      { picture: payload?.picture, name: payload?.name },
       { upsert: true }
     ).select({ __v: 0 });
 

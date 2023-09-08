@@ -115,7 +115,7 @@ router.get(
           epData.databaseSocials,
           epData.socialNetworks
         ),
-        topics: sortTopics(epData.topics)
+        topics: sortTopics(topicImageParser(epData?.topics))
       };
 
       delete result.availableHosts;
