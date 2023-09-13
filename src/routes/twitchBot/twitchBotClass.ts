@@ -71,8 +71,14 @@ export class TwitchBot {
           password: await this.getTwitchBotData()
             .then(data => data?.accessToken || "")
             .catch(err => "")
+        },
+
+        connection: {
+          secure: true,
+          reconnect: true,
+          maxReconnectAttempts: Infinity,
+          reconnectInterval: 1000
         }
-        // reconnect: true
       });
 
       this.client.on(
