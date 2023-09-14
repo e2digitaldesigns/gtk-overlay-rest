@@ -72,7 +72,7 @@ router.post("/", async (req: Request, res: Response) => {
             {
               _id: new ObjectId(),
               username: "GTK",
-              url: "Twitch"
+              site: "Twitch"
             }
           ]
         }
