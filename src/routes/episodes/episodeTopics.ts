@@ -38,6 +38,7 @@ router.get("/:episodeId", async (req: Request, res: Response) => {
     ]);
 
     res.status(200).json({
+      templateId: result[0].templateId,
       images: result[0].template[0].images.topic,
       topics: result?.[0]?.topics || []
     });

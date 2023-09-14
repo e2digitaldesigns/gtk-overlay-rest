@@ -1,7 +1,13 @@
 import { model, Schema, Types } from "mongoose";
 
-export type TemplateTickerType = "advanced" | "simple";
-export type TemplateTopicType = "single" | "multi" | "advanced" | "video";
+export type TemplateTickerConfig = {
+  hasTitle: boolean;
+};
+export type TemplateTopicConfig = {
+  allowNesting: boolean;
+  hasImage: boolean;
+  hasVideo: boolean;
+};
 
 export interface ILinkArray {
   name: string;
@@ -16,7 +22,7 @@ export interface ITemplateImages {
 }
 
 export interface ITemplateImagesDefault {
-  amount: number;
+  maxAmount: number;
   width: number;
   height: number;
 }
@@ -24,13 +30,13 @@ export interface ITemplateImagesDefault {
 export interface ITemplate {
   _id: Types.ObjectId;
   name: string;
-  url: string;
+  urlKey: string;
   maxHosts: number;
   thumbnail: string;
-  tickerType: TemplateTickerType;
-  topicType: TemplateTopicType;
+  iconBgColor: string;
+  tickerConfig: TemplateTickerConfig;
+  topicConfig: TemplateTopicConfig;
   hasSponsor: boolean;
-  hasContentBox: boolean;
   images: ITemplateImages;
   linkArray: ILinkArray[];
 }
@@ -38,13 +44,21 @@ export interface ITemplate {
 const TemplateSchema = new Schema<ITemplate>({
   _id: { type: Schema.Types.ObjectId },
   name: { type: String, required: true, default: " " },
-  url: { type: String, required: true, default: " " },
+  urlKey: { type: String, required: true, default: " " },
   thumbnail: { type: String },
+  iconBgColor: { type: String, required: true, default: "black" },
   maxHosts: { type: Number, required: true, default: 1 },
-  tickerType: { type: String, required: true, default: "simple" },
-  topicType: { type: String, required: true, default: "multi" },
+  tickerConfig: { type: String, required: true, default: { hasTitle: false } },
+  topicConfig: {
+    type: Object,
+    required: true,
+    default: {
+      allowNesting: true,
+      hasImage: true,
+      hasVideo: true
+    }
+  },
   hasSponsor: { type: Boolean, required: true, default: false },
-  hasContentBox: { type: Boolean, required: true, default: false },
   images: { type: Object, required: true, default: {} },
   linkArray: { type: [], required: true }
 });
