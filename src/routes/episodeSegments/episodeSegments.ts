@@ -58,7 +58,7 @@ router.get("/info/:episodeId", async (req: Request, res: Response) => {
 
 router.put("/info/:episodeId", async (req: Request, res: Response) => {
   try {
-    const result = await EpisodeModel.updateOne(
+    const result = await EpisodeModel.findOneAndUpdate(
       {
         _id: req.params.episodeId,
         userId: res.locals.userId
@@ -71,13 +71,17 @@ router.put("/info/:episodeId", async (req: Request, res: Response) => {
           current: req.body.current
         }
       }
-    );
+    ).select({
+      current: 1,
+      templateId: 1
+    });
 
-    if (req.body.current) {
+    if (req.body.current && result?.templateId) {
       await EpisodeModel.updateMany(
         {
-          _id: req.params.episodeId,
-          userId: { $ne: res.locals.userId }
+          _id: { $ne: result._id },
+          templateId: result.templateId,
+          userId: res.locals.userId
         },
         {
           $set: {
@@ -87,9 +91,23 @@ router.put("/info/:episodeId", async (req: Request, res: Response) => {
       );
     }
 
-    res.status(200).json(result);
+    const returnData = {
+      success: true,
+      responseCode: 200,
+      resultMessage: "Episode info successfully updated"
+    };
+
+    res.status(200).json(returnData);
   } catch (error) {
-    res.status(404).send(error);
+    const returnData = {
+      errors: error,
+      responseCode: 500,
+      resultMessage: "Episode info not fetched successfully",
+      status: "error",
+      success: false
+    };
+
+    res.status(500).send(returnData);
   }
 });
 // EPISODE INFO  /////////////////////////////////////////////////////////
