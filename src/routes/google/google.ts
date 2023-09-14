@@ -9,6 +9,7 @@ const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 import { UsersModel } from "../../models/users.model";
 import { HostModel } from "../../models/hosts.model";
 import { EpisodeModel } from "../../models/episodes.model";
+import { episodeObj } from "./episode";
 
 const router = express.Router();
 
@@ -89,46 +90,7 @@ router.post("/", async (req: Request, res: Response) => {
         ],
         number: 1,
         templateId: new ObjectId("640cb609fe1bde3d9ae9ded3"),
-        ticker: [
-          {
-            _id: new ObjectId(),
-            title: "",
-            text: "Welcome to my first episode!"
-          },
-          {
-            _id: new ObjectId(),
-            title: "",
-            text: "This will be a great episode!"
-          }
-        ],
-        topics: [
-          {
-            _id: new ObjectId(),
-            desc: "Hell Yeah! GTK Rocks!",
-            img: "",
-            isChild: false,
-            isParent: false,
-            name: "GTK Rocks",
-            order: 1,
-            parentId: "",
-            timer: 0,
-            articles: "",
-            video: ""
-          },
-          {
-            _id: new ObjectId(),
-            desc: "Just kidding! GTK Rocks!",
-            img: "",
-            isChild: false,
-            isParent: false,
-            name: "No GTK Sucks",
-            order: 2,
-            parentId: "",
-            timer: 0,
-            articles: "",
-            video: ""
-          }
-        ]
+        ...episodeObj
       });
 
       token = JWT.sign(
@@ -144,11 +106,11 @@ router.post("/", async (req: Request, res: Response) => {
 
     res.status(200).send(token);
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(404).send(error);
   }
 });
-router.post("/CXXXX", async (req: Request, res: Response) => {
+router.post("/archive", async (req: Request, res: Response) => {
   try {
     const payload = await verify(req.body.token);
 
@@ -175,7 +137,7 @@ router.post("/CXXXX", async (req: Request, res: Response) => {
 
     res.status(200).send(token);
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(404).send(error);
   }
 });

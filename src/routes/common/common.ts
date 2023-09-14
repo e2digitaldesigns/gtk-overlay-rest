@@ -12,7 +12,7 @@ router.get("/", async (req: Request, res: Response) => {
 
     res.status(200).json({ socials, templates: result });
   } catch (error) {
-    console.log(24, error);
+    console.error(24, error);
     res.status(404).send(error);
   }
 });

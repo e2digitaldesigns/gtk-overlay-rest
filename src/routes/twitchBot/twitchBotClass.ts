@@ -157,25 +157,17 @@ export class TwitchBot {
             if (connected) return;
 
             this.client.join(user.twitchUserName).catch((err: unknown) => {
-              console.log(148, "error joining channel", user.twitchUserName);
+              console.error(148, "error joining channel", user.twitchUserName);
             });
           }, 100);
         });
       });
 
       this.client.on("disconnected", (error: unknown) => {
-        console.log("xxxxx xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
-        console.log("xxxxx xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
-        console.log("Disconnected from TMI");
-        console.log(123, error);
-
         setTimeout(() => {
           // this.initTwitchBot();
           console.log("168, Do not reconnect");
         }, 20000);
-
-        console.log("xxxxx xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
-        console.log("xxxxx xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
       });
 
       setTimeout(() => {
@@ -222,7 +214,7 @@ export class TwitchBot {
         this.refreshTwitchAccessToken();
       }, (response.data.expires_in - 300) * 1000);
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   }
 
@@ -289,7 +281,7 @@ export class TwitchBot {
         return null;
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
       return null;
     }
   }

@@ -81,7 +81,7 @@ router.get("/:page/:sort/:sortby", async (req: Request, res: Response) => {
       socials: result
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(404).send(error);
   }
 });

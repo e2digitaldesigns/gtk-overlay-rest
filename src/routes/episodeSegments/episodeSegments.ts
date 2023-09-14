@@ -13,18 +13,7 @@ router.use(verifyToken);
 // EPISODE INFO  /////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 router.get("/info/:episodeId", async (req: Request, res: Response) => {
-  console.log(16);
   try {
-    // const result = await EpisodeModel.findOne({
-    //   _id: req.params.episodeId,
-    //   userId: res.locals.userId
-    // }).select({
-    //   name: 1,
-    //   number: 1,
-    //   airDate: 1,
-    //   current: 1,
-    // });
-
     const result = await EpisodeModel.aggregate([
       {
         $match: {
@@ -51,8 +40,6 @@ router.get("/info/:episodeId", async (req: Request, res: Response) => {
         }
       }
     ]);
-
-    console.log(result[0]);
 
     const data = {
       name: result[0].name,

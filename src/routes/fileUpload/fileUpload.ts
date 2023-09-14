@@ -139,7 +139,7 @@ router.post("/", upload, async (req: Request, res: Response) => {
       })
       .toFile(tempThumb, (err: any, info: any) => {
         if (err) {
-          console.log(err);
+          console.error(err);
         } else {
           const fileStream = fs.createReadStream(tempThumb);
           const imgParamsA = {
@@ -170,7 +170,7 @@ router.post("/", upload, async (req: Request, res: Response) => {
         }
       });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.send(error);
   }
 });
@@ -194,7 +194,7 @@ router.delete("/:_id", async (req: Request, res: Response) => {
       }
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.send(error);
   }
 });
@@ -244,7 +244,7 @@ router.delete(
         success: 1
       });
     } catch (error) {
-      console.log(error);
+      console.error(error);
       res.send(error);
     }
   }
@@ -323,7 +323,7 @@ router.delete(
         success: 1
       });
     } catch (error) {
-      console.log(error);
+      console.error(error);
       res.send(error);
     }
   }

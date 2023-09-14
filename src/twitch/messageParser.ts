@@ -15,7 +15,6 @@ export function twitchChatParser(
 
   emotesArr.forEach(emote => {
     const id = emote[0];
-    console.log({ id });
     const positions = emote[1][0];
     const [start, end] = positions.split("-");
 

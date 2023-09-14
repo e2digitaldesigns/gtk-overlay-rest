@@ -64,7 +64,7 @@ router.get(
 
       res.status(200).json(result);
     } catch (error) {
-      console.log(error);
+      console.error(error);
       res.status(404).send(error);
     }
   }
@@ -152,7 +152,7 @@ router.get("/showRunner/:_id", async (req: Request, res: Response) => {
 
     res.status(200).json(data);
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(404).send(error);
   }
 });

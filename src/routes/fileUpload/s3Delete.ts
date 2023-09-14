@@ -30,8 +30,6 @@ export async function deleteFromS3Multi(fileKeys: string[], folder: string) {
     }
   };
 
-  console.log(fileKeys);
-
   try {
     if (params.Bucket) {
       const response = await s3bucket.deleteObjects(params).promise();

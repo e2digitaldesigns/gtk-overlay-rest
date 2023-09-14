@@ -4,8 +4,7 @@ import { verifyToken } from "../../middleware/verifyToken";
 import { EpisodeModel, IEpisodeTopic } from "../../models/episodes.model";
 import { ITemplate } from "../../models/templates.model";
 import { IEpisode } from "./../../models/episodes.model";
-import { s3ObjectCopy } from "../../utils/imageCopy";
-import { sponsorImageParser } from "../show/utils/imageParsers";
+import { s3ObjectCopy, s3ObjectCopyVideo } from "../../utils/imageCopy";
 import { deleteFromS3Multi } from "../fileUpload/s3Delete";
 const ObjectId = mongoose.Types.ObjectId;
 
@@ -66,7 +65,7 @@ router.get("/", async (req: Request, res: Response) => {
 
     res.status(200).json(episodeArray);
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(404).send(error);
   }
 });
@@ -163,7 +162,7 @@ router.get("/:page/:sort/:sortby", async (req: Request, res: Response) => {
       episodes: episodeArray
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(404).send(error);
   }
 });
@@ -196,7 +195,7 @@ router.get("/:_id", async (req: Request, res: Response) => {
 
     res.status(200).json(data);
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(404).send(error);
   }
 });
@@ -220,7 +219,8 @@ router.post("/", async (req: Request, res: Response) => {
           number: 1,
           socialNetworks: 1,
           sponsorImages: 1,
-          ticker: 1
+          ticker: 1,
+          topics: 1
         })
       : null;
 
@@ -249,19 +249,10 @@ router.post("/", async (req: Request, res: Response) => {
       templateId,
       ticker:
         currentState.news && lastEpisode?.ticker ? lastEpisode.ticker : [],
-      topics: [
-        {
-          order: 1,
-          name: "New Topic",
-          desc: "Topic Description",
-          timer: 0,
-          isParent: false,
-          isChild: false,
-          parentId: " ",
-          img: "",
-          articles: ""
-        }
-      ],
+      topics: await lastEpisodeTopicParser(
+        currentState.topics,
+        lastEpisode?.topics
+      ),
       contentBoxes: [],
       sponsorBoxes: [],
       sponsorImages: newSponsorImages
@@ -273,7 +264,7 @@ router.post("/", async (req: Request, res: Response) => {
 
     res.status(200).json(result);
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(404).send("ppp");
   }
 });
@@ -301,22 +292,10 @@ router.put("/:_id", async (req: Request, res: Response) => {
 
     res.status(200).json(result);
   } catch (error) {
-    console.log(209, error);
+    console.error(209, error);
     res.status(404).send(error);
   }
 });
-
-// router.delete("/:_id", async (req: Request, res: Response) => {
-//   try {
-//     const result = await MODEL.deleteOne({
-//       _id: req.params._id
-//     });
-//     res.status(200).json(result);
-//   } catch (error) {
-//     console.log(error);
-//     res.status(404).send(error);
-//   }
-// });
 
 router.delete("/:_id", async (req: Request, res: Response) => {
   try {
@@ -335,7 +314,7 @@ router.delete("/:_id", async (req: Request, res: Response) => {
     episode?.sponsorImages?.map((item: string) => imageArray.push(item));
 
     episode?.topics?.map(
-      (item: IEpisodeTopic) => item.img && imageArray.push(item.img)
+      (item: IEpisodeTopic) => item?.img && imageArray.push(item.img)
     );
 
     if (imageArray.length) {
@@ -344,7 +323,7 @@ router.delete("/:_id", async (req: Request, res: Response) => {
 
     const videoArray: string[] = [];
     episode?.topics?.map((item: IEpisodeTopic) => {
-      if (item.video) {
+      if (item?.video) {
         const video = item.video.split("/");
         videoArray.push(video[video.length - 1]);
       }
@@ -361,9 +340,44 @@ router.delete("/:_id", async (req: Request, res: Response) => {
 
     res.status(200).json(result);
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(404).send(error);
   }
 });
 
 export const episodes = router;
+
+const lastEpisodeTopicParser = async (
+  useCurrent: boolean,
+  topics?: IEpisodeTopic[]
+) => {
+  if (useCurrent && topics) {
+    const newTopics = topics.map((item: IEpisodeTopic) => {
+      const newItem = {
+        ...item,
+        _id: new ObjectId(),
+        img: item?.img ? s3ObjectCopy(item.img) : "",
+        video: item?.video ? s3ObjectCopyVideo(item.video) : ""
+      };
+
+      return newItem;
+    });
+
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    return newTopics;
+  }
+
+  return [
+    {
+      order: 1,
+      name: "New Topic sdfsafsaf",
+      desc: "Topic Description",
+      timer: 0,
+      isParent: false,
+      isChild: false,
+      parentId: " ",
+      img: "",
+      articles: ""
+    }
+  ];
+};

@@ -11,7 +11,7 @@ export const connectMongo = async () => {
       console.log("connected to mongoDb");
     },
     err => {
-      console.log(err);
+      console.error(err);
     }
   );
 };

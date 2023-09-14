@@ -45,7 +45,7 @@ router.post("/", async (req: Request, res: Response) => {
     });
     res.status(200).json(result);
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(404).send(error);
   }
 });
@@ -61,7 +61,7 @@ router.put("/:_id", async (req: Request, res: Response) => {
 
     res.status(200).json(result);
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(404).send(error);
   }
 });

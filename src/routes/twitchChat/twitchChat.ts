@@ -76,8 +76,8 @@ router.get("/disconnect", verifyToken, async (req: Request, res: Response) => {
     if (!user?.twitchUserName) throw new Error("No User Found");
 
     twitchClient.part(user.twitchUserName).catch((err: unknown) => {
-      console.log(79, "error leaving channel", req.params.username);
-      console.log(80, err);
+      console.error(79, "error leaving channel", req.params.username);
+      console.error(80, err);
       res.send({ success: false, message: "bad", err });
       return;
     });
@@ -133,8 +133,8 @@ router.post("/initChat", verifyToken, async (req: Request, res: Response) => {
     // if not, connect to chat
     if (!isConnected) {
       twitchClient.join(userData.data[0].login).catch((err: unknown) => {
-        console.log(136, "error joining channel", req.params.username);
-        console.log(137, err);
+        console.error(136, "error joining channel", req.params.username);
+        console.error(137, err);
         res.json({ success: false, message: "bad", err });
         return;
       });
@@ -142,7 +142,7 @@ router.post("/initChat", verifyToken, async (req: Request, res: Response) => {
 
     res.status(200).json({ success: true, message: "Twitch Chat Connected" });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.json({ success: false, message: "bad", error });
   }
 });

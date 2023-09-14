@@ -43,7 +43,7 @@ router.get("/:episodeId", async (req: Request, res: Response) => {
       topics: result?.[0]?.topics || []
     });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).json(error);
   }
 });
