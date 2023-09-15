@@ -33,16 +33,23 @@ export async function chatCommandParser(
     case "!v1":
     case "!v2":
     case "!v3":
+    case "!sv1":
+    case "!sv2":
+    case "!sv3":
       if (!uid || !tid) {
         return;
       }
 
       socket.emit("gtkVoting", {
         _id: v4(),
-        action: command.startsWith("!v") ? "add" : "remove",
+        action: command.startsWith("!v")
+          ? "add"
+          : command.startsWith("!sv")
+          ? "super"
+          : "remove",
         username: tags.username,
         channel: parsedChannel,
-        host: command.charAt(2),
+        host: command.charAt(command.length - 1),
         tid,
         uid
       });
