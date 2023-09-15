@@ -1,6 +1,4 @@
 import express, { Request, Response } from "express";
-const mongoose = require("mongoose");
-
 import { TemplateModel } from "./../../models/templates.model";
 import { socials } from "./commonSocials";
 
@@ -10,10 +8,29 @@ router.get("/", async (req: Request, res: Response) => {
   try {
     const result = await TemplateModel.find();
 
-    res.status(200).json({ socials, templates: result });
+    const returnData = {
+      result: {
+        socials,
+        templates: result
+      },
+
+      resultStatus: {
+        errors: null,
+        responseCode: 200,
+        resultMessage: "Application data loaded successfully",
+        success: true
+      }
+    };
+
+    res.status(200).json(returnData);
   } catch (error) {
-    console.error(24, error);
-    res.status(404).send(error);
+    res.status(500).send({
+      errors: error,
+      responseCode: 500,
+      resultMessage: "Application data not loaded successfully",
+      status: "error",
+      success: false
+    });
   }
 });
 
