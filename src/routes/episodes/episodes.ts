@@ -355,7 +355,6 @@ const lastEpisodeTopicParser = async (
     const newTopics = topics.map((item: IEpisodeTopic) => {
       const newItem = {
         ...item,
-        _id: new ObjectId(),
         img: item?.img ? s3ObjectCopy(item.img) : "",
         video: item?.video ? s3ObjectCopyVideo(item.video) : ""
       };
@@ -370,8 +369,8 @@ const lastEpisodeTopicParser = async (
   return [
     {
       order: 1,
-      name: "New Topic sdfsafsaf",
-      desc: "Topic Description",
+      name: "New Topic 1",
+      desc: "Description for topic 1",
       timer: 0,
       isParent: false,
       isChild: false,

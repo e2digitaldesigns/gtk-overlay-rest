@@ -7,6 +7,8 @@ import { IEpisode } from "../../models/episodes.model";
 import { deleteFromS3 } from "../fileUpload/s3Delete";
 const ObjectId = mongoose.Types.ObjectId;
 
+import _sortBy from "lodash/sortBy";
+
 const router = express.Router();
 router.use(verifyToken);
 const MODEL = EpisodeModel;
@@ -40,7 +42,7 @@ router.get("/:episodeId", async (req: Request, res: Response) => {
     res.status(200).json({
       templateId: result[0].templateId,
       images: result[0].template[0].images.topic,
-      topics: result?.[0]?.topics || []
+      topics: result?.[0]?.topics ? _sortBy(result[0].topics, "order") : []
     });
   } catch (error) {
     console.error(error);
@@ -122,6 +124,15 @@ router.put("/:episodeId", async (req: Request, res: Response) => {
 
 router.put("/reorder/:episodeId", async (req: Request, res: Response) => {
   const { topics } = req.body;
+
+  console.log(`\r\n`);
+  console.log("xxxxx xxxxx xxxxx");
+  for (let i = 0; i < topics.length; i++) {
+    console.log(i, topics[i].order, topics[i].name);
+  }
+
+  console.log("xxxxx xxxxx xxxxx");
+  console.log(`\r\n`);
 
   try {
     for (let i = 0; i < topics.length; i++) {

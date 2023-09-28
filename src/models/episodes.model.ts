@@ -28,6 +28,7 @@ export interface IEpisodeTopic {
   timer: number;
   articles: string;
   video: string;
+  notes: string;
 }
 
 export interface IEpisode {
@@ -64,7 +65,8 @@ const EpisodeTopicSchema = new Schema<IEpisodeTopic>({
   parentId: { type: String, default: " " },
   timer: { type: Number, required: true, default: 0 },
   articles: { type: String, required: false, default: "" },
-  video: { type: String, required: false, default: "" }
+  video: { type: String, required: false, default: "" },
+  notes: { type: String, required: false, default: "" }
 });
 
 const EpisodeSchema = new Schema<IEpisode>({
