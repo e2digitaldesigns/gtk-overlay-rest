@@ -289,9 +289,12 @@ router.post("/youtube-video", upload, async (req: Request, res: Response) => {
       );
     }
 
-    res.send("data");
+    res.json({
+      success: 1,
+      videoUrl: data.body.videoUrl
+    });
   } catch (error) {
-    res.send("hill");
+    res.send("error");
   }
 });
 

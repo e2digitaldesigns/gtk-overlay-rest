@@ -255,7 +255,11 @@ router.post("/", async (req: Request, res: Response) => {
       ),
       contentBoxes: [],
       sponsorBoxes: [],
-      sponsorImages: newSponsorImages
+      sponsorImages: newSponsorImages,
+      podcastName:
+        currentState.podcastName && lastEpisode?.podcastName
+          ? lastEpisode.podcastName
+          : "What the PodCast!"
     };
 
     const result = await MODEL.create({

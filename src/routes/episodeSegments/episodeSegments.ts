@@ -31,6 +31,7 @@ router.get("/info/:episodeId", async (req: Request, res: Response) => {
       },
       {
         $project: {
+          podcastName: 1,
           name: 1,
           number: 1,
           airDate: 1,
@@ -42,6 +43,7 @@ router.get("/info/:episodeId", async (req: Request, res: Response) => {
     ]);
 
     const data = {
+      podcastName: result[0].podcastName,
       name: result[0].name,
       number: result[0].number,
       airDate: result[0].airDate,
@@ -65,6 +67,7 @@ router.put("/info/:episodeId", async (req: Request, res: Response) => {
       },
       {
         $set: {
+          podcastName: req.body.podcastName,
           name: req.body.name,
           number: req.body.number,
           airDate: req.body.airDate,

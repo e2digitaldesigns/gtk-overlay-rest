@@ -34,6 +34,7 @@ export interface IEpisodeTopic {
 export interface IEpisode {
   _id: Types.ObjectId;
   userId: Types.ObjectId;
+  podcastName: string;
   name: string;
   active: boolean;
   airDate: string;
@@ -71,6 +72,7 @@ const EpisodeTopicSchema = new Schema<IEpisodeTopic>({
 
 const EpisodeSchema = new Schema<IEpisode>({
   userId: { type: Schema.Types.ObjectId, required: true },
+  podcastName: { type: String, required: true, default: " " },
   name: { type: String, required: true, default: " " },
   active: { type: Boolean, required: true, default: false },
   airDate: {

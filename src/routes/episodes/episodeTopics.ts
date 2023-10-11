@@ -125,15 +125,6 @@ router.put("/:episodeId", async (req: Request, res: Response) => {
 router.put("/reorder/:episodeId", async (req: Request, res: Response) => {
   const { topics } = req.body;
 
-  console.log(`\r\n`);
-  console.log("xxxxx xxxxx xxxxx");
-  for (let i = 0; i < topics.length; i++) {
-    console.log(i, topics[i].order, topics[i].name);
-  }
-
-  console.log("xxxxx xxxxx xxxxx");
-  console.log(`\r\n`);
-
   try {
     for (let i = 0; i < topics.length; i++) {
       await MODEL.updateOne(
