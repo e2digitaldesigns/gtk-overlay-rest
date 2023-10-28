@@ -2,33 +2,31 @@ if (process.env.NODE_ENV !== "production") {
   require("dotenv").config();
 }
 
+import { Server } from "http";
 import express, { Express, NextFunction, Request, Response } from "express";
-import { connectMongo } from "../mongoose";
+
 import { routing } from "./routes/index";
 import { TwitchBot } from "./routes/twitchBot/twitchBotClass";
+import { connectMongo } from "./startUpServices/mongoose";
+import { socketMaker } from "./startUpServices/socket";
 
 const app: Express = express();
 app.use(require("cors")());
-app.use(express.json());
-
-connectMongo();
 
 const PORT = process.env.PORT || 8001;
-const server = app.listen(PORT, () => console.log(`Listening on port ${PORT}`));
+const server: Server = app.listen(PORT, () =>
+  console.log(`Step 01) Server is listening on port ${PORT}`)
+);
 
-const io = require("socket.io")(server, {
-  cors: {
-    origin: "*",
-    methods: ["GET"]
-  }
-});
+connectMongo();
+const io = socketMaker(server);
 
 const twitchBot = new TwitchBot(app, io);
 twitchBot.refreshTwitchAccessToken();
 
 setTimeout(() => {
   twitchBot.initTwitchBot();
-}, 15000);
+}, 5000);
 
 app.get("/", async (req: Request, res: Response) => {
   res.send("GTK REST Service");
@@ -40,14 +38,3 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 });
 
 routing(app);
-
-io.on("connection", (socket: any) => {
-  socket.on("mgOverlayActions", (data: any) => {
-    socket.broadcast.emit("mgOverlayActions", data);
-    io.emit("mgOverlayActions", data);
-  });
-
-  socket.on("mgVoting", (data: any) => {
-    io.emit("mgVoting", data);
-  });
-});

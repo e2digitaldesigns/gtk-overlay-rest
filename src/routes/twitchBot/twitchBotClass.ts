@@ -1,22 +1,25 @@
 import { Express } from "express";
+import { Server as HttpServer } from "http";
+import { Server as SocketServer, Socket } from "socket.io";
 
 import mongoose from "mongoose";
 const ObjectId = mongoose.Types.ObjectId;
-const tmi = require("tmi.js");
+import { Client as TMIClient } from "tmi.js";
 import axios from "axios";
 
-const NodeCache = require("node-cache");
+import NodeCache from "node-cache";
+
+import { twitchChatParser } from "../../twitch/messageParser";
 
 import { GtkTwitchBotModel } from "../../models/gtkBot.model";
-import { twitchChatParser } from "../../twitch/messageParser";
 import { TwitchAuthModel } from "../../models/twitch.model";
-import { chatCommandParser } from "./utils/chatCommandParser";
 import { ChatLogModel } from "../../models/chatLog.model";
+
+import { chatCommandParser } from "./utils/chatCommandParser";
 import { emojiParser } from "./utils/emojiParser";
 import { chatRankParser } from "./utils/chatRanks";
 import { chatRelayParser } from "./utils/chatRelay";
 import { getGTKUserId } from "./utils/dbFecthers";
-
 import { ignoreList } from "./utils/ignoreList";
 
 type TwitchBotData = {
@@ -28,17 +31,17 @@ type TwitchBotData = {
 
 export class TwitchBot {
   botName: string;
-  setTimerId: any;
-  socket: any;
-  twitchProfileImageCache: any;
-  client: any;
+  setTimerId: NodeJS.Timeout;
+  socket: SocketServer;
+  twitchProfileImageCache: NodeCache;
+  client: TMIClient | null;
   expressApp: Express;
 
-  constructor(expressApp: Express, socket: any) {
+  constructor(expressApp: Express, socket: SocketServer) {
     this.socket = socket;
     this.botName = "iconicbotty";
     this.twitchProfileImageCache = new NodeCache({ stdTTL: 60 * 60 * 1000 });
-    this.setTimerId = null;
+    this.setTimerId = setTimeout(() => {}, 0);
     this.client = null;
     this.expressApp = expressApp;
 
@@ -64,7 +67,8 @@ export class TwitchBot {
 
   async initTwitchBot(): Promise<void> {
     try {
-      this.client = new tmi.Client({
+      this.client = new TMIClient({
+        options: { debug: true },
         channels: [this.botName],
         identity: {
           username: this.botName,
@@ -132,8 +136,8 @@ export class TwitchBot {
         }
       );
 
-      this.client.on("connected", async (address: number, port: number) => {
-        console.log(`104, Connected to ${address}:${port}`);
+      this.client.on("connected", async (address: string, port: number) => {
+        console.log(`Step 04) Connected to ${address}:${port}`);
 
         const allUsers = await TwitchAuthModel.find().select({
           twitchUserName: 1
@@ -141,22 +145,14 @@ export class TwitchBot {
 
         allUsers.forEach(user => {
           setTimeout(() => {
-            const channels = this.client.getChannels();
+            const channels = this?.client?.getChannels() || [];
             const connected = channels.some(
               (channel: string) => channel.slice(1) === user.twitchUserName
             );
 
-            console.log(
-              143,
-              "connected",
-              user.twitchUserName,
-              "isConnected:",
-              connected
-            );
-
             if (connected) return;
 
-            this.client.join(user.twitchUserName).catch((err: unknown) => {
+            this?.client?.join(user.twitchUserName).catch((err: unknown) => {
               console.error(148, "error joining channel", user.twitchUserName);
             });
           }, 100);
@@ -164,14 +160,15 @@ export class TwitchBot {
       });
 
       this.client.on("disconnected", (error: unknown) => {
+        console.log("162, Bot Disconnected");
         setTimeout(() => {
           // this.initTwitchBot();
-          console.log("168, Do not reconnect");
+          console.log("165, Wait 20 seconds to reconnect");
         }, 20000);
       });
 
       setTimeout(() => {
-        this.client.connect().catch(console.error);
+        this?.client?.connect().catch(console.error);
       }, 2000);
 
       this.expressApp.set("twitchClient", this.client);
@@ -182,6 +179,7 @@ export class TwitchBot {
   }
 
   async refreshTwitchAccessToken(): Promise<void> {
+    console.log(182, "refreshTwitchAccessToken is refreshing");
     clearTimeout(this.setTimerId);
 
     try {
@@ -189,9 +187,14 @@ export class TwitchBot {
       if (!twitchData)
         throw new Error("146 refreshTwitchAccessToken: No Twitch Data");
 
+      console.log(190, { refreshToken: twitchData.refreshToken });
+
       const response = await axios.post(
         `https://id.twitch.tv/oauth2/token?grant_type=refresh_token&refresh_token=${twitchData.refreshToken}&client_id=${process.env.TWITCH_CLIENT_ID}&client_secret=${process.env.TWITCH_CLIENT_SECRET}`
       );
+
+      console.log("response.data.expires_in", response?.data);
+      console.log("status", response?.status);
 
       if (response.status !== 200)
         throw new Error("26 refreshTwitchAccessToken: Twitch Refresh Failed");
@@ -210,9 +213,9 @@ export class TwitchBot {
         { new: true }
       );
 
-      this.setTimerId = setTimeout(() => {
-        this.refreshTwitchAccessToken();
-      }, (response.data.expires_in - 300) * 1000);
+      // this.setTimerId = setTimeout(() => {
+      //   this.refreshTwitchAccessToken();
+      // }, (response.data.expires_in - 300) * 1000);
     } catch (error) {
       console.error(error);
     }
@@ -243,14 +246,17 @@ export class TwitchBot {
         }
       });
 
-      return validate.status === 200;
-    } catch (error: any) {
+      console.log("validate", validate);
+
+      return validate.status !== 401;
+    } catch (error: unknown) {
       return false;
     }
   }
 
   private async getUserProfileImage(username: string): Promise<string | null> {
-    const cachedImage = this?.twitchProfileImageCache.get(username);
+    const cachedImage: string | undefined =
+      this?.twitchProfileImageCache.get(username);
     if (cachedImage) return cachedImage;
 
     try {
@@ -268,11 +274,11 @@ export class TwitchBot {
         }
       );
 
-      if (data.status !== 200) {
+      if (data.status === 401) {
         await this.refreshTwitchAccessToken();
       }
 
-      const image = data.data[0].profile_image_url;
+      const image: string | undefined = data?.data?.[0]?.profile_image_url;
 
       if (image) {
         this.twitchProfileImageCache.set(username, image);

@@ -8,7 +8,7 @@ const uri =
 export const connectMongo = async () => {
   await connect(uri, {}).then(
     () => {
-      console.log("connected to mongoDb");
+      console.log("Step 02) Server is now connected to mongoDb");
     },
     err => {
       console.error(err);
