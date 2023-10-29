@@ -1,10 +1,14 @@
+import NodeCache from "node-cache";
 import { ChatLogModel } from "../../../../models/chatLog.model";
+import { getUserProfileImage } from "../getTwitchUserProfileImage";
 
 export async function chatLogParser(
   gtkUserId: string,
   channel: string,
   tags: any,
-  message: string
+  message: string,
+  twitchProfileImageCache: NodeCache,
+  refreshTwitchAccessToken: () => Promise<boolean>
 ) {
   try {
     await ChatLogModel.create({
@@ -14,8 +18,11 @@ export async function chatLogParser(
       userId: tags["user-id"],
       username: tags["display-name"] || tags.username,
       message: message,
-      image: ""
-      //   image: await this.getUserProfileImage(tags.username)
+      image: await getUserProfileImage(
+        tags.username,
+        twitchProfileImageCache,
+        refreshTwitchAccessToken
+      )
     });
   } catch (error) {
     console.error(error);

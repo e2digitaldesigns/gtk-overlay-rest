@@ -10,9 +10,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@twurple/api": "^6.1.1",
-    "@twurple/auth": "^6.1.1",
-    "@twurple/easy-bot": "^6.1.1",
     "aws-sdk": "^2.1333.0",
     "axios": "^1.3.5",
     "cors": "^2.8.5",

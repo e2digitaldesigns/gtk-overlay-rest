@@ -89,7 +89,9 @@ export class TwitchBotter {
             message,
             self,
             this.client,
-            this.socket
+            this.socket,
+            this.twitchProfileImageCache,
+            this.refreshTwitchAccessToken
           );
         }
       );

@@ -7,6 +7,7 @@ import { chatRelayParser } from "./parsers/chatRelay";
 import { emojiParser } from "./parsers/emojiParser";
 import { chatCommandParser } from "./parsers/chatCommandParser";
 import { chatLogParser } from "./parsers/chatLogParser";
+import NodeCache from "node-cache";
 
 export async function parseMessaging(
   channel: string,
@@ -14,10 +15,10 @@ export async function parseMessaging(
   message: string,
   self: boolean,
   tmiClient: TMIClient | null,
-  socket: SocketServer
+  socket: SocketServer,
+  twitchProfileImageCache: NodeCache,
+  refreshTwitchAccessToken: () => Promise<boolean>
 ) {
-  console.log("parseMessaging", channel.slice(1), tags.username.toLowerCase());
-
   if (self) return; // Ignore messages from the bot
 
   // Ignore messages from ignored users
@@ -31,7 +32,14 @@ export async function parseMessaging(
   chatCommandParser(tmiClient, socket, message.trim(), channel, tags);
 
   //Chat Log Parser
-  chatLogParser(gtkUserId, channel, tags, message);
+  chatLogParser(
+    gtkUserId,
+    channel,
+    tags,
+    message,
+    twitchProfileImageCache,
+    refreshTwitchAccessToken
+  );
 
   //Chat Rank Parser
   chatRankParser(socket, channel);
