@@ -1,11 +1,11 @@
+import { Server as SocketServer } from "socket.io";
 import { v4 } from "uuid";
-import { getGTKTemplateId, getGTKUserId } from "./dbFecthers";
+import { getGTKUserId, getGTKTemplateId } from "../utils/dbFecthers";
 
 export async function emojiParser(
-  socket: any,
+  socket: SocketServer,
   message: string,
-  channel: string,
-  tags: any
+  channel: string
 ) {
   const parsedChannel = channel.slice(1);
   const regexpEmojiPresentation = /\p{Emoji_Presentation}/gu;

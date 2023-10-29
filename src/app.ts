@@ -9,6 +9,7 @@ import { routing } from "./routes/index";
 import { TwitchBot } from "./routes/twitchBot/twitchBotClass";
 import { connectMongo } from "./startUpServices/mongoose";
 import { socketMaker } from "./startUpServices/socket";
+import { TwitchBotter } from "./twitchBot/twitchBotter";
 
 const app: Express = express();
 app.use(require("cors")());
@@ -21,12 +22,8 @@ const server: Server = app.listen(PORT, () =>
 connectMongo();
 const io = socketMaker(server);
 
-const twitchBot = new TwitchBot(app, io);
-twitchBot.refreshTwitchAccessToken();
-
-setTimeout(() => {
-  twitchBot.initTwitchBot();
-}, 5000);
+// new TwitchBot(app, io);
+new TwitchBotter(app, io);
 
 app.get("/", async (req: Request, res: Response) => {
   res.send("GTK REST Service");

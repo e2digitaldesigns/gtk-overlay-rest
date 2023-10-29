@@ -3,14 +3,17 @@ import mongoose from "mongoose";
 import { getGTKTemplateId, getGTKUserId } from "./dbFecthers";
 import { ChatLogModel } from "../../../models/chatLog.model";
 const ObjectId = mongoose.Types.ObjectId;
+import { Client as TMIClient } from "tmi.js";
+import { Server as SocketServer, Socket } from "socket.io";
 
 export async function chatCommandParser(
-  client: any,
-  socket: any,
+  client: TMIClient | null,
+  socket: SocketServer,
   message: string,
   channel: string,
   tags: any
 ) {
+  if (self || !client) return;
   if (!message.trim().startsWith("!")) return;
   const command = message.toLowerCase().split(" ")[0];
   const target = message.toLowerCase().split(" ").slice(1);

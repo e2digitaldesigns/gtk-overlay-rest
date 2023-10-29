@@ -46,6 +46,7 @@ export class TwitchBot {
     this.expressApp = expressApp;
 
     this.twitchValidationWatcher();
+    this.initTwitchBot();
   }
 
   private async getTwitchBotData(): Promise<TwitchBotData | null> {
@@ -66,7 +67,15 @@ export class TwitchBot {
   }
 
   async initTwitchBot(): Promise<void> {
+    console.log(69, "initTwitchBot is initializing");
+
     try {
+      const isValid = await this.twitchValidate();
+
+      if (!isValid) {
+        await this.refreshTwitchAccessToken();
+      }
+
       this.client = new TMIClient({
         options: { debug: true },
         channels: [this.botName],
@@ -78,10 +87,7 @@ export class TwitchBot {
         },
 
         connection: {
-          secure: true,
-          reconnect: true,
-          maxReconnectAttempts: Infinity,
-          reconnectInterval: 1000
+          secure: true
         }
       });
 
@@ -93,6 +99,7 @@ export class TwitchBot {
           if (ignoreList.includes(tags.username)) return;
 
           const getId = await getGTKUserId(channel.slice(1));
+          console.log("getId", getId);
           if (!getId) return;
 
           const gtkUserId = new ObjectId(getId);
@@ -162,7 +169,8 @@ export class TwitchBot {
       this.client.on("disconnected", (error: unknown) => {
         console.log("162, Bot Disconnected");
         setTimeout(() => {
-          // this.initTwitchBot();
+          this.client = null;
+          this.initTwitchBot();
           console.log("165, Wait 20 seconds to reconnect");
         }, 20000);
       });
@@ -193,7 +201,7 @@ export class TwitchBot {
         `https://id.twitch.tv/oauth2/token?grant_type=refresh_token&refresh_token=${twitchData.refreshToken}&client_id=${process.env.TWITCH_CLIENT_ID}&client_secret=${process.env.TWITCH_CLIENT_SECRET}`
       );
 
-      console.log("response.data.expires_in", response?.data);
+      console.log("response.data.expires_in", response?.data?.expires_in);
       console.log("status", response?.status);
 
       if (response.status !== 200)
@@ -212,10 +220,6 @@ export class TwitchBot {
         },
         { new: true }
       );
-
-      // this.setTimerId = setTimeout(() => {
-      //   this.refreshTwitchAccessToken();
-      // }, (response.data.expires_in - 300) * 1000);
     } catch (error) {
       console.error(error);
     }
@@ -246,9 +250,9 @@ export class TwitchBot {
         }
       });
 
-      console.log("validate", validate);
+      console.log("validate", validate.status);
 
-      return validate.status !== 401;
+      return validate.status === 401 ? false : true;
     } catch (error: unknown) {
       return false;
     }
