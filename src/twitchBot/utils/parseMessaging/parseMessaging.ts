@@ -45,7 +45,14 @@ export async function parseMessaging(
   chatRankParser(socket, channel);
 
   //Chat Relay Parser
-  chatRelayParser(socket, message, channel, tags, null);
+  chatRelayParser(
+    socket,
+    message,
+    channel,
+    tags,
+    twitchProfileImageCache,
+    refreshTwitchAccessToken
+  );
 
   //Emoji Parser
   emojiParser(socket, message, channel);

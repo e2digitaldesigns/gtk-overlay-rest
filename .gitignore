@@ -1,5 +1,7 @@
 .env
 
+/_backer
 /_help
 /node_modules
-/_backer
+
+/uploads
