@@ -67,9 +67,10 @@ export class TwitchBotter {
         channels: [this.botName, ...(await getTwitchChannels())],
         identity: {
           username: this.botName,
-          password: await this.getTwitchBotData()
-            .then(data => data?.accessToken || "")
-            .catch(err => "")
+          password: process.env.TWITCH_ACCESS_TOKEN
+          // password: await this.getTwitchBotData()
+          //   .then(data => data?.accessToken || "")
+          //   .catch(err => "")
         },
 
         connection: {
