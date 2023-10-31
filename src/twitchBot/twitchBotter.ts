@@ -28,8 +28,7 @@ export class TwitchBotter {
     this.resetCount = 0;
     this.resetMaxAttempts = 5;
 
-    console.log(30, "starting");
-
+    this.refreshTwitchAccessToken();
     this.twitchValidationWatcher();
     this.initTwitchBot();
   }
@@ -39,76 +38,53 @@ export class TwitchBotter {
 
   //init twitch bot
   async initTwitchBot(): Promise<void> {
-    console.log("initTwitchBot is initializing");
+    console.log(41, "twitchBotter.ts", "initTwitchBot is initializing");
+
+    this.client = new TMIClient({
+      options: { debug: true },
+      channels: [this.botName, ...(await getTwitchChannels())],
+      identity: {
+        username: this.botName,
+        password: await this.getTwitchBotData().then(
+          data => data?.accessToken || ""
+        )
+      },
+
+      connection: {
+        secure: true,
+        reconnect: true,
+        maxReconnectAttempts: Infinity,
+        reconnectInterval: 10000
+      }
+    });
+
+    this?.client?.connect().catch(console.error);
+
+    this.client.on(
+      "message",
+      async (channel: string, tags: any, message: string, self: boolean) => {
+        parseMessaging(
+          channel,
+          tags,
+          message,
+          self,
+          this.client,
+          this.socket,
+          this.twitchProfileImageCache,
+          this.refreshTwitchAccessToken
+        );
+      }
+    );
+
+    this.client.on("disconnected", async (data: string) => {
+      console.log(80, "twitchBotter.ts", "Bot Disconnected", data);
+
+      setTimeout(async () => {
+        this.refreshTwitchAccessToken();
+      }, 10000);
+    });
 
     try {
-      if (this.client) {
-        this.client?.disconnect();
-      }
-
-      const isValid = await twitchValidateMethod(this.getTwitchBotData);
-
-      if (!isValid) {
-        if (this.resetCount < this.resetMaxAttempts) {
-          this.resetCount += 1;
-          setTimeout(async () => {
-            const newTokenValid = await this.refreshTwitchAccessToken();
-            if (newTokenValid) this.initTwitchBot();
-          }, 10000 * this.resetCount);
-        }
-
-        return;
-      } else {
-        this.resetCount = 0;
-      }
-
-      this.client = new TMIClient({
-        options: { debug: true },
-        channels: [this.botName, ...(await getTwitchChannels())],
-        identity: {
-          username: this.botName,
-          password: process.env.TWITCH_ACCESS_TOKEN
-          // password: await this.getTwitchBotData()
-          //   .then(data => data?.accessToken || "")
-          //   .catch(err => "")
-        },
-
-        connection: {
-          secure: true,
-          reconnect: false,
-          maxReconnectAttempts: Infinity,
-          reconnectInterval: 10000
-        }
-      });
-
-      this.client.on("connected", () => console.log(90, "Bot Connected"));
-
-      this.client.on(
-        "message",
-        async (channel: string, tags: any, message: string, self: boolean) => {
-          parseMessaging(
-            channel,
-            tags,
-            message,
-            self,
-            this.client,
-            this.socket,
-            this.twitchProfileImageCache,
-            this.refreshTwitchAccessToken
-          );
-        }
-      );
-
-      this.client.on("disconnected", async (data: string) => {
-        console.log(102, "Bot Disconnected", data);
-
-        const isValid = await twitchValidateMethod(this.getTwitchBotData);
-        console.log(107, { isValid });
-        this.initTwitchBot();
-      });
-
-      this?.client?.connect().catch(console.error);
-
       this.expressApp.set("twitchClient", this.client);
     } catch (error) {
       this.expressApp.set("twitchClient", null);
@@ -122,12 +98,22 @@ export class TwitchBotter {
 
   //validation watcher
   private async twitchValidationWatcher() {
-    setInterval(async () => {
+    const validator = async () => {
+      console.log(102, "twitchBotter.ts", "tValidationWatcher is validating");
       const isValid = await twitchValidateMethod(this.getTwitchBotData);
 
+      console.log(105, "twitchBotter.ts", { isValid });
+
       if (!isValid) {
+        console.log(108, "twitchBotter.ts", "token is not valid so refresh it");
         await this.refreshTwitchAccessToken();
       }
-    }, 5 * 60 * 1000);
+    };
+
+    validator();
+
+    setInterval(async () => {
+      validator();
+    }, 2.5 * 60 * 1000);
   }
 }
