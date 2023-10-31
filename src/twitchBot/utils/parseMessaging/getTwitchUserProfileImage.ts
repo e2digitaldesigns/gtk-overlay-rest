@@ -10,8 +10,6 @@ export async function getUserProfileImage(
   const cachedImage: string | undefined = twitchProfileImageCache.get(username);
   if (cachedImage) return cachedImage;
 
-  console.log(12, { username });
-
   try {
     getTwitchBotDataMethod;
     const twitchData = await getTwitchBotDataMethod("iconicbotty");

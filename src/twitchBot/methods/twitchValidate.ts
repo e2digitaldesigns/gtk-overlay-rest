@@ -11,7 +11,7 @@ export async function twitchValidateMethod(getTwitchBotData: any) {
       }
     });
 
-    console.log("validate", validate.status);
+    console.log(14, "validate", validate.status);
 
     return validate.status === 401 ? false : true;
   } catch (error: unknown) {

@@ -73,8 +73,10 @@ export class TwitchBotter {
         },
 
         connection: {
-          reconnect: true,
-          secure: true
+          secure: true,
+          reconnect: false,
+          maxReconnectAttempts: Infinity,
+          reconnectInterval: 10000
         }
       });
 
@@ -96,8 +98,12 @@ export class TwitchBotter {
         }
       );
 
-      this.client.on("disconnected", (data: unknown) => {
-        console.log("Bot Disconnected", data);
+      this.client.on("disconnected", async (data: string) => {
+        console.log(102, "Bot Disconnected", data);
+
+        const isValid = await twitchValidateMethod(this.getTwitchBotData);
+        console.log(107, { isValid });
+        this.initTwitchBot();
       });
 
       this?.client?.connect().catch(console.error);
