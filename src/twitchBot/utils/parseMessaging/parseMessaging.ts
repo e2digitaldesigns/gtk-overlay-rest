@@ -7,7 +7,6 @@ import { chatRelayParser } from "./parsers/chatRelay";
 import { emojiParser } from "./parsers/emojiParser";
 import { chatCommandParser } from "./parsers/chatCommandParser";
 import { chatLogParser } from "./parsers/chatLogParser";
-import NodeCache from "node-cache";
 
 export async function parseMessaging(
   channel: string,
@@ -16,8 +15,7 @@ export async function parseMessaging(
   self: boolean,
   tmiClient: TMIClient | null,
   socket: SocketServer,
-  twitchProfileImageCache: NodeCache,
-  refreshTwitchAccessToken: () => Promise<boolean>
+  getUserProfileImage: any
 ) {
   if (self) return; // Ignore messages from the bot
 
@@ -28,31 +26,20 @@ export async function parseMessaging(
   const gtkUserId = await getGTKUserId(channel.slice(1));
   if (!gtkUserId) return;
 
+  // Get Twitch User Image
+  const twitchUserImage = await getUserProfileImage(tags.username);
+
   //Chat Command Parser
   chatCommandParser(tmiClient, socket, message.trim(), channel, tags);
 
   //Chat Log Parser
-  chatLogParser(
-    gtkUserId,
-    channel,
-    tags,
-    message,
-    twitchProfileImageCache,
-    refreshTwitchAccessToken
-  );
+  chatLogParser(gtkUserId, channel, tags, message, twitchUserImage);
 
   //Chat Rank Parser
   chatRankParser(socket, channel);
 
   //Chat Relay Parser
-  chatRelayParser(
-    socket,
-    message,
-    channel,
-    tags,
-    twitchProfileImageCache,
-    refreshTwitchAccessToken
-  );
+  chatRelayParser(socket, message, channel, tags, twitchUserImage);
 
   //Emoji Parser
   emojiParser(socket, message, channel);

@@ -21,6 +21,8 @@ export async function getTwitchBotDataMethod(
       refreshToken: 1
     });
 
+    console.log(24, "twitchBotData.ts accessToken", twitchData?.accessToken);
+
     return twitchData;
   } catch (error) {
     return null;
