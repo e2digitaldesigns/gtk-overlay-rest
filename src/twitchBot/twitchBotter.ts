@@ -1,4 +1,5 @@
 import { Express } from "express";
+import axios from "axios";
 import { Server as SocketServer } from "socket.io";
 import { Client as TMIClient } from "tmi.js";
 import NodeCache from "node-cache";
@@ -28,26 +29,35 @@ export class TwitchBotter {
     this.resetCount = 0;
     this.resetMaxAttempts = 5;
 
-    this.refreshTwitchAccessToken();
-    this.twitchValidationWatcher();
     this.initTwitchBot();
+    // this.twitchValidationWatcher();
   }
 
   //get twitch bot data from db
   private getTwitchBotData = () => getTwitchBotDataMethod(this.botName);
 
+  private async getNewAccessToken() {
+    // check for valid token
+    const isValid = await this.validateTwitchAccessToken();
+    console.log(41, "twitchBotter.ts", { isValid });
+
+    // if not valid refresh
+    if (!isValid) await this.refreshTwitchAccessToken();
+
+    // if valid return token
+    return await this.getTwitchBotData().then(data => data?.accessToken || "");
+  }
+
   //init twitch bot
   async initTwitchBot(): Promise<void> {
-    console.log(41, "twitchBotter.ts", "initTwitchBot is initializing");
+    console.log(52, "twitchBotter.ts", "initTwitchBot is initializing");
 
     this.client = new TMIClient({
       options: { debug: true },
       channels: [this.botName, ...(await getTwitchChannels())],
       identity: {
         username: this.botName,
-        password: await this.getTwitchBotData().then(
-          data => data?.accessToken || ""
-        )
+        password: await this.getNewAccessToken()
       },
 
       connection: {
@@ -93,27 +103,31 @@ export class TwitchBotter {
   }
 
   //refresh twitch access token
-  refreshTwitchAccessToken = () =>
-    refreshTwitchAccessTokenMethod(this.botName, this.getTwitchBotData);
+  private refreshTwitchAccessToken = async () => {
+    const refreshToken = await this.getTwitchBotData().then(
+      data => data?.refreshToken || ""
+    );
+    return refreshTwitchAccessTokenMethod(this.botName, refreshToken);
+  };
 
-  //validation watcher
-  private async twitchValidationWatcher() {
-    const validator = async () => {
-      console.log(102, "twitchBotter.ts", "tValidationWatcher is validating");
-      const isValid = await twitchValidateMethod(this.getTwitchBotData);
+  //validate twitch access token
+  private validateTwitchAccessToken = async () => {
+    try {
+      const accessToken = await this.getTwitchBotData().then(
+        data => data?.accessToken || ""
+      );
 
-      console.log(105, "twitchBotter.ts", { isValid });
+      if (!accessToken) throw new Error("125 No Twitch Data");
 
-      if (!isValid) {
-        console.log(108, "twitchBotter.ts", "token is not valid so refresh it");
-        await this.refreshTwitchAccessToken();
-      }
-    };
+      const validate = await axios.get("https://id.twitch.tv/oauth2/validate", {
+        headers: {
+          Authorization: `Bearer ${accessToken}`
+        }
+      });
 
-    validator();
-
-    setInterval(async () => {
-      validator();
-    }, 2.5 * 60 * 1000);
-  }
+      return validate.status === 401 ? false : true;
+    } catch (error: unknown) {
+      return false;
+    }
+  };
 }

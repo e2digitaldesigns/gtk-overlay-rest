@@ -3,15 +3,14 @@ import { GtkTwitchBotModel } from "../../models/gtkBot.model";
 
 export async function refreshTwitchAccessTokenMethod(
   botName: string,
-  getTwitchBotData: any
+  refreshToken: string
 ): Promise<boolean> {
   try {
-    const twitchData = await getTwitchBotData();
-    if (!twitchData)
+    if (!refreshToken)
       throw new Error("15 refreshTwitchAccessToken: No Twitch Data");
 
     const response = await axios.post(
-      `https://id.twitch.tv/oauth2/token?grant_type=refresh_token&refresh_token=${twitchData.refreshToken}&client_id=${process.env.TWITCH_CLIENT_ID}&client_secret=${process.env.TWITCH_CLIENT_SECRET}`
+      `https://id.twitch.tv/oauth2/token?grant_type=refresh_token&refresh_token=${refreshToken}&client_id=${process.env.TWITCH_CLIENT_ID}&client_secret=${process.env.TWITCH_CLIENT_SECRET}`
     );
 
     if (response.status !== 200)

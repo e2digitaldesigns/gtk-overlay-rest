@@ -1,13 +1,12 @@
 import axios from "axios";
 
-export async function twitchValidateMethod(getTwitchBotData: any) {
+export async function twitchValidateMethod(accessToken: string) {
   try {
-    const twitchData = await getTwitchBotData();
-    if (!twitchData) throw new Error("125 No Twitch Data");
+    if (!accessToken) throw new Error("125 No Twitch Data");
 
     const validate = await axios.get("https://id.twitch.tv/oauth2/validate", {
       headers: {
-        Authorization: `Bearer ${twitchData.accessToken}`
+        Authorization: `Bearer ${accessToken}`
       }
     });
 
