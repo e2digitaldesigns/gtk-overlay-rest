@@ -7,7 +7,14 @@ import { getTwitchBotDataMethod } from "./methods/twitchBotData";
 import { refreshTwitchAccessTokenMethod } from "./methods/refreshAccessToken";
 import { getTwitchChannels } from "./utils/getUsers";
 import { parseMessaging } from "./utils/parseMessaging/parseMessaging";
+import { GtkTwitchBotModel } from "../models/gtkBot.model";
 
+type TwitchBotData = {
+  accessToken: string;
+  expirationTime: number;
+  expiresIn: number;
+  refreshToken: string;
+};
 export class TwitchBotter {
   botName: string;
   socket: SocketServer;
@@ -26,13 +33,30 @@ export class TwitchBotter {
   }
 
   //get twitch bot data from db
-  private getTwitchBotData = async () =>
-    await getTwitchBotDataMethod(this.botName);
+  private getTwitchBotData = async (): Promise<TwitchBotData | null> => {
+    console.log(37, "twitchBotData.ts", "fecting twitch data");
+
+    try {
+      const twitchData = await GtkTwitchBotModel.findOne({
+        twitchUserName: this.botName
+      }).select({
+        accessToken: 1,
+        expirationTime: 1,
+        expiresIn: 1,
+        refreshToken: 1
+      });
+
+      console.log(49, "twitchBotData.ts accessToken", twitchData?.accessToken);
+      return twitchData;
+    } catch (error) {
+      return null;
+    }
+  };
 
   private async getNewAccessToken() {
     // check for valid token
     const isValid = await this.validateTwitchAccessToken();
-    console.log(35, "twitchBotter.ts", { isValid });
+    console.log(59, "twitchBotter.ts", { isValid });
 
     // if not valid refresh
     if (!isValid) await this.refreshTwitchAccessToken();
@@ -43,7 +67,7 @@ export class TwitchBotter {
 
   //init twitch bot
   async initTwitchBot(): Promise<void> {
-    console.log(46, "twitchBotter.ts", "initTwitchBot is initializing");
+    console.log(70, "twitchBotter.ts", "initTwitchBot is initializing");
 
     this.client = new TMIClient({
       options: { debug: true },
@@ -79,7 +103,7 @@ export class TwitchBotter {
     );
 
     this.client.on("disconnected", async (data: string) => {
-      console.log(82, "twitchBotter.ts", "Bot Disconnected", data);
+      console.log(106, "twitchBotter.ts", "Bot Disconnected", data);
       await this.refreshTwitchAccessToken();
 
       setTimeout(async () => {
@@ -91,7 +115,7 @@ export class TwitchBotter {
       this.expressApp.set("twitchClient", this.client);
     } catch (error) {
       this.expressApp.set("twitchClient", null);
-      console.error(error);
+      console.error(118, error);
     }
   }
 
@@ -110,9 +134,9 @@ export class TwitchBotter {
         data => data?.accessToken || ""
       );
 
-      console.log(113, { accessToken });
+      console.log(137, "twitchBotter.ts", { accessToken });
 
-      if (!accessToken) throw new Error("125 No Twitch Data");
+      if (!accessToken) throw new Error("115 No Twitch Data");
 
       const validate = await axios.get("https://id.twitch.tv/oauth2/validate", {
         headers: {
@@ -152,7 +176,7 @@ export class TwitchBotter {
         return "";
       }
     } catch (error: any) {
-      console.error(159, error?.response?.data);
+      console.error(179, error?.response?.data);
       return "";
     }
   };
