@@ -1,6 +1,7 @@
 import { Client as TMIClient } from "tmi.js";
 import { Server as SocketServer } from "socket.io";
 import * as chatCommands from "./chatCommands";
+import { toLower } from "lodash";
 
 export async function chatCommandParser(
   client: TMIClient | null,
@@ -15,6 +16,15 @@ export async function chatCommandParser(
   switch (command) {
     case "!gtk":
       client.action(channel, "GamerToolkit Test Command Local");
+      break;
+
+    case "!res":
+      if (tags.username === "icon33") {
+        client.action(channel, "GamerToolkit Resetting Bot");
+        client?.disconnect().catch(console.error);
+      } else {
+        client.action(channel, "No permission to reset bot" + tags.username);
+      }
       break;
 
     case "!reply":

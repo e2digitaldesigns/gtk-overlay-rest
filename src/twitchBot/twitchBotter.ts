@@ -34,7 +34,7 @@ export class TwitchBotter {
 
   //get twitch bot data from db
   private getTwitchBotData = async (): Promise<TwitchBotData | null> => {
-    console.log(37, "twitchBotData.ts", "fecting twitch data");
+    console.log(37, "twitchBotter.ts", "fecting twitch data");
 
     try {
       const twitchData = await GtkTwitchBotModel.findOne({
@@ -46,7 +46,7 @@ export class TwitchBotter {
         refreshToken: 1
       });
 
-      console.log(49, "twitchBotData.ts accessToken", twitchData?.accessToken);
+      console.log(49, "twitchBotter.ts accessToken", twitchData?.accessToken);
       return twitchData;
     } catch (error) {
       return null;
@@ -56,7 +56,7 @@ export class TwitchBotter {
   private async getNewAccessToken() {
     // check for valid token
     const isValid = await this.validateTwitchAccessToken();
-    console.log(59, "twitchBotter.ts", { isValid });
+    console.log(59, "twitchBotter.ts, is token valid?", isValid);
 
     // if not valid refresh
     if (!isValid) await this.refreshTwitchAccessToken();
@@ -68,6 +68,7 @@ export class TwitchBotter {
   //init twitch bot
   async initTwitchBot(): Promise<void> {
     console.log(70, "twitchBotter.ts", "initTwitchBot is initializing");
+    this?.client?.disconnect().catch(console.error);
 
     this.client = new TMIClient({
       options: { debug: true },
@@ -81,7 +82,7 @@ export class TwitchBotter {
         secure: true,
         reconnect: true,
         maxReconnectAttempts: Infinity,
-        reconnectInterval: 10000
+        reconnectInterval: 2000
       }
     });
 
@@ -107,8 +108,9 @@ export class TwitchBotter {
       await this.refreshTwitchAccessToken();
 
       setTimeout(async () => {
-        this.initTwitchBot();
-      }, 10000);
+        console.log(111, "twitchBotter.ts", "Bot Manual Reconnecting");
+        await this.initTwitchBot();
+      }, 100000);
     });
 
     try {
@@ -116,6 +118,11 @@ export class TwitchBotter {
     } catch (error) {
       this.expressApp.set("twitchClient", null);
       console.error(118, error);
+
+      setTimeout(async () => {
+        console.log(123, "twitchBotter.ts", "Init Twitch Bot Again");
+        await this.initTwitchBot();
+      }, 100000);
     }
   }
 
@@ -134,7 +141,7 @@ export class TwitchBotter {
         data => data?.accessToken || ""
       );
 
-      console.log(137, "twitchBotter.ts", { accessToken });
+      console.log(137, "twitchBotter.ts validate access token", accessToken);
 
       if (!accessToken) throw new Error("115 No Twitch Data");
 
@@ -152,9 +159,9 @@ export class TwitchBotter {
 
   //get user porfile image
   private getUserProfileImage = async (username: string): Promise<string> => {
-    const cachedImage: string | undefined =
-      this.twitchProfileImageCache.get(username);
-    if (cachedImage) return cachedImage;
+    // const cachedImage: string | undefined =
+    //   this.twitchProfileImageCache.get(username);
+    // if (cachedImage) return cachedImage;
 
     try {
       const { data } = await axios.get(
@@ -170,7 +177,7 @@ export class TwitchBotter {
       const image: string | undefined = data?.data?.[0]?.profile_image_url;
 
       if (image) {
-        this.twitchProfileImageCache.set(username, image);
+        // this.twitchProfileImageCache.set(username, image);
         return image;
       } else {
         return "";
