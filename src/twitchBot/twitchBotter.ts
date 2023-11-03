@@ -68,7 +68,6 @@ export class TwitchBotter {
   //init twitch bot
   async initTwitchBot(): Promise<void> {
     console.log(70, "twitchBotter.ts", "initTwitchBot is initializing");
-    this?.client?.disconnect().catch(console.error);
 
     this.client = new TMIClient({
       options: { debug: true },
@@ -80,7 +79,7 @@ export class TwitchBotter {
 
       connection: {
         secure: true,
-        reconnect: true,
+        reconnect: false,
         maxReconnectAttempts: Infinity,
         reconnectInterval: 2000
       }
@@ -108,9 +107,9 @@ export class TwitchBotter {
       await this.refreshTwitchAccessToken();
 
       setTimeout(async () => {
-        console.log(111, "twitchBotter.ts", "Bot Manual Reconnecting");
+        console.log(111, "twitchBotter.ts", "Bot Disconnected :: Reconnecting");
         await this.initTwitchBot();
-      }, 100000);
+      }, 5000);
     });
 
     try {
@@ -120,9 +119,13 @@ export class TwitchBotter {
       console.error(118, error);
 
       setTimeout(async () => {
-        console.log(123, "twitchBotter.ts", "Init Twitch Bot Again");
+        console.log(
+          123,
+          "twitchBotter.ts",
+          "Init Failed :: Try Init Twitch Bot Again"
+        );
         await this.initTwitchBot();
-      }, 100000);
+      }, 1000);
     }
   }
 
