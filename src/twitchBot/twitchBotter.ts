@@ -79,7 +79,7 @@ export class TwitchBotter {
 
       connection: {
         secure: true,
-        reconnect: false,
+        reconnect: true,
         maxReconnectAttempts: Infinity,
         reconnectInterval: 2000
       }
@@ -105,11 +105,8 @@ export class TwitchBotter {
     this.client.on("disconnected", async (data: string) => {
       console.log(106, "twitchBotter.ts", "Bot Disconnected", data);
       await this.refreshTwitchAccessToken();
-
-      setTimeout(async () => {
-        console.log(111, "twitchBotter.ts", "Bot Disconnected :: Reconnecting");
-        await this.initTwitchBot();
-      }, 5000);
+      console.log(108, "twitchBotter.ts", "Bot Disconnected :: Reconnecting");
+      await this.initTwitchBot();
     });
 
     try {
