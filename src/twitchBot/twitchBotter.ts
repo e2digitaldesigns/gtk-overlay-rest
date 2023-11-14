@@ -29,12 +29,48 @@ export class TwitchBotter {
     this.client = null;
     this.expressApp = expressApp;
 
-    this.initTwitchBot();
+    this.initTwitchBot()
+      .then(() => {
+        this?.client?.connect().catch(console.error);
+
+        this?.client?.on(
+          "message",
+          async (
+            channel: string,
+            tags: any,
+            message: string,
+            self: boolean
+          ) => {
+            parseMessaging(
+              channel,
+              tags,
+              message,
+              self,
+              this.client,
+              this.socket,
+              this.getUserProfileImage
+            );
+          }
+        );
+
+        this?.client?.on("disconnected", async (data: string) => {
+          console.log(57, "twitchBotter.ts", "Bot Disconnected", data);
+          await this.refreshTwitchAccessToken();
+
+          console.log(
+            61,
+            "twitchBotter.ts",
+            "Bot Disconnected :: Reconnecting"
+          );
+          await this.initTwitchBot();
+        });
+      })
+      .catch(console.error);
   }
 
   //get twitch bot data from db
   private getTwitchBotData = async (): Promise<TwitchBotData | null> => {
-    console.log(37, "twitchBotter.ts", "fecting twitch data");
+    console.log(73, "twitchBotter.ts", "fecting twitch data");
 
     try {
       const twitchData = await GtkTwitchBotModel.findOne({
@@ -46,7 +82,7 @@ export class TwitchBotter {
         refreshToken: 1
       });
 
-      console.log(49, "twitchBotter.ts accessToken", twitchData?.accessToken);
+      console.log(85, "twitchBotter.ts accessToken", twitchData?.accessToken);
       return twitchData;
     } catch (error) {
       return null;
@@ -56,7 +92,7 @@ export class TwitchBotter {
   private async getNewAccessToken() {
     // check for valid token
     const isValid = await this.validateTwitchAccessToken();
-    console.log(59, "twitchBotter.ts, is token valid?", isValid);
+    console.log(95, "twitchBotter.ts, is token valid?", isValid);
 
     // if not valid refresh
     if (!isValid) await this.refreshTwitchAccessToken();
@@ -67,7 +103,7 @@ export class TwitchBotter {
 
   //init twitch bot
   async initTwitchBot(): Promise<void> {
-    console.log(70, "twitchBotter.ts", "initTwitchBot is initializing");
+    console.log(106, "twitchBotter.ts", "initTwitchBot is initializing");
 
     this.client = new TMIClient({
       options: { debug: true },
@@ -85,39 +121,15 @@ export class TwitchBotter {
       }
     });
 
-    this?.client?.connect().catch(console.error);
-
-    this.client.on(
-      "message",
-      async (channel: string, tags: any, message: string, self: boolean) => {
-        parseMessaging(
-          channel,
-          tags,
-          message,
-          self,
-          this.client,
-          this.socket,
-          this.getUserProfileImage
-        );
-      }
-    );
-
-    this.client.on("disconnected", async (data: string) => {
-      console.log(106, "twitchBotter.ts", "Bot Disconnected", data);
-      await this.refreshTwitchAccessToken();
-      console.log(108, "twitchBotter.ts", "Bot Disconnected :: Reconnecting");
-      await this.initTwitchBot();
-    });
-
     try {
       this.expressApp.set("twitchClient", this.client);
     } catch (error) {
       this.expressApp.set("twitchClient", null);
-      console.error(118, error);
+      console.error(128, error);
 
       setTimeout(async () => {
         console.log(
-          123,
+          132,
           "twitchBotter.ts",
           "Init Failed :: Try Init Twitch Bot Again"
         );
@@ -141,7 +153,7 @@ export class TwitchBotter {
         data => data?.accessToken || ""
       );
 
-      console.log(137, "twitchBotter.ts validate access token", accessToken);
+      console.log(156, "twitchBotter.ts validate access token", accessToken);
 
       if (!accessToken) throw new Error("115 No Twitch Data");
 
@@ -183,7 +195,7 @@ export class TwitchBotter {
         return "";
       }
     } catch (error: any) {
-      console.error(179, error?.response?.data);
+      console.error(211, error?.response?.data);
       return "";
     }
   };
