@@ -123,13 +123,14 @@ export class TwitchBotter {
 
     try {
       this.expressApp.set("twitchClient", this.client);
+      console.log(127, "twitchBotter.ts", "Init Success");
     } catch (error) {
       this.expressApp.set("twitchClient", null);
-      console.error(128, error);
+      console.error(129, error);
 
       setTimeout(async () => {
         console.log(
-          132,
+          133,
           "twitchBotter.ts",
           "Init Failed :: Try Init Twitch Bot Again"
         );
@@ -153,7 +154,7 @@ export class TwitchBotter {
         data => data?.accessToken || ""
       );
 
-      console.log(156, "twitchBotter.ts validate access token", accessToken);
+      console.log(157, "twitchBotter.ts validate access token", accessToken);
 
       if (!accessToken) throw new Error("115 No Twitch Data");
 
@@ -195,7 +196,7 @@ export class TwitchBotter {
         return "";
       }
     } catch (error: any) {
-      console.error(211, error?.response?.data);
+      console.error(199, error?.response?.data);
       return "";
     }
   };
