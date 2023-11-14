@@ -9,6 +9,11 @@ import { getTwitchChannels } from "./utils/getUsers";
 import { parseMessaging } from "./utils/parseMessaging/parseMessaging";
 import { GtkTwitchBotModel } from "../models/gtkBot.model";
 
+enum TwitchEndPoints {
+  Validate = "https://id.twitch.tv/oauth2/validate",
+  Users = "https://api.twitch.tv/helix/users?login="
+}
+
 type TwitchBotData = {
   accessToken: string;
   expirationTime: number;
@@ -29,82 +34,36 @@ export class TwitchBotter {
     this.client = null;
     this.expressApp = expressApp;
 
-    this.initTwitchBot()
-      .then(() => {
-        this?.client?.connect().catch(console.error);
+    this.initTwitchBot().then(() => {
+      this?.client
+        ?.connect()
+        .then(() => console.log("chat connected"))
+        .catch(console.error);
 
-        this?.client?.on(
-          "message",
-          async (
-            channel: string,
-            tags: any,
-            message: string,
-            self: boolean
-          ) => {
-            parseMessaging(
-              channel,
-              tags,
-              message,
-              self,
-              this.client,
-              this.socket,
-              this.getUserProfileImage
-            );
-          }
-        );
-
-        this?.client?.on("disconnected", async (data: string) => {
-          console.log(57, "twitchBotter.ts", "Bot Disconnected", data);
-          await this.refreshTwitchAccessToken();
-
-          console.log(
-            61,
-            "twitchBotter.ts",
-            "Bot Disconnected :: Reconnecting"
+      this?.client?.on(
+        "message",
+        (channel: string, tags: any, message: string, self: boolean) => {
+          parseMessaging(
+            channel,
+            tags,
+            message,
+            self,
+            this.client,
+            this.socket,
+            this.getUserProfileImage
           );
-          await this.initTwitchBot();
-        });
-      })
-      .catch(console.error);
-  }
+        }
+      );
 
-  //get twitch bot data from db
-  private getTwitchBotData = async (): Promise<TwitchBotData | null> => {
-    console.log(73, "twitchBotter.ts", "fecting twitch data");
-
-    try {
-      const twitchData = await GtkTwitchBotModel.findOne({
-        twitchUserName: this.botName
-      }).select({
-        accessToken: 1,
-        expirationTime: 1,
-        expiresIn: 1,
-        refreshToken: 1
+      this?.client?.on("disconnected", async (data: string) => {
+        console.log(46, "twitchBotter.ts", "Bot Disconnected", data);
+        await this.refreshTwitchAccessToken();
+        await this.reconnectTwitchBot();
       });
-
-      console.log(85, "twitchBotter.ts accessToken", twitchData?.accessToken);
-      return twitchData;
-    } catch (error) {
-      return null;
-    }
-  };
-
-  private async getNewAccessToken() {
-    // check for valid token
-    const isValid = await this.validateTwitchAccessToken();
-    console.log(95, "twitchBotter.ts, is token valid?", isValid);
-
-    // if not valid refresh
-    if (!isValid) await this.refreshTwitchAccessToken();
-
-    // if valid return token
-    return await this.getTwitchBotData().then(data => data?.accessToken || "");
+    });
   }
 
-  //init twitch bot
-  async initTwitchBot(): Promise<void> {
-    console.log(106, "twitchBotter.ts", "initTwitchBot is initializing");
-
+  private async initTwitchBot(): Promise<void> {
     this.client = new TMIClient({
       options: { debug: true },
       channels: [this.botName, ...(await getTwitchChannels())],
@@ -115,50 +74,42 @@ export class TwitchBotter {
 
       connection: {
         secure: true,
-        reconnect: true,
+        reconnect: false,
         maxReconnectAttempts: Infinity,
         reconnectInterval: 2000
       }
     });
+  }
 
+  private async reconnectTwitchBot() {
     try {
-      this.expressApp.set("twitchClient", this.client);
-      console.log(127, "twitchBotter.ts", "Init Success");
+      await this?.client?.disconnect();
     } catch (error) {
-      this.expressApp.set("twitchClient", null);
-      console.error(129, error);
+      console.log(83, error);
+    }
 
-      setTimeout(async () => {
-        console.log(
-          133,
-          "twitchBotter.ts",
-          "Init Failed :: Try Init Twitch Bot Again"
-        );
-        await this.initTwitchBot();
-      }, 1000);
+    await this?.client?.connect();
+  }
+
+  private async getNewAccessToken() {
+    if (await this.validateTwitchAccessToken()) {
+      return await this.getTwitchBotData().then(
+        data => data?.accessToken || ""
+      );
+    } else {
+      await this.refreshTwitchAccessToken();
     }
   }
 
-  //refresh twitch access token
-  private refreshTwitchAccessToken = async () => {
-    const refreshToken = await this.getTwitchBotData().then(
-      data => data?.refreshToken || ""
-    );
-    return await refreshTwitchAccessTokenMethod(this.botName, refreshToken);
-  };
-
-  //validate twitch access token
-  private validateTwitchAccessToken = async () => {
+  private async validateTwitchAccessToken() {
     try {
-      const accessToken = await this.getTwitchBotData().then(
-        data => data?.accessToken || ""
+      const accessToken: string = await this.getTwitchBotData().then(
+        (data: TwitchBotData | null) => data?.accessToken || ""
       );
 
-      console.log(157, "twitchBotter.ts validate access token", accessToken);
+      if (!accessToken) throw new Error("No Twitch Data");
 
-      if (!accessToken) throw new Error("115 No Twitch Data");
-
-      const validate = await axios.get("https://id.twitch.tv/oauth2/validate", {
+      const validate = await axios.get(TwitchEndPoints.Validate, {
         headers: {
           Authorization: `Bearer ${accessToken}`
         }
@@ -168,35 +119,55 @@ export class TwitchBotter {
     } catch (error: unknown) {
       return false;
     }
-  };
+  }
 
-  //get user porfile image
+  private async getTwitchBotData(): Promise<TwitchBotData | null> {
+    try {
+      const twitchData = await GtkTwitchBotModel.findOne({
+        twitchUserName: this.botName
+      }).select({
+        accessToken: 1,
+        expirationTime: 1,
+        expiresIn: 1,
+        refreshToken: 1
+      });
+
+      return twitchData;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  private async refreshTwitchAccessToken() {
+    const refreshToken = await this.getTwitchBotData().then(
+      data => data?.refreshToken || ""
+    );
+    return await refreshTwitchAccessTokenMethod(this.botName, refreshToken);
+  }
+
   private getUserProfileImage = async (username: string): Promise<string> => {
-    // const cachedImage: string | undefined =
-    //   this.twitchProfileImageCache.get(username);
-    // if (cachedImage) return cachedImage;
+    const cachedImage: string | undefined =
+      this.twitchProfileImageCache.get(username);
+    if (cachedImage) return cachedImage;
 
     try {
-      const { data } = await axios.get(
-        `https://api.twitch.tv/helix/users?login=${username}`,
-        {
-          headers: {
-            "Client-ID": process.env.TWITCH_CLIENT_ID,
-            Authorization: `Bearer ${await this.getNewAccessToken()}`
-          }
+      const { data } = await axios.get(`${TwitchEndPoints.Users}${username}`, {
+        headers: {
+          "Client-ID": process.env.TWITCH_CLIENT_ID,
+          Authorization: `Bearer ${await this.getNewAccessToken()}`
         }
-      );
+      });
 
       const image: string | undefined = data?.data?.[0]?.profile_image_url;
 
       if (image) {
-        // this.twitchProfileImageCache.set(username, image);
+        this.twitchProfileImageCache.set(username, image);
         return image;
       } else {
         return "";
       }
     } catch (error: any) {
-      console.error(199, error?.response?.data);
+      console.error("getUserProfileImage", error?.response?.data);
       return "";
     }
   };

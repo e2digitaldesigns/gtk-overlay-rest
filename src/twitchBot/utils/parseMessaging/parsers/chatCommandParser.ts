@@ -1,7 +1,6 @@
 import { Client as TMIClient } from "tmi.js";
 import { Server as SocketServer } from "socket.io";
 import * as chatCommands from "./chatCommands";
-import { toLower } from "lodash";
 
 export async function chatCommandParser(
   client: TMIClient | null,
