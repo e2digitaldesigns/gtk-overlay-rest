@@ -142,6 +142,7 @@ router.get("/showRunner/:_id", async (req: Request, res: Response) => {
 
     const data = result
       ? {
+          _id: result._id,
           airDate: result.airDate,
           logo: result.logo,
           name: result.name,
