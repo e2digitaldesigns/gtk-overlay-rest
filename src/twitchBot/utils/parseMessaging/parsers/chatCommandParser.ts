@@ -36,9 +36,20 @@ export async function chatCommandParser(
     case "!v1":
     case "!v2":
     case "!v3":
+      await chatCommands.overlayVoting(command, tags.username, channel, socket);
+      break;
+
     case "!sv1":
     case "!sv2":
     case "!sv3":
+      if (!tags.subscriber) {
+        console.log("not a sub");
+        client.action(
+          channel,
+          `@${tags.username}, you must be a subscriber use super votes!`
+        );
+        return;
+      }
       await chatCommands.overlayVoting(command, tags.username, channel, socket);
       break;
 
