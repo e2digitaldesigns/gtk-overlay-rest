@@ -1,7 +1,6 @@
 import { Server as SocketServer } from "socket.io";
 import { Client as TMIClient } from "tmi.js";
-import { getGTKUserId } from "./utils/dbFecthers";
-import { ignoreList } from "./utils/ignoreList";
+import { getGTKUserId, getIgnoreList } from "./utils/dbFecthers";
 import { chatRankParser } from "./parsers/chatRanks";
 import { chatRelayParser } from "./parsers/chatRelay";
 import { emojiParser } from "./parsers/emojiParser";
@@ -18,6 +17,8 @@ export async function parseMessaging(
   getUserProfileImage: any
 ) {
   if (self) return; // Ignore messages from the bot
+
+  const ignoreList = await getIgnoreList(channel);
 
   // Ignore messages from ignored users
   if (ignoreList.includes(tags.username.toLowerCase())) return;

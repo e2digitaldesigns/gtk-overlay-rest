@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { TwitchAuthModel } from "../../../../models/twitch.model";
 import { ChatTemplateModel } from "../../../../models/chatTemplate.model";
+import { UserMessageIgnoreSchemaModel } from "../../../../models/ignoreList.model";
 const ObjectId = mongoose.Types.ObjectId;
 
 export const getGTKUserId = async (channel: string): Promise<string | null> => {
@@ -34,3 +35,24 @@ export const getGTKTemplateId = async (
   }
   return value;
 };
+
+export async function getIgnoreList(channel: string) {
+  try {
+    const ignoreListRaw = await UserMessageIgnoreSchemaModel.find({
+      channel
+    }).select({
+      channel: 1,
+      username: 1
+    });
+
+    console.log(channel, ignoreListRaw);
+
+    const ignoreList: string[] = ignoreListRaw.map(ignoreList =>
+      String(ignoreList.username).toLowerCase()
+    );
+
+    return ignoreList;
+  } catch (error) {
+    return [];
+  }
+}
