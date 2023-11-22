@@ -45,8 +45,6 @@ export async function getIgnoreList(channel: string) {
       username: 1
     });
 
-    console.log(channel, ignoreListRaw);
-
     const ignoreList: string[] = ignoreListRaw.map(ignoreList =>
       String(ignoreList.username).toLowerCase()
     );
