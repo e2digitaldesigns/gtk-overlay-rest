@@ -21,6 +21,7 @@ import { chatLog } from "./chatLog/chatLog";
 import { common } from "./common/common";
 
 import { gtkAi } from "./gtkAi/gtkAi";
+import { voting } from "./voting/voting";
 
 export const routing = (app: Express) => {
   const prefix = "/api/v1/";
@@ -46,4 +47,6 @@ export const routing = (app: Express) => {
   app.use(`${prefix}common`, common);
 
   app.use(`${prefix}gtkAi`, gtkAi);
+
+  app.use(`${prefix}voting`, voting);
 };

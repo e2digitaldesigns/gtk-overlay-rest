@@ -8,7 +8,7 @@ export async function overlayVoting(
   channel: string,
   socket: SocketServer
 ): Promise<void> {
-  const parsedChannel = channel.slice(1);
+  const parsedChannel = channel.startsWith("#") ? channel.slice(1) : channel;
   const uid = await getGTKUserId(parsedChannel);
   const tid = uid ? await getGTKTemplateId(uid) : null;
 
