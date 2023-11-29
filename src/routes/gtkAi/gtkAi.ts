@@ -15,8 +15,6 @@ router.post("/img", async (req: Request, res: Response) => {
       size: "1024x1024"
     });
 
-    console.log(response?.data?.[0].url);
-
     res.status(200).json(response?.data?.[0].url);
   } catch (error) {
     res.status(404).send(error);

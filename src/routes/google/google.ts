@@ -110,6 +110,7 @@ router.post("/", async (req: Request, res: Response) => {
     res.status(404).send(error);
   }
 });
+
 router.post("/archive", async (req: Request, res: Response) => {
   try {
     const payload = await verify(req.body.token);
