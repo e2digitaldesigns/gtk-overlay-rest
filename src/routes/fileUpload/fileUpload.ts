@@ -12,7 +12,6 @@ import { v4 } from "uuid";
 import { EpisodeModel } from "../../models/episodes.model";
 import axios from "axios";
 import { deleteFromS3Multi } from "./s3Delete";
-import { uniqueId } from "lodash";
 
 const router = express.Router();
 router.use(verifyToken);
@@ -421,8 +420,8 @@ async function imageSizeParser2(imgUrl: string, template: any) {
 
   const { data } = await sharp(formFile)
     .resize(width, height, {
-      fit: sharp.fit.cover,
-      position: "right top"
+      fit: sharp.fit.outside,
+      position: "centre"
     })
     .png({ quality: 100 })
     .toBuffer({

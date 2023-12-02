@@ -41,7 +41,8 @@ router.post("/", async (req: Request, res: Response) => {
         {
           _id: checkUser?._id,
           name: checkUser?.name,
-          picture: checkUser?.picture
+          picture: checkUser?.picture,
+          gtkAi: !!checkUser?.gtkAi
         },
         secretKey,
         options
@@ -52,7 +53,8 @@ router.post("/", async (req: Request, res: Response) => {
       const theUser = await MODEL.create({
         email: payload?.email,
         name: payload?.name,
-        picture: payload?.picture
+        picture: payload?.picture,
+        gtkAi: false
       });
 
       // add a host
@@ -97,7 +99,8 @@ router.post("/", async (req: Request, res: Response) => {
         {
           _id: theUser?._id,
           name: theUser?.name,
-          picture: theUser?.picture
+          picture: theUser?.picture,
+          gtkAi: !!theUser?.gtkAi
         },
         secretKey,
         options

@@ -12,7 +12,7 @@ router.post("/img", async (req: Request, res: Response) => {
       model: "dall-e-3",
       prompt: aiPrompt,
       n: 1,
-      size: "1024x1024"
+      size: "1792x1024"
     });
 
     res.status(200).json(response?.data?.[0].url);
