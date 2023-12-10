@@ -14,17 +14,43 @@ export async function overlayVoting(
 
   if (!uid || !tid) return;
 
+  const action = parseAction(command);
+
+  if (!action) return;
+
   socket.emit("gtkVoting", {
     _id: v4(),
-    action: command.startsWith("!v")
-      ? "add"
-      : command.startsWith("!sv")
-      ? "super"
-      : "remove",
+    action,
     username,
     channel: parsedChannel,
     host: command.charAt(command.length - 1),
     tid,
     uid
   });
+}
+
+function parseAction(command: string): string | undefined {
+  const action = command.split(" ")?.[0];
+  let actionValue = undefined;
+
+  const actionObj: { [key: string]: string } = {
+    "!v": "add",
+    "!sv": "super",
+    "!d": "remove",
+    true: "true",
+    false: "false"
+  };
+
+  const keys = Object.keys(actionObj);
+
+  for (const key of keys) {
+    if (action.startsWith(key)) {
+      actionValue = actionObj?.[key];
+      break;
+    }
+  }
+
+  console.log(54, actionValue);
+
+  return actionValue;
 }
