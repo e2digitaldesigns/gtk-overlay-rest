@@ -12,6 +12,12 @@ import { v4 } from "uuid";
 import { EpisodeModel } from "../../models/episodes.model";
 import axios from "axios";
 import { deleteFromS3Multi } from "./s3Delete";
+import {
+  deleteFromS3,
+  imageSizeParser,
+  imageSizeParser2,
+  pushToS3
+} from "../_utils";
 
 const router = express.Router();
 router.use(verifyToken);
@@ -59,7 +65,7 @@ router.post("/update", upload, async (req: Request, res: Response) => {
 
     const data = await imageSizeParser(req, template);
 
-    const s3Push = await pushToS3(data, fileName);
+    const s3Push = await pushToS3(data, `images/user-images/${fileName}`);
     if (!s3Push) throw new Error("S3 Push failed");
 
     switch (req.body.imageType) {
@@ -408,79 +414,3 @@ router.post("/openAi-img", upload, async (req: Request, res: Response) => {
 });
 
 export const fileUpload = router;
-
-async function getBufferFromUrl(url: string): Promise<Buffer> {
-  const response = await axios.get(url, { responseType: "arraybuffer" });
-  return Buffer.from(response.data);
-}
-
-async function imageSizeParser2(imgUrl: string, template: any) {
-  const formFile = await getBufferFromUrl(imgUrl);
-  const { width, height } = template[0].template.images.topic;
-
-  const { data } = await sharp(formFile)
-    .resize(width, height, {
-      fit: sharp.fit.outside,
-      position: "centre"
-    })
-    .png({ quality: 100 })
-    .toBuffer({
-      resolveWithObject: true
-    });
-
-  return data;
-}
-
-async function imageSizeParser(req: Request, template: any) {
-  const formFile = (req as any).file;
-  const { width, height } = template[0].template.images[req.body.imageType];
-
-  const { data } = await sharp(formFile.buffer)
-    .resize(width, height, {
-      fit: sharp.fit.cover,
-      position: "right top"
-    })
-    .png({ quality: 100 })
-    .toBuffer({
-      resolveWithObject: true
-    });
-
-  return data;
-}
-
-function pushToS3(fileBuffer: any, fileName: string) {
-  return new Promise((resolve, reject) => {
-    const imgParams = {
-      Bucket: process.env.AWS_SECRET_S3_BUCKET || "",
-      Key: `images/user-images/${fileName}`,
-      ContentType: "image/png",
-      Body: fileBuffer,
-      ACL: "public-read"
-    };
-
-    s3bucket.upload(imgParams, function (err: unknown, data: any) {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(data);
-      }
-    });
-  });
-}
-
-function deleteFromS3(fileName: string) {
-  return new Promise((resolve, reject) => {
-    const imgParams = {
-      Bucket: process.env.AWS_SECRET_S3_BUCKET || "",
-      Key: `images/user-images/${fileName}`
-    };
-
-    s3bucket.deleteObject(imgParams, function (err: unknown, data: any) {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(data);
-      }
-    });
-  });
-}
