@@ -56,8 +56,11 @@ export async function chatCommandParser(
       await chatCommands.overlayVoting(command, tags.username, channel, socket);
       break;
 
+    case "!1":
+    case "!2":
     case "!true":
     case "!false":
+      console.log(61, command);
       await chatCommands.overlayVoting(command, tags.username, channel, socket);
       break;
 

@@ -34,11 +34,13 @@ function parseAction(command: string): string | undefined {
   let actionValue = undefined;
 
   const actionObj: { [key: string]: string } = {
+    "!1": "true",
+    "!2": "false",
     "!v": "add",
     "!sv": "super",
     "!d": "remove",
-    true: "true",
-    false: "false"
+    "!true": "true",
+    "!false": "false"
   };
 
   const keys = Object.keys(actionObj);
