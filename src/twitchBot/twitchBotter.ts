@@ -3,7 +3,6 @@ import axios from "axios";
 import { Server as SocketServer } from "socket.io";
 import { Client as TMIClient } from "tmi.js";
 import NodeCache from "node-cache";
-import { getTwitchBotDataMethod } from "./methods/twitchBotData";
 import { refreshTwitchAccessTokenMethod } from "./methods/refreshAccessToken";
 import { getTwitchChannels } from "./utils/getUsers";
 import { parseMessaging } from "./utils/parseMessaging/parseMessaging";
@@ -34,7 +33,7 @@ export class TwitchBotter {
     this.client = null;
     this.expressApp = expressApp;
 
-    this.initTwitchBot().then(() => {
+    this.initTwitchBot().then(async () => {
       this?.client
         ?.connect()
         .then(() => console.log("chat connected"))
@@ -64,6 +63,8 @@ export class TwitchBotter {
   }
 
   private async initTwitchBot(): Promise<void> {
+    await this.refreshTwitchAccessToken();
+
     this.client = new TMIClient({
       options: { debug: true },
       channels: [this.botName, ...(await getTwitchChannels())],
@@ -79,6 +80,8 @@ export class TwitchBotter {
         reconnectInterval: 2000
       }
     });
+
+    this.expressApp.set("twitchClient", this.client);
   }
 
   private async reconnectTwitchBot() {

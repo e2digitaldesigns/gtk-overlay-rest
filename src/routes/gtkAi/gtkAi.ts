@@ -20,8 +20,6 @@ router.post("/img", async (req: Request, res: Response) => {
   const openai = new OpenAI();
   const { aiPrompt } = req.body;
 
-  console.log(aiPrompt);
-
   try {
     const response = await openai.images.generate({
       model: "dall-e-3",

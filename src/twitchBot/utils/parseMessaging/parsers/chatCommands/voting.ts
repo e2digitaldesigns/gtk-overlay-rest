@@ -46,8 +46,8 @@ function parseAction(command: string): string | undefined {
   const keys = Object.keys(actionObj);
 
   for (const key of keys) {
-    if (action.startsWith(key)) {
-      actionValue = actionObj?.[key];
+    if (action.startsWith(key.toLowerCase())) {
+      actionValue = actionObj?.[key.toLowerCase()];
       break;
     }
   }
