@@ -10,13 +10,14 @@ export async function chatCommandParser(
   tags: any
 ) {
   if (!client) return;
+  message = message.toLowerCase();
 
   const commandPrefixes = ["!", "0", "1", "true", "false"];
   if (!commandPrefixes.some(prefix => message.trim().startsWith(prefix))) {
     return;
   }
 
-  let command = message.toLowerCase().split(" ")[0];
+  let command = message.split(" ")[0];
   command = command.startsWith("!") ? command : `!${command}`;
 
   switch (command) {
@@ -75,7 +76,7 @@ export async function chatCommandParser(
       break;
 
     default:
-      console.log(87, "chatCommandParser.ts", "No command found");
+      console.log("chatCommandParser.ts", "No command found");
       break;
   }
 }
