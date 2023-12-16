@@ -9,8 +9,15 @@ export async function chatCommandParser(
   channel: string,
   tags: any
 ) {
-  if (!message.trim().startsWith("!") || !client) return;
-  const command = message.toLowerCase().split(" ")[0];
+  if (!client) return;
+
+  const commandPrefixes = ["!", "0", "1", "true", "false"];
+  if (!commandPrefixes.some(prefix => message.trim().startsWith(prefix))) {
+    return;
+  }
+
+  let command = message.toLowerCase().split(" ")[0];
+  command = command.startsWith("!") ? command : `!${command}`;
 
   switch (command) {
     case "!gtk":
@@ -56,11 +63,10 @@ export async function chatCommandParser(
       await chatCommands.overlayVoting(command, tags.username, channel, socket);
       break;
 
+    case "!0":
     case "!1":
-    case "!2":
     case "!true":
     case "!false":
-      console.log(61, command);
       await chatCommands.overlayVoting(command, tags.username, channel, socket);
       break;
 
@@ -69,6 +75,7 @@ export async function chatCommandParser(
       break;
 
     default:
+      console.log(87, "chatCommandParser.ts", "No command found");
       break;
   }
 }

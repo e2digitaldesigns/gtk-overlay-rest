@@ -35,7 +35,7 @@ function parseAction(command: string): string | undefined {
 
   const actionObj: { [key: string]: string } = {
     "!1": "true",
-    "!2": "false",
+    "!0": "false",
     "!v": "add",
     "!sv": "super",
     "!d": "remove",
