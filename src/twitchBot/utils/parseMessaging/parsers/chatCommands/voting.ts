@@ -40,7 +40,9 @@ function parseAction(command: string): string | undefined {
     "!sv": "super",
     "!d": "remove",
     "!true": "true",
-    "!false": "false"
+    "!false": "false",
+    "!yes": "true",
+    "!no": "false"
   };
 
   const keys = Object.keys(actionObj);

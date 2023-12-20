@@ -43,7 +43,7 @@ export async function getRankByUser(
     const message =
       userRank === 0
         ? "Get good, noob!"
-        : `You are ranked #${userRank} out of ${result.length}, with ${
+        : `You are ranked #${userRank} out of ${result.length * 2}, with ${
             result[userRank - 1].messageCount
           } messages.`;
 

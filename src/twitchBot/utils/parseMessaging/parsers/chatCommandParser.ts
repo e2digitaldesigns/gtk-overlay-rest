@@ -12,7 +12,7 @@ export async function chatCommandParser(
   if (!client) return;
   message = message.toLowerCase();
 
-  const commandPrefixes = ["!", "0", "1", "true", "false"];
+  const commandPrefixes = ["!", "0", "1", "true", "false", "yes", "no"];
   if (!commandPrefixes.some(prefix => message.trim().startsWith(prefix))) {
     return;
   }
@@ -23,15 +23,6 @@ export async function chatCommandParser(
   switch (command) {
     case "!gtk":
       client.action(channel, "GamerToolkit Test Command");
-      break;
-
-    case "!res":
-      if (tags.username === "icon33") {
-        client.action(channel, "GamerToolkit Resetting Bot");
-        client?.disconnect().catch(console.error);
-      } else {
-        client.action(channel, "No permission to reset bot" + tags.username);
-      }
       break;
 
     case "!reply":
@@ -68,6 +59,8 @@ export async function chatCommandParser(
     case "!1":
     case "!true":
     case "!false":
+    case "!yes":
+    case "!no":
       await chatCommands.overlayVoting(command, tags.username, channel, socket);
       break;
 
