@@ -25,7 +25,8 @@ export async function overlayVoting(
     channel: parsedChannel,
     host: command.charAt(command.length - 1),
     tid,
-    uid
+    uid,
+    createdAt: new Date()
   });
 }
 
