@@ -220,7 +220,7 @@ router.put("/news/:episodeId", async (req: Request, res: Response) => {
       }
     );
 
-    res.status(200).json(result);
+    res.status(200).json({ success: result.modifiedCount, newsItem: req.body });
   } catch (error) {
     res.status(404).send(error);
   }
