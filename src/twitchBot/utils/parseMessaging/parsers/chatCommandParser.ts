@@ -37,7 +37,13 @@ export async function chatCommandParser(
     case "!v2":
     case "!v3":
     case "!v4":
-      await chatCommands.overlayVoting(command, tags.username, channel, socket);
+      await chatCommands.overlayVoting(
+        command,
+        tags.username,
+        channel,
+        socket,
+        client
+      );
       break;
 
     case "!sv1":
@@ -52,7 +58,13 @@ export async function chatCommandParser(
         );
         return;
       }
-      await chatCommands.overlayVoting(command, tags.username, channel, socket);
+      await chatCommands.overlayVoting(
+        command,
+        tags.username,
+        channel,
+        socket,
+        client
+      );
       break;
 
     case "!0":
@@ -61,7 +73,13 @@ export async function chatCommandParser(
     case "!false":
     case "!yes":
     case "!no":
-      await chatCommands.overlayVoting(command, tags.username, channel, socket);
+      await chatCommands.overlayVoting(
+        command,
+        tags.username,
+        channel,
+        socket,
+        client
+      );
       break;
 
     case "!rank":

@@ -1,12 +1,14 @@
 import { v4 } from "uuid";
 import { Server as SocketServer } from "socket.io";
 import { getGTKUserId, getGTKTemplateId } from "../../utils/dbFecthers";
+import { Client as TMIClient } from "tmi.js";
 
 export async function overlayVoting(
   command: string,
   username: string,
   channel: string,
-  socket: SocketServer
+  socket: SocketServer,
+  client: TMIClient | null
 ): Promise<void> {
   const parsedChannel = channel.startsWith("#") ? channel.slice(1) : channel;
   const uid = await getGTKUserId(parsedChannel);
@@ -28,6 +30,10 @@ export async function overlayVoting(
     uid,
     createdAt: new Date()
   });
+
+  if (client) {
+    client.action(channel, `@${username}, your vote has been counted!`);
+  }
 }
 
 function parseAction(command: string): string | undefined {
