@@ -68,6 +68,10 @@ export async function chatCommandParser(
       await chatCommands.getRankByUser(tags.username, client, channel);
       break;
 
+    case "!topic":
+      await chatCommands.getTopic(tags.username, client, channel);
+      break;
+
     default:
       console.log("chatCommandParser.ts", "No command found");
       break;
