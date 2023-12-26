@@ -18,7 +18,7 @@ router.post("/", async (req: Request, res: Response) => {
     const result = await MODEL.updateOne(
       { userId: new ObjectId(req.body.userId) },
       {
-        $set: { chat: req.body.chat }
+        $set: { chat: String(req.body.chat) }
       },
       { upsert: true }
     );

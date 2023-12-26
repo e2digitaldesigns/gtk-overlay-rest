@@ -19,10 +19,10 @@ export async function getTopic(
       userId: new ObjectId(uid)
     });
 
-    // if (!result?.chat) return;
+    // console.log(22, "getTopic.ts", result);
 
-    const message = result?.chat
-      ? `Current Topic: ${result?.chat}`
+    const message = result
+      ? `Current Topic: ${String(result.chat)}`
       : "No topic set";
     client.action(channel, `@${username}, ${message}`);
   } catch (error) {
