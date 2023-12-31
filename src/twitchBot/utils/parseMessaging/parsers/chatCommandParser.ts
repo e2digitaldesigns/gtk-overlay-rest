@@ -1,7 +1,9 @@
 import { Client as TMIClient } from "tmi.js";
 import { Server as SocketServer } from "socket.io";
 import * as chatCommands from "./chatCommands";
-import { UserSettingsModel } from "../../../../models/settings.model";
+import { UserCommandsModel } from "../../../../models/commands.model";
+import mongoose from "mongoose";
+const ObjectId = mongoose.Types.ObjectId;
 
 const validatedCommand = async (
   gtkUserId: string,
@@ -10,15 +12,15 @@ const validatedCommand = async (
   const exceptions = ["!gtk", "!reply"];
   if (exceptions.includes(command)) return true;
 
-  const data = await UserSettingsModel.findOne({
-    userId: gtkUserId
-  }).select("commands");
+  const data = await UserCommandsModel.findOne({
+    command: command
+  }).select("users");
 
   if (!data) return false;
 
-  const theCommand = data.commands.find(obj => obj.command === command);
-  console.log(theCommand);
-  return theCommand?.status || false;
+  const isUserInArray = data?.users.includes(new ObjectId(gtkUserId));
+
+  return isUserInArray;
 };
 
 export async function chatCommandParser(
@@ -49,7 +51,7 @@ export async function chatCommandParser(
 
     client.action(
       channel,
-      `@${tags.username}, the command, ${typedCommand}, is disabled or does not exist!`
+      `@${tags.username}, the command ${typedCommand} is disabled or does not exist!`
     );
     return;
   }
@@ -85,7 +87,6 @@ export async function chatCommandParser(
     case "!sv3":
     case "!sv4":
       if (!tags.subscriber) {
-        console.log("not a sub");
         client.action(
           channel,
           `@${tags.username}, you must be a subscriber to use super votes!`

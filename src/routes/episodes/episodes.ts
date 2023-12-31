@@ -235,13 +235,13 @@ router.post("/", async (req: Request, res: Response) => {
       userId: new ObjectId(res.locals.userId),
       name: req.body.name,
       active: false,
-      current: false,
+      current: lastEpisode ? false : true,
       hosts: currentState.hosts && lastEpisode?.hosts ? lastEpisode.hosts : [],
       logo:
         currentState.logo && lastEpisode?.logo
           ? s3ObjectCopy(lastEpisode.logo)
           : "",
-      number: lastEpisode?.number || 1,
+      number: lastEpisode?.number ? Number(lastEpisode.number) + 1 : 1,
       socialNetworks:
         currentState.socialNetworks && lastEpisode?.socialNetworks
           ? lastEpisode?.socialNetworks

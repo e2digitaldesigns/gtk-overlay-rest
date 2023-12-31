@@ -6,7 +6,6 @@ const JWT = require("jsonwebtoken");
 const { OAuth2Client } = require("google-auth-library");
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-import { UserSettingsModel } from "../../models/settings.model";
 import { UsersModel } from "../../models/users.model";
 import { HostModel } from "../../models/hosts.model";
 import { EpisodeModel } from "../../models/episodes.model";
@@ -57,12 +56,6 @@ router.post("/", async (req: Request, res: Response) => {
         name: payload?.name,
         picture: payload?.picture,
         gtkAi: false
-      });
-
-      // add settings
-      await UserSettingsModel.create({
-        userId: new ObjectId(theUser._id),
-        ...defaultSettings
       });
 
       // add a host
