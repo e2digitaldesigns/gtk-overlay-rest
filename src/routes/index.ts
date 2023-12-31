@@ -20,6 +20,7 @@ import { chatLog } from "./chatLog/chatLog";
 import { topicLog } from "./topicLog/topicLog";
 
 import { common } from "./common/common";
+import { settings } from "./settings/settings";
 
 import { gtkAi } from "./gtkAi/gtkAi";
 import { voting } from "./voting/voting";
@@ -47,6 +48,7 @@ export const routing = (app: Express) => {
   app.use(`${prefix}chatlog`, chatLog);
   app.use(`${prefix}topicLog`, topicLog);
   app.use(`${prefix}common`, common);
+  app.use(`${prefix}settings`, settings);
 
   app.use(`${prefix}gtkAi`, gtkAi);
 

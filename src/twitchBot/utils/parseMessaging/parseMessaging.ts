@@ -31,7 +31,14 @@ export async function parseMessaging(
   const twitchUserImage = await getUserProfileImage(tags.username);
 
   //Chat Command Parser
-  chatCommandParser(tmiClient, socket, message.trim(), channel, tags);
+  chatCommandParser(
+    gtkUserId,
+    tmiClient,
+    socket,
+    message.trim(),
+    channel,
+    tags
+  );
 
   //Chat Log Parser
   chatLogParser(gtkUserId, channel, tags, message, twitchUserImage);

@@ -1,8 +1,28 @@
 import { Client as TMIClient } from "tmi.js";
 import { Server as SocketServer } from "socket.io";
 import * as chatCommands from "./chatCommands";
+import { UserSettingsModel } from "../../../../models/settings.model";
+
+const validatedCommand = async (
+  gtkUserId: string,
+  command: string
+): Promise<boolean> => {
+  const exceptions = ["!gtk", "!reply"];
+  if (exceptions.includes(command)) return true;
+
+  const data = await UserSettingsModel.findOne({
+    userId: gtkUserId
+  }).select("commands");
+
+  if (!data) return false;
+
+  const theCommand = data.commands.find(obj => obj.command === command);
+  console.log(theCommand);
+  return theCommand?.status || false;
+};
 
 export async function chatCommandParser(
+  gtkUserId: string,
   client: TMIClient | null,
   socket: SocketServer,
   message: string,
@@ -12,13 +32,27 @@ export async function chatCommandParser(
   if (!client) return;
   message = message.toLowerCase();
 
-  const commandPrefixes = ["!", "0", "1", "true", "false", "yes", "no"];
+  const commandPrefixes = ["!", "1", "2", "true", "false", "yes", "no"];
   if (!commandPrefixes.some(prefix => message.trim().startsWith(prefix))) {
     return;
   }
 
-  let command = message.split(" ")[0];
-  command = command.startsWith("!") ? command : `!${command}`;
+  const typedCommand = message.split(" ")[0];
+  const command = typedCommand.startsWith("!")
+    ? typedCommand
+    : `!${typedCommand}`;
+
+  const isCommandValid = await validatedCommand(gtkUserId, typedCommand);
+
+  if (!isCommandValid) {
+    if (!typedCommand.startsWith("!")) return;
+
+    client.action(
+      channel,
+      `@${tags.username}, the command, ${typedCommand}, is disabled or does not exist!`
+    );
+    return;
+  }
 
   switch (command) {
     case "!gtk":
@@ -67,8 +101,8 @@ export async function chatCommandParser(
       );
       break;
 
-    case "!0":
     case "!1":
+    case "!2":
     case "!true":
     case "!false":
     case "!yes":

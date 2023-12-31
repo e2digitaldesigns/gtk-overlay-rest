@@ -1,0 +1,179 @@
+[
+  {
+    "command": "!topic",
+    "description": "Current Topic",
+    "type": "podcastOverlays",
+    "status": false,
+    "subType": "common"
+  },
+  {
+    "command": "!v1",
+    "description": "UpVote for host 1",
+    "type": "podcastOverlays",
+    "status": false,
+    "subType": "hostVoting"
+  },
+  {
+    "command": "!v2",
+    "description": "UpVote host 2",
+    "type": "podcastOverlays",
+    "status": false,
+    "subType": "hostVoting"
+  },
+  {
+    "command": "!v3",
+    "description": "UpVote host 3",
+    "type": "podcastOverlays",
+    "status": false,
+    "subType": "hostVoting"
+  },
+  {
+    "command": "!v4",
+    "description": "UpVote host 4",
+    "type": "podcastOverlays",
+    "status": false,
+    "subType": "hostVoting"
+  },
+  {
+    "command": "!sv1",
+    "description": "Super UpVote host 1 and give them 5 points (once per topic)",
+    "type": "podcastOverlays",
+    "status": false,
+    "subType": "hostVoting"
+  },
+  {
+    "command": "!sv2",
+    "type": "podcastOverlays",
+    "description": "Super UpVote host 2 and give them 5 points (once per topic)",
+    "status": false,
+    "subType": "hostVoting"
+  },
+  {
+    "command": "!sv3",
+    "type": "podcastOverlays",
+    "description": "Super UpVote host 3 and give them 5 points (once per topic)",
+    "status": false,
+    "subType": "hostVoting"
+  },
+  {
+    "command": "!sv4",
+    "type": "podcastOverlays",
+    "description": "Super UpVote host 4 and give them 5 points (once per topic)",
+    "status": false,
+    "subType": "hostVoting"
+  },
+  {
+    "command": "!d1",
+    "type": "podcastOverlays",
+    "description": "DownVote host 1",
+    "status": false,
+    "subType": "hostVoting"
+  },
+  {
+    "command": "!d2",
+    "type": "podcastOverlays",
+    "description": "DownVote host 2",
+    "status": false,
+    "subType": "hostVoting"
+  },
+  {
+    "command": "!d3",
+    "type": "podcastOverlays",
+    "description": "DownVote host 3",
+    "status": false,
+    "subType": "hostVoting"
+  },
+  {
+    "command": "!d4",
+    "type": "podcastOverlays",
+    "description": "DownVote host 4",
+    "status": false,
+    "subType": "hostVoting"
+  },
+
+  {
+    "command": "!true",
+    "type": "podcastOverlays",
+    "description": "Vote True",
+    "status": false,
+    "subType": "topicVoting"
+  },
+  {
+    "command": "true",
+    "type": "podcastOverlays",
+    "description": "Vote True",
+    "status": false,
+    "subType": "topicVoting"
+  },
+  {
+    "command": "!false",
+    "type": "podcastOverlays",
+    "description": "Vote False",
+    "status": false,
+    "subType": "topicVoting"
+  },
+  {
+    "command": "false",
+    "type": "podcastOverlays",
+    "description": "Vote False",
+    "status": false,
+    "subType": "topicVoting"
+  },
+  {
+    "command": "!1",
+    "type": "podcastOverlays",
+    "description": "Vote 1",
+    "status": false,
+    "subType": "topicVoting"
+  },
+  {
+    "command": "1",
+    "type": "podcastOverlays",
+    "description": "Vote 1",
+    "status": false,
+    "subType": "topicVoting"
+  },
+  {
+    "command": "!2",
+    "type": "podcastOverlays",
+    "description": "Vote 2",
+    "status": false,
+    "subType": "topicVoting"
+  },
+  {
+    "command": "2",
+    "type": "podcastOverlays",
+    "description": "Vote 2",
+    "status": false,
+    "subType": "topicVoting"
+  },
+
+  {
+    "command": "!yes",
+    "type": "podcastOverlays",
+    "description": "Vote Yes",
+    "status": false,
+    "subType": "topicVoting"
+  },
+  {
+    "command": "yes",
+    "type": "podcastOverlays",
+    "description": "Vote Yes",
+    "status": false,
+    "subType": "topicVoting"
+  },
+  {
+    "command": "!no",
+    "type": "podcastOverlays",
+    "description": "Vote No",
+    "status": false,
+    "subType": "topicVoting"
+  },
+  {
+    "command": "no",
+    "type": "podcastOverlays",
+    "description": "Vote No",
+    "status": false,
+    "subType": "topicVoting"
+  }
+]
