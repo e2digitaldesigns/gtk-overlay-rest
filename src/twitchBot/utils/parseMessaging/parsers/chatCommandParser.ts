@@ -49,10 +49,10 @@ export async function chatCommandParser(
   if (!isCommandValid) {
     if (!typedCommand.startsWith("!")) return;
 
-    client.action(
-      channel,
-      `@${tags.username}, the command ${typedCommand} is disabled or does not exist!`
-    );
+    // client.action(
+    //   channel,
+    //   `@${tags.username}, the command ${typedCommand} is disabled or does not exist!`
+    // );
     return;
   }
 

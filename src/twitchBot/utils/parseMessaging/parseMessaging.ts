@@ -6,6 +6,7 @@ import { chatRelayParser } from "./parsers/chatRelay";
 import { emojiParser } from "./parsers/emojiParser";
 import { chatCommandParser } from "./parsers/chatCommandParser";
 import { chatLogParser } from "./parsers/chatLogParser";
+import { chatGptParser } from "./parsers/chatGptParser/chatGptParser";
 
 export async function parseMessaging(
   channel: string,
@@ -30,7 +31,7 @@ export async function parseMessaging(
   // Get Twitch User Image
   const twitchUserImage = await getUserProfileImage(tags.username);
 
-  //Chat Command Parser
+  // Chat Command Parser
   chatCommandParser(
     gtkUserId,
     tmiClient,
@@ -51,4 +52,7 @@ export async function parseMessaging(
 
   //Emoji Parser
   emojiParser(socket, message, channel);
+
+  //Chat GPT Parser
+  // chatGptParser(channel, tmiClient, tags, message);
 }

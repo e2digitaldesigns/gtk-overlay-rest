@@ -116,6 +116,28 @@ router.put("/:episodeId", async (req: Request, res: Response) => {
       }
     );
 
+    if (!req.params.isParent) {
+      await MODEL.updateMany(
+        {
+          _id: new ObjectId(req.params.episodeId),
+          userId: new ObjectId(res.locals.userId),
+          "topics.parentId": req.params.topicId,
+          "topics.isChild": true
+        },
+        {
+          $set: {
+            "topics.$[elem].isChild": false,
+            "topics.$[elem].parentId": ""
+          }
+        },
+        {
+          arrayFilters: [
+            { "elem.isChild": true, "elem.parentId": req.params.topicId }
+          ]
+        }
+      );
+    }
+
     res.status(200).json(result);
   } catch (error) {
     res.status(404).send(error);

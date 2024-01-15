@@ -24,6 +24,7 @@ import { settings } from "./settings/settings";
 
 import { gtkAi } from "./gtkAi/gtkAi";
 import { voting } from "./voting/voting";
+import { socialAi } from "./socialAi/socialAi";
 
 export const routing = (app: Express) => {
   const prefix = "/api/v1/";
@@ -51,6 +52,7 @@ export const routing = (app: Express) => {
   app.use(`${prefix}settings`, settings);
 
   app.use(`${prefix}gtkAi`, gtkAi);
+  app.use(`${prefix}socialAi`, socialAi);
 
   app.use(`${prefix}voting`, voting);
 };
