@@ -111,7 +111,16 @@ router.put("/:episodeId", async (req: Request, res: Response) => {
       },
       {
         $set: {
-          "topics.$": req.body
+          "topics.$.desc": req.body.desc,
+          "topics.$.isChild": req.body.isChild,
+          "topics.$.isParent": req.body.isParent,
+          "topics.$.name": req.body.name,
+          "topics.$.parentId": req.body.parentId,
+          "topics.$.timer": req.body.timer,
+          "topics.$.articles": req.body.articles,
+          "topics.$.video": req.body.video,
+          "topics.$.notes": req.body.notes,
+          "topics.$.chat": req.body.chat
         }
       }
     );
