@@ -41,8 +41,6 @@ router.post("/", async (req: Request, res: Response) => {
 
     const parsedResult = JSON.parse(openaiData?.choices?.[0]?.message?.content);
 
-    console.log(parsedResult);
-
     const { titles, descriptions, tags, thumbnailText } = parsedResult;
 
     const data = {
