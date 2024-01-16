@@ -7,6 +7,9 @@ const ytmp4 = require("ytmp4");
 
 import { prompts } from "./prompts";
 
+import { verifyToken } from "../../middleware/verifyToken";
+router.use(verifyToken);
+
 router.post("/", async (req: Request, res: Response) => {
   try {
     const openai = new OpenAI();
@@ -62,6 +65,7 @@ router.post("/", async (req: Request, res: Response) => {
 
     res.status(200).json(data);
   } catch (error) {
+    console.log(error);
     res.status(404).send(error);
   }
 });
