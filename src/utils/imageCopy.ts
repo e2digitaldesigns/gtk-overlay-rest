@@ -22,7 +22,7 @@ export const s3ObjectCopy = (sourceObject: string): string | undefined => {
       function (copyErr, copyData) {
         if (copyErr) {
           console.error("Error: " + copyErr);
-          throw new Error("Error: " + copyErr);
+          // throw new Error("Error: " + copyErr);
         }
       }
     );
@@ -52,7 +52,7 @@ export const s3ObjectCopyVideo = (sourceObject: string): string | undefined => {
       function (copyErr, copyData) {
         if (copyErr) {
           console.error("Error: " + copyErr);
-          throw new Error("Error: " + copyErr);
+          // throw new Error("Error: " + copyErr);
         }
       }
     );

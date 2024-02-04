@@ -119,7 +119,7 @@ router.post("/update", upload, async (req: Request, res: Response) => {
 
     res.send({
       success: 1,
-      fileName
+      fileName: process.env.S3_CLOUD_IMAGES + fileName
     });
   } catch (error) {
     res.send(error);
@@ -404,7 +404,7 @@ router.post("/openAi-img", upload, async (req: Request, res: Response) => {
         res.json({
           success: 1,
           location: data.Location,
-          fileName
+          fileName: process.env.S3_CLOUD_IMAGES + fileName
         });
       }
     });

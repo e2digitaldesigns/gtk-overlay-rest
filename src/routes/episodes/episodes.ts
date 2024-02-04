@@ -6,6 +6,10 @@ import { ITemplate } from "../../models/templates.model";
 import { IEpisode } from "./../../models/episodes.model";
 import { s3ObjectCopy, s3ObjectCopyVideo } from "../../utils/imageCopy";
 import { deleteFromS3Multi } from "../fileUpload/s3Delete";
+import {
+  logoImageParser,
+  sponsorImageParser
+} from "../show/utils/imageParsers";
 const ObjectId = mongoose.Types.ObjectId;
 
 const router = express.Router();
@@ -188,9 +192,15 @@ router.get("/:_id", async (req: Request, res: Response) => {
 
     const { template, ...episode } = result[0];
 
+    const episodeData = {
+      ...episode,
+      logo: logoImageParser(episode?.logo),
+      sponsorImages: sponsorImageParser(episode?.sponsorImages)
+    };
+
     const data = {
       template: template?.[0],
-      episode
+      episode: episodeData
     };
 
     res.status(200).json(data);

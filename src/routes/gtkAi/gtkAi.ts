@@ -30,7 +30,7 @@ router.post("/img", async (req: Request, res: Response) => {
 
     res.status(200).json(response?.data?.[0].url);
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(404).send(error);
   }
 });
@@ -105,11 +105,7 @@ router.post("/gtk-assistant", async (req: Request, res: Response) => {
       });
 
       const imgUrl = response?.data?.[0].url;
-
-      console.log(response?.data?.[0]);
-
       const thumbWidth = 450;
-
       const theDate = Date.now();
       const fileName = `${theDate}.png`;
       const fileNameThumb = `${theDate}_thumb.png`;
@@ -152,7 +148,7 @@ router.post("/gtk-assistant", async (req: Request, res: Response) => {
       });
     }
   } catch (error: unknown) {
-    console.log(error);
+    console.error(error);
     res.status(404).send(error);
   }
 });

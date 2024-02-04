@@ -8,6 +8,7 @@ import { deleteFromS3 } from "../fileUpload/s3Delete";
 const ObjectId = mongoose.Types.ObjectId;
 
 import _sortBy from "lodash/sortBy";
+import { topicImageParser } from "../show/utils/imageParsers";
 
 const router = express.Router();
 router.use(verifyToken);
@@ -42,7 +43,9 @@ router.get("/:episodeId", async (req: Request, res: Response) => {
     res.status(200).json({
       templateId: result[0].templateId,
       images: result[0].template[0].images.topic,
-      topics: result?.[0]?.topics ? _sortBy(result[0].topics, "order") : []
+      topics: result?.[0]?.topics
+        ? _sortBy(topicImageParser(result[0].topics), "order")
+        : []
     });
   } catch (error) {
     console.error(error);
@@ -120,7 +123,8 @@ router.put("/:episodeId", async (req: Request, res: Response) => {
           "topics.$.articles": req.body.articles,
           "topics.$.video": req.body.video,
           "topics.$.notes": req.body.notes,
-          "topics.$.chat": req.body.chat
+          "topics.$.chat": req.body.chat,
+          "topics.$.voting": req.body.voting
         }
       }
     );

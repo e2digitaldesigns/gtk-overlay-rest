@@ -16,6 +16,11 @@ export interface IEpisodeSocials {
   order: number;
 }
 
+export interface IEpisodeTopicVotingOptions {
+  label: string;
+  value: boolean;
+}
+
 export interface IEpisodeTopic {
   _id: Types.ObjectId;
   desc: string;
@@ -30,6 +35,8 @@ export interface IEpisodeTopic {
   video: string;
   notes: string;
   chat: string;
+  voting: boolean;
+  votingOptions?: IEpisodeTopicVotingOptions[];
 }
 
 export interface IEpisode {
@@ -69,7 +76,8 @@ const EpisodeTopicSchema = new Schema<IEpisodeTopic>({
   articles: { type: String, required: false, default: "" },
   video: { type: String, required: false, default: "" },
   notes: { type: String, required: false, default: "" },
-  chat: { type: String, required: false, default: "" }
+  chat: { type: String, required: false, default: "" },
+  voting: { type: Boolean, required: true, default: false }
 });
 
 const EpisodeSchema = new Schema<IEpisode>({

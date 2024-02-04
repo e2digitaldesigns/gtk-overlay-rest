@@ -39,7 +39,7 @@ export async function imageSizeParser(req: Request | any, template: any) {
   const { data } = await sharp(formFile.buffer)
     .resize(width, height, {
       fit: sharp.fit.cover,
-      position: "right top"
+      position: "centre"
     })
     .png({ quality: 100 })
     .toBuffer({
