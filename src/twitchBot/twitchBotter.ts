@@ -7,10 +7,13 @@ import { refreshTwitchAccessTokenMethod } from "./methods/refreshAccessToken";
 import { getTwitchChannels } from "./utils/getUsers";
 import { parseMessaging } from "./utils/parseMessaging/parseMessaging";
 import { GtkTwitchBotModel } from "../models/gtkBot.model";
+import { TwitchAuthModel } from "../models/twitch.model";
+import { refreshTwitchStreamerAccessTokenMethod } from "./methods/refreshStreamerToken";
 
 enum TwitchEndPoints {
   Validate = "https://id.twitch.tv/oauth2/validate",
-  Users = "https://api.twitch.tv/helix/users?login="
+  Users = "https://api.twitch.tv/helix/users?login=",
+  Followers = "https://api.twitch.tv/helix/channels/followers?"
 }
 
 type TwitchBotData = {
@@ -49,13 +52,13 @@ export class TwitchBotter {
             self,
             this.client,
             this.socket,
-            this.getUserProfileImage
+            this.getUserProfileImage,
+            this.isSenderFollowing
           );
         }
       );
 
       this?.client?.on("disconnected", async (data: string) => {
-        console.log(46, "twitchBotter.ts", "Bot Disconnected", data);
         await this.refreshTwitchAccessToken();
         await this.reconnectTwitchBot();
       });
@@ -132,7 +135,8 @@ export class TwitchBotter {
         accessToken: 1,
         expirationTime: 1,
         expiresIn: 1,
-        refreshToken: 1
+        refreshToken: 1,
+        twitchUserId: 1
       });
 
       return twitchData;
@@ -142,11 +146,90 @@ export class TwitchBotter {
   }
 
   private async refreshTwitchAccessToken() {
-    const refreshToken = await this.getTwitchBotData().then(
-      data => data?.refreshToken || ""
-    );
-    return await refreshTwitchAccessTokenMethod(this.botName, refreshToken);
+    // const refreshToken = await this.getTwitchBotData().then(
+    //   data => data?.refreshToken || ""
+    // );
+    return await refreshTwitchAccessTokenMethod(this.botName);
   }
+
+  private async isFollowingCall(
+    accessToken: string,
+    twitchUserId: string,
+    userId: string
+  ) {
+    const data = await axios
+      .get(
+        `${TwitchEndPoints.Followers}broadcaster_id=${twitchUserId}&user_id=${userId}`,
+        {
+          headers: {
+            "Client-ID": process.env.TWITCH_CLIENT_ID,
+            Authorization: `Bearer ${accessToken}`
+          }
+        }
+      )
+      .then(res => ({
+        status: res.status,
+        following: res.data.data.length > 0
+      }))
+      .catch(error => ({
+        status: error.response?.data?.status,
+        following: false
+      }));
+
+    return data;
+  }
+
+  private isSenderFollowing = async (
+    streamerChannel: string,
+    username: string
+  ): Promise<boolean> => {
+    try {
+      const channel = streamerChannel.replace(/^#/, "");
+
+      let streamerData = await TwitchAuthModel.findOne({
+        twitchUserName: channel
+      }).select({ twitchUserId: 1, accessToken: 1, refreshToken: 1 });
+
+      if (!streamerData) return false;
+
+      const chatterUserId = await axios
+        .get(`${TwitchEndPoints.Users}${username}`, {
+          headers: {
+            "Client-ID": process.env.TWITCH_CLIENT_ID,
+            Authorization: `Bearer ${await this.getNewAccessToken()}`
+          }
+        })
+        .then(res => res.data.data[0].id)
+        .catch(error => "");
+
+      if (!chatterUserId) return false;
+
+      let isFollowingData = await this.isFollowingCall(
+        streamerData.accessToken,
+        streamerData.twitchUserId,
+        chatterUserId
+      );
+
+      if (isFollowingData.status !== 200) {
+        streamerData.accessToken = await refreshTwitchStreamerAccessTokenMethod(
+          username
+        );
+
+        isFollowingData = await this.isFollowingCall(
+          streamerData.accessToken,
+          streamerData.twitchUserId,
+          chatterUserId
+        );
+      }
+
+      if (!isFollowingData) return false;
+
+      return isFollowingData.following;
+    } catch (error: any) {
+      console.error("test", error.response?.data);
+      return false;
+    }
+  };
 
   private getUserProfileImage = async (username: string): Promise<string> => {
     const cachedImage: string | undefined =
@@ -175,3 +258,34 @@ export class TwitchBotter {
     }
   };
 }
+
+type RefreshTwitchBotAccessToken = (
+  botName: string,
+  refreshToken?: string
+) => Promise<string | undefined>;
+
+type RefreshTwitchStreamerAccessToken = (
+  twitchUsername: string,
+  refreshToken?: string
+) => Promise<string | undefined>;
+
+type RefreshTwitchAccessToken =
+  | RefreshTwitchBotAccessToken
+  | RefreshTwitchStreamerAccessToken;
+
+type BaseFunction = (...args: any[]) => Promise<number>;
+
+type TwitchAuthWrapper = (
+  twitchRefreshMethod: RefreshTwitchAccessToken,
+  baseFunction: BaseFunction
+) => Promise<boolean | string>;
+
+const twitchIfAuthWrapper: TwitchAuthWrapper = async (
+  twitchRefreshMethod,
+  baseFunction
+) => {
+  const status = await baseFunction();
+  if (status === 200) return true;
+  // const newAccessToken = await twitchRefreshMethod();
+  return true;
+};

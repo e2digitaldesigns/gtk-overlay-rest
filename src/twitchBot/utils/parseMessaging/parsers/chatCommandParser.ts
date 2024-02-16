@@ -12,9 +12,13 @@ const validatedCommand = async (
   const exceptions = ["!gtk", "!reply"];
   if (exceptions.includes(command)) return true;
 
+  // make this search case insensitive
+
   const data = await UserCommandsModel.findOne({
-    command: command
+    command: { $regex: new RegExp(`^${command}$`, "i") }
   }).select("users");
+
+  console.log(33, command, data, new ObjectId(gtkUserId));
 
   if (!data) return false;
 
@@ -29,22 +33,29 @@ export async function chatCommandParser(
   socket: SocketServer,
   message: string,
   channel: string,
-  tags: any
+  tags: any,
+  isFollowing: boolean
 ) {
   if (!client) return;
-  message = message.toLowerCase();
+  // message = message.toLowerCase();
+
+  console.log(37, tags);
 
   const commandPrefixes = ["!", "1", "2", "true", "false", "yes", "no"];
   if (!commandPrefixes.some(prefix => message.trim().startsWith(prefix))) {
     return;
   }
 
-  const typedCommand = message.split(" ")[0];
+  const typedCommand = message.split(" ")[0].toLowerCase();
   const command = typedCommand.startsWith("!")
     ? typedCommand
     : `!${typedCommand}`;
 
+  console.log(48, { typedCommand, command });
+
   const isCommandValid = await validatedCommand(gtkUserId, typedCommand);
+
+  console.log(52, { isCommandValid });
 
   if (!isCommandValid) {
     if (!typedCommand.startsWith("!")) return;
@@ -64,6 +75,80 @@ export async function chatCommandParser(
     case "!reply":
       client.action(channel, `@${tags.username}, heya!`);
       break;
+
+    // VIDEO REQUEST OVERLAY
+    // VIDEO REQUEST OVERLAY
+    // VIDEO REQUEST OVERLAY
+    case "!vr":
+    case "!pvr":
+      await chatCommands.videoSearch(
+        command,
+        tags.username,
+        tags.mod,
+        client,
+        channel,
+        message,
+        socket,
+        isFollowing
+      );
+      break;
+
+    case "!vremove":
+      await chatCommands.videoRemove(channel, socket, tags.username);
+
+    case "!vhot":
+    case "!vnot":
+    case "!vskip":
+      await chatCommands.videoVoting(command, tags.username, channel, socket);
+      break;
+
+    case "!vvol":
+      if (tags.mod || tags.subscriber) {
+        console.log(tags);
+        await chatCommands.videoVolume(command, channel, socket, message);
+      }
+      break;
+
+    case "!vdel":
+
+    case "!vnormal":
+    case "!vsmall":
+    case "!vfs":
+
+    case "!vstop":
+    case "!vpause":
+    case "!vplay":
+    case "!vnext":
+    case "!vprev":
+
+    case "!vpladd":
+
+    case "!vpclear":
+    case "!vreset":
+      if (tags.mod || tags.subscriber) {
+        await chatCommands.videoPassThrough(
+          command,
+          channel,
+          socket,
+          tags.username
+        );
+      }
+      break;
+
+    case "!vplayme":
+      if (tags.mod || tags.subscriber) {
+        await chatCommands.videoPlaylistFetcher(
+          command,
+          tags.username,
+          channel,
+          message,
+          socket
+        );
+      }
+      break;
+    // VIDEO REQUEST OVERLAY
+    // VIDEO REQUEST OVERLAY
+    // VIDEO REQUEST OVERLAY
 
     case "!d1":
     case "!d2":

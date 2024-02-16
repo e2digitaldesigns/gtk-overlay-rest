@@ -1,21 +1,20 @@
 import axios from "axios";
-import { GtkTwitchBotModel } from "../../models/gtkBot.model";
+import { TwitchAuthModel } from "../../models/twitch.model";
 
-export async function refreshTwitchAccessTokenMethod(
-  botName: string,
+export async function refreshTwitchStreamerAccessTokenMethod(
+  twitchUsername: string,
   refreshToken: string = ""
 ): Promise<string> {
-  console.log(9, "refresh bot token");
   try {
     if (!refreshToken) {
-      const botData = await GtkTwitchBotModel.findOne({
-        twitchUserName: botName
+      const userdata = await TwitchAuthModel.findOne({
+        twitchUserName: twitchUsername
       }).select({ refreshToken: 1 });
 
-      if (!botData?.refreshToken) {
+      if (!userdata?.refreshToken) {
         throw new Error("15 refreshTwitchAccessToken: No Twitch Data");
       } else {
-        refreshToken = botData.refreshToken;
+        refreshToken = userdata.refreshToken;
       }
     }
 
@@ -24,18 +23,17 @@ export async function refreshTwitchAccessTokenMethod(
     );
 
     if (response.status !== 200)
-      throw new Error("26 refreshBotToken: Twitch Refresh Failed");
+      throw new Error("26 refreshStreamerToken: Twitch Refresh Failed");
 
-    await GtkTwitchBotModel.findOneAndUpdate(
+    await TwitchAuthModel.findOneAndUpdate(
       {
-        twitchUserName: botName
+        twitchUserName: twitchUsername
       },
       {
         $set: {
           refreshToken: response.data.refresh_token,
           accessToken: response.data.access_token,
-          expiresIn: response.data.expires_in,
-          expirationTime: Date.now() + response.data.expires_in * 1000
+          expiresIn: response.data.expires_in
         }
       },
       { new: true }

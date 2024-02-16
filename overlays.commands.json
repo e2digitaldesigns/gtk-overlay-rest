@@ -1,0 +1,576 @@
+[
+  {
+    "_id": {
+      "$oid": "6590c8589f1e7e9b28fc2619"
+    },
+    "command": "!topic",
+    "type": "podcastOverlays",
+    "subType": "common",
+    "users": [],
+    "description": "Current Topic"
+  },
+  {
+    "_id": {
+      "$oid": "6590c8589f1e7e9b28fc261a"
+    },
+    "command": "!v1",
+    "type": "podcastOverlays",
+    "subType": "hostVoting",
+    "users": [
+      {
+        "$oid": "640bef8f88f7663004024d65"
+      }
+    ],
+    "description": "UpVote for host 1"
+  },
+  {
+    "_id": {
+      "$oid": "6590c8589f1e7e9b28fc261b"
+    },
+    "command": "!v2",
+    "type": "podcastOverlays",
+    "subType": "hostVoting",
+    "users": [
+      {
+        "$oid": "640bef8f88f7663004024d65"
+      }
+    ],
+    "description": "UpVote host 2"
+  },
+  {
+    "_id": {
+      "$oid": "6590c8589f1e7e9b28fc261c"
+    },
+    "command": "!v3",
+    "type": "podcastOverlays",
+    "subType": "hostVoting",
+    "users": [
+      {
+        "$oid": "640bef8f88f7663004024d65"
+      }
+    ],
+    "description": "UpVote host 3"
+  },
+  {
+    "_id": {
+      "$oid": "6590c8589f1e7e9b28fc261d"
+    },
+    "command": "!v4",
+    "type": "podcastOverlays",
+    "subType": "hostVoting",
+    "users": [
+      {
+        "$oid": "640bef8f88f7663004024d65"
+      }
+    ],
+    "description": "UpVote host 4"
+  },
+  {
+    "_id": {
+      "$oid": "6590c8589f1e7e9b28fc261e"
+    },
+    "command": "!sv1",
+    "type": "podcastOverlays",
+    "subType": "hostVoting",
+    "users": [
+      {
+        "$oid": "640bef8f88f7663004024d65"
+      }
+    ],
+    "description": "SuperVote host 1, 5 points (once per topic)"
+  },
+  {
+    "_id": {
+      "$oid": "6590c8589f1e7e9b28fc261f"
+    },
+    "command": "!sv2",
+    "type": "podcastOverlays",
+    "subType": "hostVoting",
+    "users": [
+      {
+        "$oid": "640bef8f88f7663004024d65"
+      }
+    ],
+    "description": "SuperVote host 2, 5 points (once per topic)"
+  },
+  {
+    "_id": {
+      "$oid": "6590c8589f1e7e9b28fc2620"
+    },
+    "command": "!sv3",
+    "type": "podcastOverlays",
+    "subType": "hostVoting",
+    "users": [
+      {
+        "$oid": "640bef8f88f7663004024d65"
+      }
+    ],
+    "description": "SuperVote host 3, 5 points (once per topic)"
+  },
+  {
+    "_id": {
+      "$oid": "6590c8589f1e7e9b28fc2621"
+    },
+    "command": "!sv4",
+    "type": "podcastOverlays",
+    "subType": "hostVoting",
+    "users": [
+      {
+        "$oid": "640bef8f88f7663004024d65"
+      }
+    ],
+    "description": "SuperVote host 4, 5 points (once per topic)"
+  },
+  {
+    "_id": {
+      "$oid": "6590c8589f1e7e9b28fc2622"
+    },
+    "command": "!d1",
+    "type": "podcastOverlays",
+    "subType": "hostVoting",
+    "users": [
+      {
+        "$oid": "640bef8f88f7663004024d65"
+      }
+    ],
+    "description": "DownVote host 1"
+  },
+  {
+    "_id": {
+      "$oid": "6590c8589f1e7e9b28fc2623"
+    },
+    "command": "!d2",
+    "type": "podcastOverlays",
+    "subType": "hostVoting",
+    "users": [
+      {
+        "$oid": "640bef8f88f7663004024d65"
+      }
+    ],
+    "description": "DownVote host 2"
+  },
+  {
+    "_id": {
+      "$oid": "6590c8589f1e7e9b28fc2624"
+    },
+    "command": "!d3",
+    "type": "podcastOverlays",
+    "subType": "hostVoting",
+    "users": [
+      {
+        "$oid": "640bef8f88f7663004024d65"
+      }
+    ],
+    "description": "DownVote host 3"
+  },
+  {
+    "_id": {
+      "$oid": "6590c8589f1e7e9b28fc2625"
+    },
+    "command": "!d4",
+    "type": "podcastOverlays",
+    "subType": "hostVoting",
+    "users": [
+      {
+        "$oid": "640bef8f88f7663004024d65"
+      }
+    ],
+    "description": "DownVote host 4"
+  },
+  {
+    "_id": {
+      "$oid": "6590c8589f1e7e9b28fc2626"
+    },
+    "command": "!true",
+    "type": "podcastOverlays",
+    "subType": "topicVoting",
+    "users": [
+      {
+        "$oid": "640bef8f88f7663004024d65"
+      }
+    ],
+    "description": "Vote True"
+  },
+  {
+    "_id": {
+      "$oid": "6590c8589f1e7e9b28fc2627"
+    },
+    "command": "true",
+    "type": "podcastOverlays",
+    "subType": "topicVoting",
+    "users": [
+      {
+        "$oid": "640bef8f88f7663004024d65"
+      }
+    ],
+    "description": "Vote True"
+  },
+  {
+    "_id": {
+      "$oid": "6590c8589f1e7e9b28fc2628"
+    },
+    "command": "!false",
+    "type": "podcastOverlays",
+    "subType": "topicVoting",
+    "users": [
+      {
+        "$oid": "640bef8f88f7663004024d65"
+      }
+    ],
+    "description": "Vote False"
+  },
+  {
+    "_id": {
+      "$oid": "6590c8589f1e7e9b28fc2629"
+    },
+    "command": "false",
+    "type": "podcastOverlays",
+    "subType": "topicVoting",
+    "users": [
+      {
+        "$oid": "640bef8f88f7663004024d65"
+      }
+    ],
+    "description": "Vote False"
+  },
+  {
+    "_id": {
+      "$oid": "6590c8589f1e7e9b28fc262a"
+    },
+    "command": "!1",
+    "type": "podcastOverlays",
+    "subType": "topicVoting",
+    "users": [
+      {
+        "$oid": "640bef8f88f7663004024d65"
+      }
+    ],
+    "description": "Vote 1"
+  },
+  {
+    "_id": {
+      "$oid": "6590c8589f1e7e9b28fc262b"
+    },
+    "command": "1",
+    "type": "podcastOverlays",
+    "subType": "topicVoting",
+    "users": [
+      {
+        "$oid": "640bef8f88f7663004024d65"
+      }
+    ],
+    "description": "Vote 1"
+  },
+  {
+    "_id": {
+      "$oid": "6590c8589f1e7e9b28fc262c"
+    },
+    "command": "!2",
+    "type": "podcastOverlays",
+    "subType": "topicVoting",
+    "users": [
+      {
+        "$oid": "640bef8f88f7663004024d65"
+      }
+    ],
+    "description": "Vote 2"
+  },
+  {
+    "_id": {
+      "$oid": "6590c8589f1e7e9b28fc262d"
+    },
+    "command": "2",
+    "type": "podcastOverlays",
+    "subType": "topicVoting",
+    "users": [
+      {
+        "$oid": "640bef8f88f7663004024d65"
+      }
+    ],
+    "description": "Vote 2"
+  },
+  {
+    "_id": {
+      "$oid": "6590c8589f1e7e9b28fc262e"
+    },
+    "command": "!yes",
+    "type": "podcastOverlays",
+    "subType": "topicVoting",
+    "users": [
+      {
+        "$oid": "640bef8f88f7663004024d65"
+      }
+    ],
+    "description": "Vote Yes"
+  },
+  {
+    "_id": {
+      "$oid": "6590c8589f1e7e9b28fc262f"
+    },
+    "command": "yes",
+    "type": "podcastOverlays",
+    "subType": "topicVoting",
+    "users": [
+      {
+        "$oid": "640bef8f88f7663004024d65"
+      }
+    ],
+    "description": "Vote Yes"
+  },
+  {
+    "_id": {
+      "$oid": "6590c8589f1e7e9b28fc2630"
+    },
+    "command": "!no",
+    "type": "podcastOverlays",
+    "subType": "topicVoting",
+    "users": [
+      {
+        "$oid": "640bef8f88f7663004024d65"
+      }
+    ],
+    "description": "Vote No"
+  },
+  {
+    "_id": {
+      "$oid": "6590c8589f1e7e9b28fc2631"
+    },
+    "command": "no",
+    "type": "podcastOverlays",
+    "subType": "topicVoting",
+    "users": [
+      {
+        "$oid": "640bef8f88f7663004024d65"
+      }
+    ],
+    "description": "Vote No"
+  },
+  {
+    "_id": {
+      "$oid": "65c83a3284a8e9b1a459df29"
+    },
+    "command": "!vr",
+    "type": "videoRequest",
+    "subType": "videoRequest",
+    "users": [],
+    "description": "Search and queue Youtube video.",
+    "usage": "!vr Artist Name - Song Name"
+  },
+  {
+    "_id": {
+      "$oid": "65c83a3284a8e9b1a459df2a"
+    },
+    "command": "!pvr",
+    "type": "videoRequest",
+    "subType": "videoRequest",
+    "users": [],
+    "description": "Search and queue Youtube video to the top of the queue.",
+    "usage": "!pvr Artist Name - Song Name"
+  },
+  {
+    "_id": {
+      "$oid": "65c83a3284a8e9b1a459df2b"
+    },
+    "command": "!vremove",
+    "type": "videoRequest",
+    "subType": "videoRequest",
+    "users": [],
+    "description": "Viewer can remove their last requested video.",
+    "usage": "!vRemove"
+  },
+  {
+    "_id": {
+      "$oid": "65c83a3284a8e9b1a459df2c"
+    },
+    "command": "!vdel",
+    "type": "videoRequest",
+    "subType": "videoRequest",
+    "users": [],
+    "description": "Mods can remove the last requested unseen video.",
+    "usage": "!vDel"
+  },
+  {
+    "_id": {
+      "$oid": "65c83a3284a8e9b1a459df2d"
+    },
+    "command": "!vpclear",
+    "type": "videoRequest",
+    "subType": "videoRequest",
+    "users": [],
+    "description": "Mods can clear (delete) the playlist.",
+    "usage": "!vPClear"
+  },
+  {
+    "_id": {
+      "$oid": "65c83a3284a8e9b1a459df2e"
+    },
+    "command": "!vHot",
+    "type": "videoRequest",
+    "subType": "videoVoting",
+    "users": [],
+    "description": "Viewers can up vote the video.",
+    "usage": "!vHot"
+  },
+  {
+    "_id": {
+      "$oid": "65c83a3284a8e9b1a459df2f"
+    },
+    "command": "!vNot",
+    "type": "videoRequest",
+    "subType": "videoVoting",
+    "users": [],
+    "description": "Viewers can down vote the video.",
+    "usage": "!vNot"
+  },
+  {
+    "_id": {
+      "$oid": "65c83a3284a8e9b1a459df30"
+    },
+    "command": "!vSkip",
+    "type": "videoRequest",
+    "subType": "videoVoting",
+    "users": [],
+    "description": "Viewers can vote to skip the current video.",
+    "usage": "!vSkip"
+  },
+  {
+    "_id": {
+      "$oid": "65c83a3284a8e9b1a459df31"
+    },
+    "command": "!vVol",
+    "type": "videoRequest",
+    "subType": "playerControl",
+    "users": [],
+    "description": "Mods can adjust the volume of the video.",
+    "usage": "!vVol 55"
+  },
+  {
+    "_id": {
+      "$oid": "65c83a3284a8e9b1a459df32"
+    },
+    "command": "!vNormal",
+    "type": "videoRequest",
+    "subType": "videoSize",
+    "users": [],
+    "description": "Mods can set the video size to normal.",
+    "usage": "!vNormal"
+  },
+  {
+    "_id": {
+      "$oid": "65c83a3284a8e9b1a459df33"
+    },
+    "command": "!vSmall",
+    "type": "videoRequest",
+    "subType": "videoSize",
+    "users": [],
+    "description": "Mods can set the video size to small.",
+    "usage": "!vSmall"
+  },
+  {
+    "_id": {
+      "$oid": "65c83a3284a8e9b1a459df34"
+    },
+    "command": "!vFs",
+    "type": "videoRequest",
+    "subType": "videoSize",
+    "users": [],
+    "description": "Mods can set the video size to fullscreen.",
+    "usage": "!vFs"
+  },
+  {
+    "_id": {
+      "$oid": "65c83a3284a8e9b1a459df35"
+    },
+    "command": "!vStop",
+    "type": "videoRequest",
+    "subType": "playerControl",
+    "users": [],
+    "description": "Mods can stop the video.",
+    "usage": "!vStop"
+  },
+  {
+    "_id": {
+      "$oid": "65c83a3284a8e9b1a459df36"
+    },
+    "command": "!vPause",
+    "type": "videoRequest",
+    "subType": "playerControl",
+    "users": [],
+    "description": "Mods can pause / upause the video.",
+    "usage": "!vPause"
+  },
+  {
+    "_id": {
+      "$oid": "65c83a3284a8e9b1a459df37"
+    },
+    "command": "!vPlay",
+    "type": "videoRequest",
+    "subType": "playerControl",
+    "users": [],
+    "description": "Mods can play the video.",
+    "usage": "!vPlay"
+  },
+  {
+    "_id": {
+      "$oid": "65c83a3284a8e9b1a459df38"
+    },
+    "command": "!vNext",
+    "type": "videoRequest",
+    "subType": "playerControl",
+    "users": [],
+    "description": "Mods can go to and play the next video.",
+    "usage": "!vNext"
+  },
+  {
+    "_id": {
+      "$oid": "65c83a3284a8e9b1a459df39"
+    },
+    "command": "!vPrev",
+    "type": "videoRequest",
+    "subType": "playerControl",
+    "users": [],
+    "description": "Mods can go to and play the previous video.",
+    "usage": "!vPrev"
+  },
+  {
+    "_id": {
+      "$oid": "65c83a3284a8e9b1a459df3a"
+    },
+    "command": "!vReset",
+    "type": "videoRequest",
+    "subType": "playerControl",
+    "users": [],
+    "description": "Mods can reset the overlay to its initial state.",
+    "usage": "!vReset"
+  },
+  {
+    "_id": {
+      "$oid": "65cc3c376166fa478de109b1"
+    },
+    "command": "!vAdd",
+    "type": "videoRequest",
+    "subType": "videoPlaylist",
+    "users": [
+      {
+        "$oid": "640bef8f88f7663004024d65"
+      }
+    ],
+    "description": "Add video the default playlist.",
+    "usage": "!vAdd"
+  },
+  {
+    "_id": {
+      "$oid": "65cda3df0f977a0df68a20dd"
+    },
+    "command": "!vplayMe",
+    "type": "videoRequest",
+    "subType": "videoPlaylist",
+    "users": [
+      {
+        "$oid": "640bef8f88f7663004024d65"
+      }
+    ],
+    "description": "Add users playlist to the playing list.",
+    "usage": "!vplayMe"
+  }
+]

@@ -20,11 +20,15 @@ import { chatLog } from "./chatLog/chatLog";
 import { topicLog } from "./topicLog/topicLog";
 
 import { common } from "./common/common";
-import { settings } from "./settings/settings";
+import { commands } from "./commands/commands";
 
 import { gtkAi } from "./gtkAi/gtkAi";
 import { voting } from "./voting/voting";
 import { socialAi } from "./socialAi/socialAi";
+
+import { videoOverlay } from "./videoOverlay/videoOverlay";
+import { videoOverlayPlaylist } from "./videoOverlay/videoPlaylist";
+import { chatSender } from "./chatSender/chatSender";
 
 export const routing = (app: Express) => {
   const prefix = "/api/v1/";
@@ -49,10 +53,15 @@ export const routing = (app: Express) => {
   app.use(`${prefix}chatlog`, chatLog);
   app.use(`${prefix}topicLog`, topicLog);
   app.use(`${prefix}common`, common);
-  app.use(`${prefix}settings`, settings);
+
+  app.use(`${prefix}commands`, commands);
 
   app.use(`${prefix}gtkAi`, gtkAi);
   app.use(`${prefix}socialAi`, socialAi);
 
   app.use(`${prefix}voting`, voting);
+
+  app.use(`${prefix}videoOverlay`, videoOverlay);
+  app.use(`${prefix}videoOverlayPlaylist`, videoOverlayPlaylist);
+  app.use(`${prefix}chatSender`, chatSender);
 };

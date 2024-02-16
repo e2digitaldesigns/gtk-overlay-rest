@@ -15,7 +15,11 @@ export async function parseMessaging(
   self: boolean,
   tmiClient: TMIClient | null,
   socket: SocketServer,
-  getUserProfileImage: any
+  getUserProfileImage: (username: string) => Promise<string>,
+  isSenderFollowing: (
+    streamerChannel: string,
+    username: string
+  ) => Promise<boolean>
 ) {
   if (self) return; // Ignore messages from the bot
 
@@ -31,6 +35,11 @@ export async function parseMessaging(
   // Get Twitch User Image
   const twitchUserImage = await getUserProfileImage(tags.username);
 
+  // Is chat sender following the channel
+  const isFollowing = await isSenderFollowing(channel, tags.username);
+
+  console.log(40, { isFollowing });
+
   // Chat Command Parser
   chatCommandParser(
     gtkUserId,
@@ -38,7 +47,8 @@ export async function parseMessaging(
     socket,
     message.trim(),
     channel,
-    tags
+    tags,
+    isFollowing
   );
 
   //Chat Log Parser

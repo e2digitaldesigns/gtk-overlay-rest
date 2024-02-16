@@ -10,7 +10,7 @@ import { UsersModel } from "../../models/users.model";
 import { HostModel } from "../../models/hosts.model";
 import { EpisodeModel } from "../../models/episodes.model";
 import { episodeObj } from "./episode";
-import defaultSettings from "../settings/defaults.json";
+import defaultSettings from "../commands/defaults.json";
 
 const router = express.Router();
 

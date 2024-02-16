@@ -5,6 +5,7 @@ interface CommandDocument {
   command: string;
 
   description: string;
+  usage: string;
   subType: string;
   type: string;
   users: Types.ObjectId[];
@@ -13,6 +14,7 @@ interface CommandDocument {
 const CommandSchema = new Schema<CommandDocument>({
   command: { type: String, required: true, default: " " },
   description: { type: String, required: true, default: " " },
+  usage: { type: String, required: true, default: " " },
   subType: { type: String, required: true, default: " " },
   type: { type: String, required: true, default: " " },
   users: [

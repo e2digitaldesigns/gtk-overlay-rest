@@ -8,8 +8,12 @@ const router = express.Router();
 router.use(verifyToken);
 
 router.get("/", async (req: Request, res: Response) => {
+  const type = req.query.type;
+
   try {
-    let result = await UserCommandsModel.find();
+    let result = await UserCommandsModel.find({
+      type: type
+    });
 
     const commands = [];
 
@@ -20,6 +24,7 @@ router.get("/", async (req: Request, res: Response) => {
         type: command.type,
         subType: command.subType,
         status: command.users.includes(new ObjectId(res.locals.userId)),
+        usage: command.usage,
         description: command.description
       });
     }
@@ -59,4 +64,4 @@ router.patch("/", async (req: Request, res: Response) => {
   }
 });
 
-export const settings = router;
+export const commands = router;

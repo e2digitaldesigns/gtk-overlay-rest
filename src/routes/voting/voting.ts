@@ -13,7 +13,13 @@ router.get("/vote", async (req: Request, res: Response) => {
     const channelName = channel?.toString().split("/").pop();
 
     if (command && channelName && user) {
-      overlayVoting(command, user?.toString(), channelName, res.locals.io);
+      overlayVoting(
+        command,
+        user?.toString(),
+        channelName,
+        res.locals.io,
+        null
+      );
     } else {
       throw new Error("Missing parameters");
     }

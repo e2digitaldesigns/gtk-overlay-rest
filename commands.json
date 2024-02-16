@@ -1,0 +1,208 @@
+[
+  {
+    "command": "!vr",
+    "type": "videoRequest",
+    "subType": "videoRequest",
+    "users": [],
+    "description": "Search and queue Youtube video.",
+    "usage": "!vr Artist Name - Song Name"
+  },
+
+  {
+    "command": "!pvr",
+    "type": "videoRequest",
+    "subType": "videoRequest",
+    "users": [],
+    "description": "Search and queue Youtube video to the top of the queue.",
+    "usage": "!pvr Artist Name - Song Name"
+  },
+
+  {
+    "command": "!vremove",
+    "type": "videoRequest",
+    "subType": "videoRequest",
+    "users": [],
+    "description": "Viewer can remove their last requested video.",
+    "usage": "!vremove"
+  },
+
+  {
+    "command": "!vdel",
+    "type": "videoRequest",
+    "subType": "videoRequest",
+    "users": [],
+    "description": "Mods can remove the last requested unseen video.",
+    "usage": "!vdel"
+  },
+
+  {
+    "command": "!vpclear",
+    "type": "videoRequest",
+    "subType": "videoRequest",
+    "users": [],
+    "description": "Mods can clear (delete) the playlist.",
+    "usage": "!vpclear"
+  },
+
+  {
+    "command": "!vHot",
+    "type": "videoRequest",
+    "subType": "videoVoting",
+    "users": [],
+    "description": "Viewers can up vote the video.",
+    "usage": "!vHot"
+  },
+
+  {
+    "command": "!vNot",
+    "type": "videoRequest",
+    "subType": "videoVoting",
+    "users": [],
+    "description": "Viewers can down vote the video.",
+    "usage": "!vNot"
+  },
+
+  {
+    "command": "!vSkip",
+    "type": "videoRequest",
+    "subType": "videoVoting",
+    "users": [],
+    "description": "Viewers can vote to skip the current video.",
+    "usage": "!vSkip"
+  },
+
+  {
+    "command": "!vvol",
+    "type": "videoRequest",
+    "subType": "videoControl",
+    "users": [],
+    "description": "Mods can adjust the volume of the video.",
+    "usage": "!vvol 55"
+  },
+
+  {
+    "command": "!vnormal",
+    "type": "videoRequest",
+    "subType": "videoSize",
+    "users": [],
+    "description": "Mods can set the video size to normal.",
+    "usage": "!vnormal"
+  },
+
+  {
+    "command": "!vsmall",
+    "type": "videoRequest",
+    "subType": "videoSize",
+    "users": [],
+    "description": "Mods can set the video size to small.",
+    "usage": "!vsmall"
+  },
+
+  {
+    "command": "!vfs",
+    "type": "videoRequest",
+    "subType": "videoSize",
+    "users": [],
+    "description": "Mods can set the video size to fullscreen.",
+    "usage": "!vfs"
+  },
+
+  {
+    "command": "!vstop",
+    "type": "videoRequest",
+    "subType": "playerControl",
+    "users": [],
+    "description": "Mods can stop the video.",
+    "usage": "!vstop"
+  },
+
+  {
+    "command": "!vpause",
+    "type": "videoRequest",
+    "subType": "playerControl",
+    "users": [],
+    "description": "Mods can pause / upause the video.",
+    "usage": "!vpause"
+  },
+
+  {
+    "command": "!vplay",
+    "type": "videoRequest",
+    "subType": "playerControl",
+    "users": [],
+    "description": "Mods can play the video.",
+    "usage": "!vplay"
+  },
+
+  {
+    "command": "!vnext",
+    "type": "videoRequest",
+    "subType": "playerControl",
+    "users": [],
+    "description": "Mods can go to and play the next video.",
+    "usage": "!vnext"
+  },
+
+  {
+    "command": "!vprev",
+    "type": "videoRequest",
+    "subType": "playerControl",
+    "users": [],
+    "description": "Mods can go to and play the previous video.",
+    "usage": "!vprev"
+  },
+
+  {
+    "command": "!vreset",
+    "type": "videoRequest",
+    "subType": "playerControl",
+    "users": [],
+    "description": "Mods can reset the overlay to its initial state.",
+    "usage": "!vreset"
+  },
+
+  {
+    "command": "!vDel",
+    "type": "videoRequest",
+    "subType": "",
+    "users": [],
+    "description": "Remove the last unseen video.",
+    "usage": "!vDel"
+  },
+
+  {
+    "command": "!vRemove",
+    "type": "videoRequest",
+    "subType": "",
+    "users": [],
+    "description": "User removes the last unseen video they requested from the queue.",
+    "usage": "!vRemove"
+  },
+
+  {
+    "command": "!vrOn",
+    "type": "videoRequest",
+    "subType": "",
+    "users": [],
+    "description": "Turn video request on.",
+    "usage": "!vrOn"
+  },
+
+  {
+    "command": "!vrOff",
+    "type": "videoRequest",
+    "subType": "",
+    "users": [],
+    "description": "Turn video request off.",
+    "usage": "!vrOff"
+  },
+
+  {
+    "command": "!vPP",
+    "type": "videoRequest",
+    "subType": "",
+    "users": [],
+    "description": "Add the currently playing video to the user's default playlist.",
+    "usage": "!vPP"
+  }
+]

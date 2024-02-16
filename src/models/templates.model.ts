@@ -27,8 +27,11 @@ export interface ITemplateImagesDefault {
   height: number;
 }
 
+type TemplateTypes = "podcast" | "video";
+
 export interface ITemplate {
   _id: Types.ObjectId;
+  type: TemplateTypes;
   name: string;
   urlKey: string;
   maxHosts: number;
@@ -43,6 +46,7 @@ export interface ITemplate {
 
 const TemplateSchema = new Schema<ITemplate>({
   _id: { type: Schema.Types.ObjectId },
+  type: { type: String, required: true, default: "podcast" },
   name: { type: String, required: true, default: " " },
   urlKey: { type: String, required: true, default: " " },
   thumbnail: { type: String },
