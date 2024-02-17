@@ -1,0 +1,252 @@
+[
+  {
+    "command": "!topic",
+    "type": "podcastOverlays",
+    "subType": "common",
+    "users": [],
+    "description": "Current Topic",
+    "_id": {
+      "$oid": "6590c8589f1e7e9b28fc2619"
+    }
+  },
+  {
+    "command": "!v1",
+    "type": "podcastOverlays",
+    "subType": "hostVoting",
+    "users": [],
+    "description": "UpVote for host 1",
+    "_id": {
+      "$oid": "6590c8589f1e7e9b28fc261a"
+    }
+  },
+  {
+    "command": "!v2",
+    "type": "podcastOverlays",
+    "subType": "hostVoting",
+    "users": [],
+    "description": "UpVote host 2",
+    "_id": {
+      "$oid": "6590c8589f1e7e9b28fc261b"
+    }
+  },
+  {
+    "command": "!v3",
+    "type": "podcastOverlays",
+    "subType": "hostVoting",
+    "users": [],
+    "description": "UpVote host 3",
+    "_id": {
+      "$oid": "6590c8589f1e7e9b28fc261c"
+    }
+  },
+  {
+    "command": "!v4",
+    "type": "podcastOverlays",
+    "subType": "hostVoting",
+    "users": [],
+    "description": "UpVote host 4",
+    "_id": {
+      "$oid": "6590c8589f1e7e9b28fc261d"
+    }
+  },
+  {
+    "command": "!sv1",
+    "type": "podcastOverlays",
+    "subType": "hostVoting",
+    "users": [],
+    "description": "SuperVote host 1, 5 points (once per topic)",
+    "_id": {
+      "$oid": "6590c8589f1e7e9b28fc261e"
+    }
+  },
+  {
+    "command": "!sv2",
+    "type": "podcastOverlays",
+    "subType": "hostVoting",
+    "users": [],
+    "description": "SuperVote host 2, 5 points (once per topic)",
+    "_id": {
+      "$oid": "6590c8589f1e7e9b28fc261f"
+    }
+  },
+  {
+    "command": "!sv3",
+    "type": "podcastOverlays",
+    "subType": "hostVoting",
+    "users": [],
+    "description": "SuperVote host 3, 5 points (once per topic)",
+    "_id": {
+      "$oid": "6590c8589f1e7e9b28fc2620"
+    }
+  },
+  {
+    "command": "!sv4",
+    "type": "podcastOverlays",
+    "subType": "hostVoting",
+    "users": [],
+    "description": "SuperVote host 4, 5 points (once per topic)",
+    "_id": {
+      "$oid": "6590c8589f1e7e9b28fc2621"
+    }
+  },
+  {
+    "command": "!d1",
+    "type": "podcastOverlays",
+    "subType": "hostVoting",
+    "users": [],
+    "description": "DownVote host 1",
+    "_id": {
+      "$oid": "6590c8589f1e7e9b28fc2622"
+    }
+  },
+  {
+    "command": "!d2",
+    "type": "podcastOverlays",
+    "subType": "hostVoting",
+    "users": [],
+    "description": "DownVote host 2",
+    "_id": {
+      "$oid": "6590c8589f1e7e9b28fc2623"
+    }
+  },
+  {
+    "command": "!d3",
+    "type": "podcastOverlays",
+    "subType": "hostVoting",
+    "users": [],
+    "description": "DownVote host 3",
+    "_id": {
+      "$oid": "6590c8589f1e7e9b28fc2624"
+    }
+  },
+  {
+    "command": "!d4",
+    "type": "podcastOverlays",
+    "subType": "hostVoting",
+    "users": [],
+    "description": "DownVote host 4",
+    "_id": {
+      "$oid": "6590c8589f1e7e9b28fc2625"
+    }
+  },
+  {
+    "command": "!true",
+    "type": "podcastOverlays",
+    "subType": "topicVoting",
+    "users": [],
+    "description": "Vote True",
+    "_id": {
+      "$oid": "6590c8589f1e7e9b28fc2626"
+    }
+  },
+  {
+    "command": "true",
+    "type": "podcastOverlays",
+    "subType": "topicVoting",
+    "users": [],
+    "description": "Vote True",
+    "_id": {
+      "$oid": "6590c8589f1e7e9b28fc2627"
+    }
+  },
+  {
+    "command": "!false",
+    "type": "podcastOverlays",
+    "subType": "topicVoting",
+    "users": [],
+    "description": "Vote False",
+    "_id": {
+      "$oid": "6590c8589f1e7e9b28fc2628"
+    }
+  },
+  {
+    "command": "false",
+    "type": "podcastOverlays",
+    "subType": "topicVoting",
+    "users": [],
+    "description": "Vote False",
+    "_id": {
+      "$oid": "6590c8589f1e7e9b28fc2629"
+    }
+  },
+  {
+    "command": "!1",
+    "type": "podcastOverlays",
+    "subType": "topicVoting",
+    "users": [],
+    "description": "Vote 1",
+    "_id": {
+      "$oid": "6590c8589f1e7e9b28fc262a"
+    }
+  },
+  {
+    "command": "1",
+    "type": "podcastOverlays",
+    "subType": "topicVoting",
+    "users": [],
+    "description": "Vote 1",
+    "_id": {
+      "$oid": "6590c8589f1e7e9b28fc262b"
+    }
+  },
+  {
+    "command": "!2",
+    "type": "podcastOverlays",
+    "subType": "topicVoting",
+    "users": [],
+    "description": "Vote 2",
+    "_id": {
+      "$oid": "6590c8589f1e7e9b28fc262c"
+    }
+  },
+  {
+    "command": "2",
+    "type": "podcastOverlays",
+    "subType": "topicVoting",
+    "users": [],
+    "description": "Vote 2",
+    "_id": {
+      "$oid": "6590c8589f1e7e9b28fc262d"
+    }
+  },
+  {
+    "command": "!yes",
+    "type": "podcastOverlays",
+    "subType": "topicVoting",
+    "users": [],
+    "description": "Vote Yes",
+    "_id": {
+      "$oid": "6590c8589f1e7e9b28fc262e"
+    }
+  },
+  {
+    "command": "yes",
+    "type": "podcastOverlays",
+    "subType": "topicVoting",
+    "users": [],
+    "description": "Vote Yes",
+    "_id": {
+      "$oid": "6590c8589f1e7e9b28fc262f"
+    }
+  },
+  {
+    "command": "!no",
+    "type": "podcastOverlays",
+    "subType": "topicVoting",
+    "users": [],
+    "description": "Vote No",
+    "_id": {
+      "$oid": "6590c8589f1e7e9b28fc2630"
+    }
+  },
+  {
+    "command": "no",
+    "type": "podcastOverlays",
+    "subType": "topicVoting",
+    "users": [],
+    "description": "Vote No",
+    "_id": {
+      "$oid": "6590c8589f1e7e9b28fc2631"
+    }
+  }
+]

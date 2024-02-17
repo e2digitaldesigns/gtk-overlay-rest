@@ -68,6 +68,7 @@ router.put("/info/:episodeId", async (req: Request, res: Response) => {
       {
         $set: {
           podcastName: req.body.podcastName,
+          templateId: req.body.templateId,
           name: req.body.name,
           number: req.body.number,
           airDate: req.body.airDate,
@@ -154,7 +155,10 @@ router.post("/hosts/:episodeId", async (req: Request, res: Response) => {
       { $set: { hosts: req.body.episodeHosts } }
     );
 
-    res.status(200).json(result);
+    res.status(200).json({
+      success: result.modifiedCount,
+      episodeHosts: req.body.episodeHosts
+    });
   } catch (error) {
     res.status(404).send(error);
   }
@@ -194,7 +198,7 @@ router.post("/news/:episodeId", async (req: Request, res: Response) => {
       }
     );
 
-    res.status(200).json(result);
+    res.status(200).json({ success: result.modifiedCount, news: req.body });
   } catch (error) {
     res.status(404).send(error);
   }
@@ -216,7 +220,7 @@ router.put("/news/:episodeId", async (req: Request, res: Response) => {
       }
     );
 
-    res.status(200).json(result);
+    res.status(200).json({ success: result.modifiedCount, newsItem: req.body });
   } catch (error) {
     res.status(404).send(error);
   }
@@ -236,7 +240,9 @@ router.delete(
         }
       );
 
-      res.status(200).json(result);
+      res
+        .status(200)
+        .json({ success: result.modifiedCount, _id: req.params.tickerId });
     } catch (error) {
       res.status(404).send(error);
     }
@@ -257,7 +263,11 @@ router.put("/news/reorder/:episodeId", async (req: Request, res: Response) => {
       }
     );
 
-    res.status(200).json(result);
+    console.log(result);
+
+    res
+      .status(200)
+      .json({ success: result.modifiedCount, ticker: req.body.ticker });
   } catch (error) {
     res.status(404).send(error);
   }

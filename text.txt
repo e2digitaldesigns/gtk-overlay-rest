@@ -1,0 +1,19 @@
+Up Votes (!v1)
+    visitors: 1
+    followers: 1
+    subscribers: 2
+
+Down Votes (!d1)
+    visitors: 0
+    followers: 1
+    subscribers: 1
+
+Super Votes (!sv1)
+    visitors: 0
+    followers: 0
+    subscribers: 5
+
+Topic Votes (!true)
+    visitors: no
+    followers: yes
+    subscribers: yes

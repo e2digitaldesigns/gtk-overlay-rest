@@ -6,6 +6,7 @@ import { chatRelayParser } from "./parsers/chatRelay";
 import { emojiParser } from "./parsers/emojiParser";
 import { chatCommandParser } from "./parsers/chatCommandParser";
 import { chatLogParser } from "./parsers/chatLogParser";
+import { chatGptParser } from "./parsers/chatGptParser/chatGptParser";
 
 export async function parseMessaging(
   channel: string,
@@ -14,7 +15,12 @@ export async function parseMessaging(
   self: boolean,
   tmiClient: TMIClient | null,
   socket: SocketServer,
-  getUserProfileImage: any
+  getUserProfileImage: (username: string) => Promise<string>,
+  isChatterFollowing: (
+    streamerChannel: string,
+    chatterUserName: string,
+    chatterUserId: string
+  ) => Promise<boolean>
 ) {
   if (self) return; // Ignore messages from the bot
 
@@ -30,8 +36,23 @@ export async function parseMessaging(
   // Get Twitch User Image
   const twitchUserImage = await getUserProfileImage(tags.username);
 
-  //Chat Command Parser
-  chatCommandParser(tmiClient, socket, message.trim(), channel, tags);
+  // Is chat sender following the channel
+  const isFollowing = await isChatterFollowing(
+    channel,
+    tags.username,
+    tags["user-id"]
+  );
+
+  // Chat Command Parser
+  chatCommandParser(
+    gtkUserId,
+    tmiClient,
+    socket,
+    message.trim(),
+    channel,
+    tags,
+    isFollowing
+  );
 
   //Chat Log Parser
   chatLogParser(gtkUserId, channel, tags, message, twitchUserImage);
@@ -40,8 +61,11 @@ export async function parseMessaging(
   chatRankParser(socket, channel);
 
   //Chat Relay Parser
-  chatRelayParser(socket, message, channel, tags, twitchUserImage);
+  chatRelayParser(gtkUserId, socket, message, channel, tags, twitchUserImage);
 
   //Emoji Parser
   emojiParser(socket, message, channel);
+
+  //Chat GPT Parser
+  // chatGptParser(channel, tmiClient, tags, message);
 }

@@ -10,6 +10,7 @@ import { UsersModel } from "../../models/users.model";
 import { HostModel } from "../../models/hosts.model";
 import { EpisodeModel } from "../../models/episodes.model";
 import { episodeObj } from "./episode";
+import defaultSettings from "../commands/defaults.json";
 
 const router = express.Router();
 
@@ -41,7 +42,8 @@ router.post("/", async (req: Request, res: Response) => {
         {
           _id: checkUser?._id,
           name: checkUser?.name,
-          picture: checkUser?.picture
+          picture: checkUser?.picture,
+          gtkAi: !!checkUser?.gtkAi
         },
         secretKey,
         options
@@ -52,7 +54,8 @@ router.post("/", async (req: Request, res: Response) => {
       const theUser = await MODEL.create({
         email: payload?.email,
         name: payload?.name,
-        picture: payload?.picture
+        picture: payload?.picture,
+        gtkAi: false
       });
 
       // add a host
@@ -97,7 +100,8 @@ router.post("/", async (req: Request, res: Response) => {
         {
           _id: theUser?._id,
           name: theUser?.name,
-          picture: theUser?.picture
+          picture: theUser?.picture,
+          gtkAi: !!theUser?.gtkAi
         },
         secretKey,
         options
@@ -110,6 +114,7 @@ router.post("/", async (req: Request, res: Response) => {
     res.status(404).send(error);
   }
 });
+
 router.post("/archive", async (req: Request, res: Response) => {
   try {
     const payload = await verify(req.body.token);

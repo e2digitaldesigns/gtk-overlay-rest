@@ -1,9 +1,7 @@
 import express, { Request, Response } from "express";
 import { verifyToken } from "../../middleware/verifyToken";
 import { HostModel } from "../../models/hosts.model";
-import { EpisodeModel } from "../../models/episodes.model";
 import mongoose from "mongoose";
-import { episodes } from "./../episodes/episodes";
 const ObjectId = mongoose.Types.ObjectId;
 
 const router = express.Router();

@@ -42,13 +42,33 @@ export const episodeObj = {
     return {
       _id: new ObjectId(),
       ...item,
-      img: s3ObjectCopy("_default__400x220_topic.jpg")
+      img: ""
     };
   }),
 
-  sponsorImages: [
-    s3ObjectCopy("_default__400x120_sponsor.jpg"),
-    s3ObjectCopy("_default__400x120_sponsor.jpg")
-  ],
-  logo: s3ObjectCopy("_default__400x120_logo.jpg")
+  sponsorImages: [],
+  logo: ""
 };
+
+// export const episodeObj = {
+//   ticker: ticker.map((item: any) => {
+//     return {
+//       _id: new ObjectId(),
+//       title: "",
+//       text: item
+//     };
+//   }),
+//   topics: topics.map((item: any) => {
+//     return {
+//       _id: new ObjectId(),
+//       ...item,
+//       img: s3ObjectCopy("_default__400x220_topic.jpg")
+//     };
+//   }),
+
+//   sponsorImages: [
+//     s3ObjectCopy("_default__400x120_sponsor.jpg"),
+//     s3ObjectCopy("_default__400x120_sponsor.jpg")
+//   ],
+//   logo: s3ObjectCopy("_default__400x120_logo.jpg")
+// };

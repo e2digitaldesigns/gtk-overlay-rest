@@ -3,18 +3,28 @@ import { GtkTwitchBotModel } from "../../models/gtkBot.model";
 
 export async function refreshTwitchAccessTokenMethod(
   botName: string,
-  refreshToken: string
-): Promise<boolean> {
+  refreshToken: string = ""
+): Promise<string> {
+  console.log(8, "refresh bot token: refreshTwitchAccessTokenMethod");
   try {
-    if (!refreshToken)
-      throw new Error("15 refreshTwitchAccessToken: No Twitch Data");
+    if (!refreshToken) {
+      const botData = await GtkTwitchBotModel.findOne({
+        twitchUserName: botName
+      }).select({ refreshToken: 1 });
+
+      if (!botData?.refreshToken) {
+        throw new Error("15 refreshTwitchAccessToken: No Twitch Data");
+      } else {
+        refreshToken = botData.refreshToken;
+      }
+    }
 
     const response = await axios.post(
       `https://id.twitch.tv/oauth2/token?grant_type=refresh_token&refresh_token=${refreshToken}&client_id=${process.env.TWITCH_CLIENT_ID}&client_secret=${process.env.TWITCH_CLIENT_SECRET}`
     );
 
     if (response.status !== 200)
-      throw new Error("26 refreshTwitchAccessToken: Twitch Refresh Failed");
+      throw new Error("26 refreshBotToken: Twitch Refresh Failed");
 
     await GtkTwitchBotModel.findOneAndUpdate(
       {
@@ -31,9 +41,9 @@ export async function refreshTwitchAccessTokenMethod(
       { new: true }
     );
 
-    return true;
+    return response.data.access_token;
   } catch (error) {
     console.error(error);
-    return false;
+    return "";
   }
 }

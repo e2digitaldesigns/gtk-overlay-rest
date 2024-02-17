@@ -1,12 +1,13 @@
 import express, { Request, Response } from "express";
 import axios from "axios";
+const crypto = require("crypto");
 
 import mongoose from "mongoose";
 const ObjectId = mongoose.Types.ObjectId;
 
 import { TwitchAuthModel } from "../../models/twitch.model";
 import { verifyToken } from "../../middleware/verifyToken";
-import { isUserConnected } from "../twitchBot/twitchBot";
+import { isUserConnected } from "../../twitchBot/utils/isUserConnected";
 
 const router = express.Router();
 
@@ -41,6 +42,7 @@ router.get("/connect/:username", async (req: Request, res: Response) => {
 
 router.get("/status", async (req: Request, res: Response) => {
   const twitchClient = req.app.get("twitchClient");
+
   res.send(`TMI state: ${twitchClient.readyState()}`);
 });
 

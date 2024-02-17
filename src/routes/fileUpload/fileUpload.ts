@@ -12,6 +12,12 @@ import { v4 } from "uuid";
 import { EpisodeModel } from "../../models/episodes.model";
 import axios from "axios";
 import { deleteFromS3Multi } from "./s3Delete";
+import {
+  deleteFromS3,
+  imageSizeParser,
+  imageSizeParser2,
+  pushToS3
+} from "../_utils";
 
 const router = express.Router();
 router.use(verifyToken);
@@ -59,7 +65,7 @@ router.post("/update", upload, async (req: Request, res: Response) => {
 
     const data = await imageSizeParser(req, template);
 
-    const s3Push = await pushToS3(data, fileName);
+    const s3Push = await pushToS3(data, `images/user-images/${fileName}`);
     if (!s3Push) throw new Error("S3 Push failed");
 
     switch (req.body.imageType) {
@@ -113,7 +119,7 @@ router.post("/update", upload, async (req: Request, res: Response) => {
 
     res.send({
       success: 1,
-      fileName
+      fileName: process.env.S3_CLOUD_IMAGES + fileName
     });
   } catch (error) {
     res.send(error);
@@ -332,58 +338,79 @@ router.delete(
   }
 );
 
-export const fileUpload = router;
+router.post("/openAi-img", upload, async (req: Request, res: Response) => {
+  req.body.imageType = "topic";
 
-async function imageSizeParser(req: Request, template: any) {
-  const formFile = (req as any).file;
-  const { width, height } = template[0].template.images[req.body.imageType];
+  try {
+    const fileName = `${v4()}.png`;
 
-  const { data } = await sharp(formFile.buffer)
-    .resize(width, height, {
-      fit: sharp.fit.cover,
-      position: "right top"
-    })
-    .png({ quality: 100 })
-    .toBuffer({
-      resolveWithObject: true
-    });
+    const template = await EpisodeModel.aggregate([
+      {
+        $match: {
+          _id: new ObjectId(req.body.episodeId)
+          // userId: new ObjectId(res.locals.userId)
+        }
+      },
+      {
+        $lookup: {
+          from: "templates",
+          localField: "templateId",
+          foreignField: "_id",
+          as: "template"
+        }
+      },
+      {
+        $unwind: "$template"
+      },
+      {
+        $project: {
+          "template.images": 1
+        }
+      }
+    ]);
 
-  return data;
-}
+    const imageBufferData = await imageSizeParser2(req.body.imgUrl, template);
 
-function pushToS3(fileBuffer: any, fileName: string) {
-  return new Promise((resolve, reject) => {
-    const imgParams = {
+    const s3Params = {
       Bucket: process.env.AWS_SECRET_S3_BUCKET || "",
       Key: `images/user-images/${fileName}`,
       ContentType: "image/png",
-      Body: fileBuffer,
+      Body: imageBufferData,
       ACL: "public-read"
     };
 
-    s3bucket.upload(imgParams, function (err: unknown, data: any) {
+    s3bucket.upload(s3Params, async function (err: unknown, data: any) {
       if (err) {
-        reject(err);
+        res.json({ err });
       } else {
-        resolve(data);
+        const episodeTopics = await EpisodeModel.findOneAndUpdate(
+          {
+            _id: new ObjectId(req.body.episodeId),
+            "topics._id": new ObjectId(req.body.topicId)
+          },
+          {
+            $set: {
+              "topics.$.img": fileName
+            }
+          },
+          {
+            returnOriginal: true,
+            projection: { "topics.$": 1 }
+          }
+        );
+        if (episodeTopics?.topics?.[0].img) {
+          await deleteFromS3(episodeTopics?.topics?.[0].img);
+        }
+        res.json({
+          success: 1,
+          location: data.Location,
+          fileName: process.env.S3_CLOUD_IMAGES + fileName
+        });
       }
     });
-  });
-}
+  } catch (error) {
+    res.send(error);
+  }
+});
 
-function deleteFromS3(fileName: string) {
-  return new Promise((resolve, reject) => {
-    const imgParams = {
-      Bucket: process.env.AWS_SECRET_S3_BUCKET || "",
-      Key: `images/user-images/${fileName}`
-    };
-
-    s3bucket.deleteObject(imgParams, function (err: unknown, data: any) {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(data);
-      }
-    });
-  });
-}
+export const fileUpload = router;

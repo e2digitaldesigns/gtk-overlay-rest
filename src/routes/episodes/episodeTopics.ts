@@ -8,6 +8,7 @@ import { deleteFromS3 } from "../fileUpload/s3Delete";
 const ObjectId = mongoose.Types.ObjectId;
 
 import _sortBy from "lodash/sortBy";
+import { topicImageParser } from "../show/utils/imageParsers";
 
 const router = express.Router();
 router.use(verifyToken);
@@ -42,7 +43,9 @@ router.get("/:episodeId", async (req: Request, res: Response) => {
     res.status(200).json({
       templateId: result[0].templateId,
       images: result[0].template[0].images.topic,
-      topics: result?.[0]?.topics ? _sortBy(result[0].topics, "order") : []
+      topics: result?.[0]?.topics
+        ? _sortBy(topicImageParser(result[0].topics), "order")
+        : []
     });
   } catch (error) {
     console.error(error);
@@ -111,10 +114,42 @@ router.put("/:episodeId", async (req: Request, res: Response) => {
       },
       {
         $set: {
-          "topics.$": req.body
+          "topics.$.desc": req.body.desc,
+          "topics.$.isChild": req.body.isChild,
+          "topics.$.isParent": req.body.isParent,
+          "topics.$.name": req.body.name,
+          "topics.$.parentId": req.body.parentId,
+          "topics.$.timer": req.body.timer,
+          "topics.$.articles": req.body.articles,
+          "topics.$.video": req.body.video,
+          "topics.$.notes": req.body.notes,
+          "topics.$.chat": req.body.chat,
+          "topics.$.voting": req.body.voting
         }
       }
     );
+
+    if (!req.params.isParent) {
+      await MODEL.updateMany(
+        {
+          _id: new ObjectId(req.params.episodeId),
+          userId: new ObjectId(res.locals.userId),
+          "topics.parentId": req.params.topicId,
+          "topics.isChild": true
+        },
+        {
+          $set: {
+            "topics.$[elem].isChild": false,
+            "topics.$[elem].parentId": ""
+          }
+        },
+        {
+          arrayFilters: [
+            { "elem.isChild": true, "elem.parentId": req.params.topicId }
+          ]
+        }
+      );
+    }
 
     res.status(200).json(result);
   } catch (error) {

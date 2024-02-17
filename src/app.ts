@@ -6,7 +6,6 @@ import { Server } from "http";
 import express, { Express, NextFunction, Request, Response } from "express";
 
 import { routing } from "./routes/index";
-import { TwitchBot } from "./routes/twitchBot/twitchBotClass";
 import { connectMongo } from "./startUpServices/mongoose";
 import { socketMaker } from "./startUpServices/socket";
 import { TwitchBotter } from "./twitchBot/twitchBotter";
@@ -22,7 +21,6 @@ const server: Server = app.listen(PORT, () =>
 connectMongo();
 const io = socketMaker(server);
 
-// new TwitchBot(app, io);
 new TwitchBotter(app, io);
 
 app.get("/", async (req: Request, res: Response) => {

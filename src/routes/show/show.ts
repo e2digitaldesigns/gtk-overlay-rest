@@ -12,6 +12,7 @@ import {
   sponsorImageParser,
   topicImageParser
 } from "./utils/imageParsers";
+import { votingParser } from "./utils/votingparser";
 
 const router = express.Router();
 
@@ -56,7 +57,7 @@ router.get(
           epData?.databaseSocials,
           epData?.socialNetworks
         ),
-        topics: sortTopics(topicImageParser(epData?.topics))
+        topics: sortTopics(topicImageParser(votingParser(epData?.topics)))
       };
 
       delete result.availableHosts;
