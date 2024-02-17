@@ -5,6 +5,8 @@ export async function refreshTwitchStreamerAccessTokenMethod(
   twitchUsername: string,
   refreshToken: string = ""
 ): Promise<string> {
+  twitchUsername = twitchUsername.replace(/^#/, "");
+
   try {
     if (!refreshToken) {
       const userdata = await TwitchAuthModel.findOne({

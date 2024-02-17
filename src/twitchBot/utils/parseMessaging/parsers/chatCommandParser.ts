@@ -39,7 +39,11 @@ export async function chatCommandParser(
   if (!client) return;
   // message = message.toLowerCase();
 
-  console.log(37, tags);
+  // console.log("TMI DATA-TAGS - TMI DATA-TAGS - TMI DATA-TAGS - TMI DATA-TAGS");
+  // console.log("TMI DATA-TAGS - TMI DATA-TAGS - TMI DATA-TAGS - TMI DATA-TAGS");
+  // console.log(tags);
+  // console.log("TMI DATA-TAGS - TMI DATA-TAGS - TMI DATA-TAGS - TMI DATA-TAGS");
+  // console.log("TMI DATA-TAGS - TMI DATA-TAGS - TMI DATA-TAGS - TMI DATA-TAGS");
 
   const commandPrefixes = ["!", "1", "2", "true", "false", "yes", "no"];
   if (!commandPrefixes.some(prefix => message.trim().startsWith(prefix))) {

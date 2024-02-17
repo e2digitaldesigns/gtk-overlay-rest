@@ -16,9 +16,10 @@ export async function parseMessaging(
   tmiClient: TMIClient | null,
   socket: SocketServer,
   getUserProfileImage: (username: string) => Promise<string>,
-  isSenderFollowing: (
+  isChatterFollowing: (
     streamerChannel: string,
-    username: string
+    chatterUserName: string,
+    chatterUserId: string
   ) => Promise<boolean>
 ) {
   if (self) return; // Ignore messages from the bot
@@ -36,9 +37,11 @@ export async function parseMessaging(
   const twitchUserImage = await getUserProfileImage(tags.username);
 
   // Is chat sender following the channel
-  const isFollowing = await isSenderFollowing(channel, tags.username);
-
-  console.log(40, { isFollowing });
+  const isFollowing = await isChatterFollowing(
+    channel,
+    tags.username,
+    tags["user-id"]
+  );
 
   // Chat Command Parser
   chatCommandParser(
