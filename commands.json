@@ -99,12 +99,12 @@
   },
 
   {
-    "command": "!vfs",
+    "command": "!vfull",
     "type": "videoRequest",
     "subType": "videoSize",
     "users": [],
     "description": "Mods can set the video size to fullscreen.",
-    "usage": "!vfs"
+    "usage": "!vfull"
   },
 
   {

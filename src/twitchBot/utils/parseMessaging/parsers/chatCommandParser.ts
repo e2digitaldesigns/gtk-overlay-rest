@@ -97,7 +97,7 @@ export async function chatCommandParser(
 
     case "!vnormal":
     case "!vsmall":
-    case "!vfs":
+    case "!vfull":
 
     case "!vstop":
     case "!vpause":

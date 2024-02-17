@@ -16,11 +16,7 @@
     "command": "!v1",
     "type": "podcastOverlays",
     "subType": "hostVoting",
-    "users": [
-      {
-        "$oid": "640bef8f88f7663004024d65"
-      }
-    ],
+    "users": [],
     "description": "UpVote for host 1"
   },
   {
@@ -30,11 +26,7 @@
     "command": "!v2",
     "type": "podcastOverlays",
     "subType": "hostVoting",
-    "users": [
-      {
-        "$oid": "640bef8f88f7663004024d65"
-      }
-    ],
+    "users": [],
     "description": "UpVote host 2"
   },
   {
@@ -44,11 +36,7 @@
     "command": "!v3",
     "type": "podcastOverlays",
     "subType": "hostVoting",
-    "users": [
-      {
-        "$oid": "640bef8f88f7663004024d65"
-      }
-    ],
+    "users": [],
     "description": "UpVote host 3"
   },
   {
@@ -58,11 +46,7 @@
     "command": "!v4",
     "type": "podcastOverlays",
     "subType": "hostVoting",
-    "users": [
-      {
-        "$oid": "640bef8f88f7663004024d65"
-      }
-    ],
+    "users": [],
     "description": "UpVote host 4"
   },
   {
@@ -72,11 +56,7 @@
     "command": "!sv1",
     "type": "podcastOverlays",
     "subType": "hostVoting",
-    "users": [
-      {
-        "$oid": "640bef8f88f7663004024d65"
-      }
-    ],
+    "users": [],
     "description": "SuperVote host 1, 5 points (once per topic)"
   },
   {
@@ -86,11 +66,7 @@
     "command": "!sv2",
     "type": "podcastOverlays",
     "subType": "hostVoting",
-    "users": [
-      {
-        "$oid": "640bef8f88f7663004024d65"
-      }
-    ],
+    "users": [],
     "description": "SuperVote host 2, 5 points (once per topic)"
   },
   {
@@ -100,11 +76,7 @@
     "command": "!sv3",
     "type": "podcastOverlays",
     "subType": "hostVoting",
-    "users": [
-      {
-        "$oid": "640bef8f88f7663004024d65"
-      }
-    ],
+    "users": [],
     "description": "SuperVote host 3, 5 points (once per topic)"
   },
   {
@@ -114,11 +86,7 @@
     "command": "!sv4",
     "type": "podcastOverlays",
     "subType": "hostVoting",
-    "users": [
-      {
-        "$oid": "640bef8f88f7663004024d65"
-      }
-    ],
+    "users": [],
     "description": "SuperVote host 4, 5 points (once per topic)"
   },
   {
@@ -128,11 +96,7 @@
     "command": "!d1",
     "type": "podcastOverlays",
     "subType": "hostVoting",
-    "users": [
-      {
-        "$oid": "640bef8f88f7663004024d65"
-      }
-    ],
+    "users": [],
     "description": "DownVote host 1"
   },
   {
@@ -142,11 +106,7 @@
     "command": "!d2",
     "type": "podcastOverlays",
     "subType": "hostVoting",
-    "users": [
-      {
-        "$oid": "640bef8f88f7663004024d65"
-      }
-    ],
+    "users": [],
     "description": "DownVote host 2"
   },
   {
@@ -156,11 +116,7 @@
     "command": "!d3",
     "type": "podcastOverlays",
     "subType": "hostVoting",
-    "users": [
-      {
-        "$oid": "640bef8f88f7663004024d65"
-      }
-    ],
+    "users": [],
     "description": "DownVote host 3"
   },
   {
@@ -170,11 +126,7 @@
     "command": "!d4",
     "type": "podcastOverlays",
     "subType": "hostVoting",
-    "users": [
-      {
-        "$oid": "640bef8f88f7663004024d65"
-      }
-    ],
+    "users": [],
     "description": "DownVote host 4"
   },
   {
@@ -184,11 +136,7 @@
     "command": "!true",
     "type": "podcastOverlays",
     "subType": "topicVoting",
-    "users": [
-      {
-        "$oid": "640bef8f88f7663004024d65"
-      }
-    ],
+    "users": [],
     "description": "Vote True"
   },
   {
@@ -198,11 +146,7 @@
     "command": "true",
     "type": "podcastOverlays",
     "subType": "topicVoting",
-    "users": [
-      {
-        "$oid": "640bef8f88f7663004024d65"
-      }
-    ],
+    "users": [],
     "description": "Vote True"
   },
   {
@@ -212,11 +156,7 @@
     "command": "!false",
     "type": "podcastOverlays",
     "subType": "topicVoting",
-    "users": [
-      {
-        "$oid": "640bef8f88f7663004024d65"
-      }
-    ],
+    "users": [],
     "description": "Vote False"
   },
   {
@@ -226,11 +166,7 @@
     "command": "false",
     "type": "podcastOverlays",
     "subType": "topicVoting",
-    "users": [
-      {
-        "$oid": "640bef8f88f7663004024d65"
-      }
-    ],
+    "users": [],
     "description": "Vote False"
   },
   {
@@ -240,11 +176,7 @@
     "command": "!1",
     "type": "podcastOverlays",
     "subType": "topicVoting",
-    "users": [
-      {
-        "$oid": "640bef8f88f7663004024d65"
-      }
-    ],
+    "users": [],
     "description": "Vote 1"
   },
   {
@@ -254,11 +186,7 @@
     "command": "1",
     "type": "podcastOverlays",
     "subType": "topicVoting",
-    "users": [
-      {
-        "$oid": "640bef8f88f7663004024d65"
-      }
-    ],
+    "users": [],
     "description": "Vote 1"
   },
   {
@@ -268,11 +196,7 @@
     "command": "!2",
     "type": "podcastOverlays",
     "subType": "topicVoting",
-    "users": [
-      {
-        "$oid": "640bef8f88f7663004024d65"
-      }
-    ],
+    "users": [],
     "description": "Vote 2"
   },
   {
@@ -282,11 +206,7 @@
     "command": "2",
     "type": "podcastOverlays",
     "subType": "topicVoting",
-    "users": [
-      {
-        "$oid": "640bef8f88f7663004024d65"
-      }
-    ],
+    "users": [],
     "description": "Vote 2"
   },
   {
@@ -296,11 +216,7 @@
     "command": "!yes",
     "type": "podcastOverlays",
     "subType": "topicVoting",
-    "users": [
-      {
-        "$oid": "640bef8f88f7663004024d65"
-      }
-    ],
+    "users": [],
     "description": "Vote Yes"
   },
   {
@@ -310,11 +226,7 @@
     "command": "yes",
     "type": "podcastOverlays",
     "subType": "topicVoting",
-    "users": [
-      {
-        "$oid": "640bef8f88f7663004024d65"
-      }
-    ],
+    "users": [],
     "description": "Vote Yes"
   },
   {
@@ -324,11 +236,7 @@
     "command": "!no",
     "type": "podcastOverlays",
     "subType": "topicVoting",
-    "users": [
-      {
-        "$oid": "640bef8f88f7663004024d65"
-      }
-    ],
+    "users": [],
     "description": "Vote No"
   },
   {
@@ -338,11 +246,7 @@
     "command": "no",
     "type": "podcastOverlays",
     "subType": "topicVoting",
-    "users": [
-      {
-        "$oid": "640bef8f88f7663004024d65"
-      }
-    ],
+    "users": [],
     "description": "Vote No"
   },
   {
@@ -470,12 +374,12 @@
     "_id": {
       "$oid": "65c83a3284a8e9b1a459df34"
     },
-    "command": "!vFs",
+    "command": "!vFull",
     "type": "videoRequest",
     "subType": "videoSize",
     "users": [],
     "description": "Mods can set the video size to fullscreen.",
-    "usage": "!vFs"
+    "usage": "!vFull"
   },
   {
     "_id": {
@@ -550,11 +454,7 @@
     "command": "!vAdd",
     "type": "videoRequest",
     "subType": "videoPlaylist",
-    "users": [
-      {
-        "$oid": "640bef8f88f7663004024d65"
-      }
-    ],
+    "users": [],
     "description": "Add video the default playlist.",
     "usage": "!vAdd"
   },
@@ -565,11 +465,7 @@
     "command": "!vplayMe",
     "type": "videoRequest",
     "subType": "videoPlaylist",
-    "users": [
-      {
-        "$oid": "640bef8f88f7663004024d65"
-      }
-    ],
+    "users": [],
     "description": "Add users playlist to the playing list.",
     "usage": "!vplayMe"
   }
