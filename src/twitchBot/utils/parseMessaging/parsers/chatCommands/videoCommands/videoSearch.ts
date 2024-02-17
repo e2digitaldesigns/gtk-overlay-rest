@@ -35,7 +35,7 @@ export async function videoSearch(
   ) {
     client?.action(
       channel,
-      `@${username}, you must be following to request a video!`
+      `@${username}, you must be following ${channel} to request a video!`
     );
     return;
   }

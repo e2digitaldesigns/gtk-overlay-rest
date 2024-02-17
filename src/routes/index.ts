@@ -17,7 +17,6 @@ import { socket } from "./socket/socket";
 import { twitchChat } from "./twitchChat/twitchChat";
 import { chatTemplate } from "./chatTemplate/chatTemplate";
 import { chatLog } from "./chatLog/chatLog";
-import { topicLog } from "./topicLog/topicLog";
 
 import { common } from "./common/common";
 import { commands } from "./commands/commands";
@@ -51,7 +50,6 @@ export const routing = (app: Express) => {
 
   app.use(`${prefix}chatTemplate`, chatTemplate);
   app.use(`${prefix}chatlog`, chatLog);
-  app.use(`${prefix}topicLog`, topicLog);
   app.use(`${prefix}common`, common);
 
   app.use(`${prefix}commands`, commands);

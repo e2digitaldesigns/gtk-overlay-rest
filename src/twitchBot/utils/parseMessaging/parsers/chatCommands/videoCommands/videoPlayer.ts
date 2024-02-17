@@ -50,7 +50,7 @@ export async function videoPassThrough(
     "!vsmall": "video-size-small",
     "!vstop": "video-stop",
 
-    "!vpladd": "playlist-return-now-playing",
+    "!vadd": "playlist-return-now-playing",
     "!vplayme": "playlist-load"
   };
 

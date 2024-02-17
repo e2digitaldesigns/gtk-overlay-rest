@@ -12,13 +12,9 @@ const validatedCommand = async (
   const exceptions = ["!gtk", "!reply"];
   if (exceptions.includes(command)) return true;
 
-  // make this search case insensitive
-
   const data = await UserCommandsModel.findOne({
     command: { $regex: new RegExp(`^${command}$`, "i") }
   }).select("users");
-
-  console.log(33, command, data, new ObjectId(gtkUserId));
 
   if (!data) return false;
 
@@ -37,13 +33,6 @@ export async function chatCommandParser(
   isFollowing: boolean
 ) {
   if (!client) return;
-  // message = message.toLowerCase();
-
-  // console.log("TMI DATA-TAGS - TMI DATA-TAGS - TMI DATA-TAGS - TMI DATA-TAGS");
-  // console.log("TMI DATA-TAGS - TMI DATA-TAGS - TMI DATA-TAGS - TMI DATA-TAGS");
-  // console.log(tags);
-  // console.log("TMI DATA-TAGS - TMI DATA-TAGS - TMI DATA-TAGS - TMI DATA-TAGS");
-  // console.log("TMI DATA-TAGS - TMI DATA-TAGS - TMI DATA-TAGS - TMI DATA-TAGS");
 
   const commandPrefixes = ["!", "1", "2", "true", "false", "yes", "no"];
   if (!commandPrefixes.some(prefix => message.trim().startsWith(prefix))) {
@@ -55,19 +44,10 @@ export async function chatCommandParser(
     ? typedCommand
     : `!${typedCommand}`;
 
-  console.log(48, { typedCommand, command });
-
   const isCommandValid = await validatedCommand(gtkUserId, typedCommand);
-
-  console.log(52, { isCommandValid });
 
   if (!isCommandValid) {
     if (!typedCommand.startsWith("!")) return;
-
-    // client.action(
-    //   channel,
-    //   `@${tags.username}, the command ${typedCommand} is disabled or does not exist!`
-    // );
     return;
   }
 
@@ -125,7 +105,7 @@ export async function chatCommandParser(
     case "!vnext":
     case "!vprev":
 
-    case "!vpladd":
+    case "!vadd":
 
     case "!vpclear":
     case "!vreset":

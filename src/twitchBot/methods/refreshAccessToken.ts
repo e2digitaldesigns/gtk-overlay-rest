@@ -5,7 +5,7 @@ export async function refreshTwitchAccessTokenMethod(
   botName: string,
   refreshToken: string = ""
 ): Promise<string> {
-  console.log(9, "refresh bot token");
+  console.log(8, "refresh bot token: refreshTwitchAccessTokenMethod");
   try {
     if (!refreshToken) {
       const botData = await GtkTwitchBotModel.findOne({

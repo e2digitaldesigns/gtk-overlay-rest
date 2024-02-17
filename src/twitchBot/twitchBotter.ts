@@ -112,7 +112,6 @@ export class TwitchBotter {
   }
 
   private async validateTwitchAccessToken() {
-    console.log(115, "we are validating");
     try {
       const accessToken: string = await this.getTwitchBotData().then(
         (data: TwitchBotData | null) => data?.accessToken || ""

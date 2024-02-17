@@ -71,8 +71,6 @@ export async function chatGptParser(
   
   `;
 
-  // console.log(79, prompt);
-
   try {
     let chatGptMessage = "";
 
