@@ -39,7 +39,7 @@ export async function videoPassThrough(
 
   const commandMap: { [key: string]: string } = {
     "!vdel": "playlist-delete-last",
-    "!vfull": "video-fullscreen",
+    "!vfull": "video-size-fullscreen",
     "!vnext": "playlist-next",
     "!vnormal": "video-size-normal",
     "!vpause": "video-pause",
