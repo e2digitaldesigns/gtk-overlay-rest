@@ -50,7 +50,9 @@ router.get("/settings", verifyToken, async (req: Request, res: Response) => {
         seekBackwardSeconds: result.seekBackwardSeconds,
         seekForwardSeconds: result.seekForwardSeconds,
         skipCount: result.skipCount,
-        userVideoQueueCount: result.userVideoQueueCount
+        userVideoQueueCount: result.userVideoQueueCount,
+        volumeUpIncrement: result.volumeUpIncrement,
+        volumeDownIncrement: result.volumeDownIncrement
       }
     });
   } catch (error) {
@@ -80,7 +82,9 @@ router.get("/settings/:userId", async (req: Request, res: Response) => {
         seekBackwardSeconds: result.seekBackwardSeconds,
         seekForwardSeconds: result.seekForwardSeconds,
         skipCount: result.skipCount,
-        userVideoQueueCount: result.userVideoQueueCount
+        userVideoQueueCount: result.userVideoQueueCount,
+        volumeUpIncrement: result.volumeUpIncrement,
+        volumeDownIncrement: result.volumeDownIncrement
       }
     });
   } catch (error) {
@@ -95,7 +99,9 @@ router.put("/settings", verifyToken, async (req: Request, res: Response) => {
       seekBackwardSeconds,
       seekForwardSeconds,
       skipCount,
-      userVideoQueueCount
+      userVideoQueueCount,
+      volumeUpIncrement,
+      volumeDownIncrement
     } = req.body;
     const result = await VideoOverlaySettingsModel.findOneAndUpdate(
       { userId: res.locals.userId },
@@ -104,7 +110,9 @@ router.put("/settings", verifyToken, async (req: Request, res: Response) => {
         seekBackwardSeconds,
         seekForwardSeconds,
         skipCount,
-        userVideoQueueCount
+        userVideoQueueCount,
+        volumeUpIncrement,
+        volumeDownIncrement
       },
       { new: true }
     );

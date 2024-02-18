@@ -204,5 +204,21 @@
     "users": [],
     "description": "Add the currently playing video to the user's default playlist.",
     "usage": "!vPP"
+  },
+  {
+    "command": "!vVolUp",
+    "type": "videoRequest",
+    "subType": "",
+    "users": [],
+    "description": "Mod can turn the volume up by increments of x.",
+    "usage": "!vVolUp"
+  },
+  {
+    "command": "!vVolDown",
+    "type": "videoRequest",
+    "subType": "",
+    "users": [],
+    "description": "Mod can turn the volume down by increments of x.",
+    "usage": "!vVolDown"
   }
 ]

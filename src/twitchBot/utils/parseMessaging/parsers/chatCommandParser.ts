@@ -106,6 +106,8 @@ export async function chatCommandParser(
     case "!vprev":
 
     case "!vadd":
+    case "!vvolup":
+    case "!vvoldown":
 
     case "!vpclear":
     case "!vreset":

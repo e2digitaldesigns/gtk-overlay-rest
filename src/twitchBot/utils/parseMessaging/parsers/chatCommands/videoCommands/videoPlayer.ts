@@ -51,7 +51,10 @@ export async function videoPassThrough(
     "!vstop": "video-stop",
 
     "!vadd": "playlist-return-now-playing",
-    "!vplayme": "playlist-load"
+    "!vplayme": "playlist-load",
+
+    "!vvolup": "video-volume-up",
+    "!vvoldown": "video-volume-down"
   };
 
   socket.emit("gtkVideoOverlayAction", {
@@ -103,8 +106,6 @@ export async function videoRemove(
     }
   });
 }
-
-// !vmyplaylist chill
 
 export async function videoPlaylistFetcher(
   command: string,
