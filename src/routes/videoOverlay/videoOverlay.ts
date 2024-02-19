@@ -13,6 +13,33 @@ router.get("/", async (req: Request, res: Response) => {
   res.send("Video Overlay");
 });
 
+router.post("/updateAllVideoVideos", async (req: Request, res: Response) => {
+  try {
+    const { videos } = req.body;
+
+    const updatedVideos = await Promise.all(
+      videos.map(async (video: any) => {
+        if (video.videoExpire > Date.now()) return video;
+        const videoData = await ytmp4(
+          `https://www.youtube.com/watch?v=${video.videoId}`
+        );
+
+        video.videoUrl = videoData.urls.sd;
+        video.videoExpire =
+          videoData.urls.sd.match(/expire=([0-9]+)/).pop() * 1000;
+        return video;
+      })
+    );
+
+    res.json({
+      success: true,
+      videos: updatedVideos
+    });
+  } catch (error) {
+    res.json({ success: false, error });
+  }
+});
+
 router.get("/updateVideo/:ytId", async (req: Request, res: Response) => {
   try {
     const video = await ytmp4(
@@ -20,7 +47,7 @@ router.get("/updateVideo/:ytId", async (req: Request, res: Response) => {
     );
 
     res.json({
-      success: video.success,
+      success: true,
       videoUrl: video.urls.sd,
       videoExpire: video.urls.sd.match(/expire=([0-9]+)/).pop() * 1000
     });
