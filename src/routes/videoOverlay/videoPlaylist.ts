@@ -70,10 +70,22 @@ router.post("/addItemToDefault", async (req: Request, res: Response) => {
 
     if (!newItem) return res.status(500).send("Error adding item to playlist");
 
-    res.status(200).json({ success: true, newItem });
+    res.status(200).json({
+      resultStatus: {
+        success: true,
+        errors: null,
+        responseCode: 200,
+        resultMessage: "Your request was successful."
+      }
+    });
   } catch (error) {
     console.log(68, error);
-    res.status(500).send(error);
+    res.status(404).json({
+      success: false,
+      errors: error,
+      responseCode: 404,
+      resultMessage: "Your request failed."
+    });
   }
 });
 

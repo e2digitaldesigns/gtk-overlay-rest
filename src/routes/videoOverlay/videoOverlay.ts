@@ -31,12 +31,24 @@ router.post("/updateAllVideoVideos", async (req: Request, res: Response) => {
       })
     );
 
-    res.json({
-      success: true,
-      videos: updatedVideos
+    res.status(200).json({
+      resultStatus: {
+        success: true,
+        errors: null,
+        responseCode: 200,
+        resultMessage: "Your request was successful."
+      },
+      result: {
+        videos: updatedVideos
+      }
     });
   } catch (error) {
-    res.json({ success: false, error });
+    res.status(404).json({
+      success: false,
+      errors: error,
+      responseCode: 404,
+      resultMessage: "Your request failed."
+    });
   }
 });
 
@@ -46,13 +58,25 @@ router.get("/updateVideo/:ytId", async (req: Request, res: Response) => {
       `https://www.youtube.com/watch?v=${req.params.ytId}`
     );
 
-    res.json({
-      success: true,
-      videoUrl: video.urls.sd,
-      videoExpire: video.urls.sd.match(/expire=([0-9]+)/).pop() * 1000
+    res.status(200).json({
+      resultStatus: {
+        success: true,
+        errors: null,
+        responseCode: 200,
+        resultMessage: "Your request was successful."
+      },
+      result: {
+        videoUrl: video.urls.sd,
+        videoExpire: video.urls.sd.match(/expire=([0-9]+)/).pop() * 1000
+      }
     });
   } catch (error) {
-    res.json({ success: false, error });
+    res.status(404).json({
+      success: false,
+      errors: error,
+      responseCode: 404,
+      resultMessage: "Your request failed."
+    });
   }
 });
 
@@ -102,20 +126,32 @@ router.get("/settings/:userId", async (req: Request, res: Response) => {
     }).exec();
 
     res.status(200).json({
-      success: true,
-      twitchChannel: twitchAuth?.twitchUserName,
-      settings: {
-        onFireCount: result.onFireCount,
-        seekBackwardSeconds: result.seekBackwardSeconds,
-        seekForwardSeconds: result.seekForwardSeconds,
-        skipCount: result.skipCount,
-        userVideoQueueCount: result.userVideoQueueCount,
-        volumeUpIncrement: result.volumeUpIncrement,
-        volumeDownIncrement: result.volumeDownIncrement
+      resultStatus: {
+        success: true,
+        errors: null,
+        responseCode: 200,
+        resultMessage: "Your request was successful."
+      },
+      result: {
+        twitchChannel: twitchAuth?.twitchUserName,
+        settings: {
+          onFireCount: result.onFireCount,
+          seekBackwardSeconds: result.seekBackwardSeconds,
+          seekForwardSeconds: result.seekForwardSeconds,
+          skipCount: result.skipCount,
+          userVideoQueueCount: result.userVideoQueueCount,
+          volumeUpIncrement: result.volumeUpIncrement,
+          volumeDownIncrement: result.volumeDownIncrement
+        }
       }
     });
   } catch (error) {
-    res.status(404).send(error);
+    res.status(404).json({
+      success: false,
+      errors: error,
+      responseCode: 404,
+      resultMessage: "Your request failed."
+    });
   }
 });
 
