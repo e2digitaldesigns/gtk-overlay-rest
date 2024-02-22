@@ -18,7 +18,7 @@ export interface IEpisodeSocials {
 
 export interface IEpisodeTopicVotingOptions {
   label: string;
-  value: boolean;
+  value: string;
 }
 
 export interface IEpisodeTopic {

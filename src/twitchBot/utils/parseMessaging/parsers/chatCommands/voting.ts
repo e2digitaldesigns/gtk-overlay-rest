@@ -41,15 +41,15 @@ function parseAction(command: string): string | undefined {
   let actionValue = undefined;
 
   const actionObj: { [key: string]: string } = {
-    "!2": "true",
-    "!1": "false",
+    "!1": "one",
+    "!2": "two",
     "!v": "add",
     "!sv": "super",
     "!d": "remove",
     "!true": "true",
     "!false": "false",
-    "!yes": "true",
-    "!no": "false"
+    "!yes": "yes",
+    "!no": "no"
   };
 
   const keys = Object.keys(actionObj);
@@ -60,8 +60,6 @@ function parseAction(command: string): string | undefined {
       break;
     }
   }
-
-  console.log(54, actionValue);
 
   return actionValue;
 }
