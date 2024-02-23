@@ -6,6 +6,7 @@ import { Client as TMIClient } from "tmi.js";
 import { getGTKUserId } from "../../../utils/dbFecthers";
 import axios from "axios";
 import { Server as SocketServer } from "socket.io";
+import { gtkVideoSearch } from "./utils/gtkVideoSearch";
 const ytmp4 = require("ytmp4");
 const { Client } = require("youtubei");
 
@@ -51,15 +52,24 @@ export async function videoSearch(
   const query = getIdFromUrl(messageSplit);
 
   try {
-    let videoId: string = "";
+    let videoId: string | undefined;
 
     if (regex.test(query.trim())) {
       videoId = query.trim();
     } else {
-      console.log(59, "use youtube.search to get videoId");
-      console.log(60, query);
       const youtubeSearch = await youtube.search(query, { type: "video" });
-      videoId = youtubeSearch.items[0].id;
+      videoId = youtubeSearch?.items?.[0]?.id;
+
+      if (!videoId) {
+        const search = await gtkVideoSearch(query);
+        videoId = search ? search : "";
+      }
+    }
+
+    if (!videoId) {
+      throw new Error("No videoId found");
+    } else {
+      console.log(80, { videoId });
     }
 
     const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
