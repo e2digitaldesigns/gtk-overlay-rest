@@ -56,6 +56,8 @@ export async function videoSearch(
     if (regex.test(query.trim())) {
       videoId = query.trim();
     } else {
+      console.log(59, "use youtube.search to get videoId");
+      console.log(60, query);
       const youtubeSearch = await youtube.search(query, { type: "video" });
       videoId = youtubeSearch.items[0].id;
     }
