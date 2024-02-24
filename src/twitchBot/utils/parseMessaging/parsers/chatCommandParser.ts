@@ -111,6 +111,7 @@ export async function chatCommandParser(
 
     case "!vpclear":
     case "!vreset":
+    case "!vdnp":
       if (tags.mod || tags.subscriber) {
         await chatCommands.videoPassThrough(
           command,

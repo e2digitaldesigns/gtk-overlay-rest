@@ -54,7 +54,9 @@ export async function videoPassThrough(
     "!vplayme": "playlist-load",
 
     "!vvolup": "video-volume-up",
-    "!vvoldown": "video-volume-down"
+    "!vvoldown": "video-volume-down",
+
+    "!vdnp": "playlist-delete-now-playing-video"
   };
 
   socket.emit("gtkVideoOverlayAction", {
