@@ -12,12 +12,14 @@ const { Client } = require("youtubei");
 
 const regex = /^\S{11}$/;
 
-const getIdFromUrl = (string: string) => {
+const getIdFromUrl = (string: string): string => {
   const reg = new RegExp("^(http(s)?://)?((w){3}.)?youtu(be|.be)?(.com)?/.+");
-  if (reg.test(string)) {
-    return string.split("v=")[1].split("&")[0];
-  }
-  return string;
+
+  if (!reg.test(string)) return string;
+  let starter = string.split("v=")[1] || string.split(".be/")[1];
+  starter = starter.split(/[&?]/)[0];
+
+  return starter.trim();
 };
 
 export async function videoSearch(
