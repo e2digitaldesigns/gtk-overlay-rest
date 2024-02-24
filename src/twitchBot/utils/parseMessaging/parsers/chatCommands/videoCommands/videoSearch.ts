@@ -107,6 +107,15 @@ export async function videoSearch(
     }
   } catch (error: any) {
     console.error(72, error?.message);
+
+    console.log("xxxxx xxxxx xxxxx xxxxx xxxxx");
+    console.log("xxxxx xxxxx xxxxx xxxxx xxxxx");
+    console.error(error);
+    console.log("xxxxx xxxxx xxxxx xxxxx xxxxx");
+    console.log("xxxxx xxxxx xxxxx xxxxx xxxxx");
+
+    if (error?.message === "72 Status code: 410") return;
+
     client.action(
       channel,
       `@${username}, sorry, there was an error processing your request!`
