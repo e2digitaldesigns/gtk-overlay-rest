@@ -31,23 +31,17 @@ router.post("/addItemToDefault", async (req: Request, res: Response) => {
   const { userId, username, videoId, videoThumbnail, videoTitle, videoUrl } =
     req.body;
 
-  console.log(30, { userId, videoId, videoThumbnail, videoTitle, videoUrl });
+  console.log(30, {
+    userId,
+    videoId,
+    videoThumbnail,
+    videoTitle,
+    videoUrl: !!videoUrl
+  });
 
   if (!userId) return res.status(400).send("Missing required fields");
 
   try {
-    const playlistItemLimit = 8;
-
-    const count = await VideoPlaylistItemModel.countDocuments({
-      userId: new ObjectId(userId),
-      viewerUsername: username,
-      videoId: { $ne: videoId }
-    });
-
-    if (count > playlistItemLimit) {
-      return res.status(400).send("Playlist is full");
-    }
-
     const newItem = await VideoPlaylistItemModel.findOneAndUpdate(
       {
         userId: new ObjectId(userId),

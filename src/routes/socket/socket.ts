@@ -8,7 +8,7 @@ const _replace = require("lodash/replace");
 const _split = require("lodash/split");
 const _slice = require("lodash/slice");
 
-const parseParams = (url: string, type: string) => {
+const parseParams = (url: string, type: string, body: object = {}) => {
   const nodeSendArray: { [key: string]: string } = {};
 
   let rawParams = _replace(url, "?", "&");
@@ -23,9 +23,8 @@ const parseParams = (url: string, type: string) => {
   });
 
   return {
-    // action: type === "vote" ? "mgVoting" : "mgOverlayActions",
     action: type,
-    nodeSendArray
+    nodeSendArray: { ...nodeSendArray, data: { ...body } }
   };
 };
 
@@ -37,6 +36,21 @@ router.get("/manual/:type", function (req: Request, res: Response) {
   const { action, nodeSendArray } = parseParams(req.url, req.params.type);
 
   res.send(nodeSendArray);
+  res.locals.io.emit(action, nodeSendArray);
+});
+
+router.post("/manual/:type", function (req: Request, res: Response) {
+  const { action, nodeSendArray } = parseParams(
+    req.url,
+    req.params.type,
+    req.body
+  );
+
+  console.log(req.body);
+
+  console.log("nodeSendArray", nodeSendArray);
+
+  res.json({ action, nodeSendArray });
   res.locals.io.emit(action, nodeSendArray);
 });
 
