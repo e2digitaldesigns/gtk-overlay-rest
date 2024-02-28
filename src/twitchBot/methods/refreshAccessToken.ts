@@ -43,7 +43,9 @@ export async function refreshTwitchAccessTokenMethod(
 
     return response.data.access_token;
   } catch (error) {
+    console.log(46, "refreshTwitchAccessTokenMethod error");
     console.error(error);
+    console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
     return "";
   }
 }

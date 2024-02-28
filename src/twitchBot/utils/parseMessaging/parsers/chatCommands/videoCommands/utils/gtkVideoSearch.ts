@@ -5,7 +5,12 @@ export const gtkVideoSearch = async (
 ): Promise<string | undefined> => {
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
-  await page.goto(`https://www.youtube.com/results?search_query=${searchTerm}`);
+  await page.goto(
+    `https://www.youtube.com/results?search_query=${searchTerm.replace(
+      " ",
+      "+"
+    )}`
+  );
 
   const videoId = await page.evaluate(() => {
     const videoTitleDiv = document.querySelector("#video-title");

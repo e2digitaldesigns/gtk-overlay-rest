@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 const ObjectId = mongoose.Types.ObjectId;
 const ytmp4 = require("ytmp4");
 import md5 from "md5";
+import puppeteer from "puppeteer";
 
 import {
   VideoPlaylistModel,
@@ -14,6 +15,7 @@ import { TwitchAuthModel } from "../../models/twitch.model";
 
 import { verifyToken } from "../../middleware/verifyToken";
 import { fetchVideoFile } from "../../utils/videoRequest";
+import { update } from "lodash";
 
 const router = express.Router();
 
@@ -138,6 +140,437 @@ router.get(
       res.status(200).json({ success: true, playlistArray });
     } catch (error) {
       res.status(500).send(error);
+    }
+  }
+);
+
+router.get(
+  "/getUserPlaylists",
+  verifyToken,
+  async (req: Request, res: Response) => {
+    try {
+      const playlists = await VideoPlaylistModel.find({
+        userId: new ObjectId(res.locals.userId)
+      })
+        .select({ _id: 1, playlistName: 1 })
+        .exec();
+
+      const videos: any = await VideoPlaylistItemModel.find({
+        userId: new ObjectId(res.locals.userId),
+        playlistId: null
+      })
+        .select({
+          _id: 1,
+          videoId: 1,
+          videoThumbnail: 1,
+          videoTitle: 1,
+          videoUrl: 1
+        })
+        .exec();
+
+      res.status(200).json({
+        resultStatus: {
+          success: true,
+          errors: null,
+          responseCode: 200,
+          resultMessage: "Your request was successful."
+        },
+        result: {
+          playlists: [
+            {
+              _id: "default",
+              playlistName: "Default Playlist"
+            },
+            ...playlists
+          ],
+          playlistItems: videos
+        }
+      });
+    } catch (error) {
+      res.status(404).json({
+        success: false,
+        errors: error,
+        responseCode: 404,
+        resultMessage: "Your request failed."
+      });
+    }
+  }
+);
+
+router.post("/searchYoutube", async (req: Request, res: Response) => {
+  try {
+    const searchTerm = req.body.searchTerm.trim().replace(/ /g, "+");
+    const youtubeSearchLink = `https://www.youtube.com/results?search_query=${searchTerm}`;
+
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+    await page.goto(youtubeSearchLink);
+
+    const searchData = await page.evaluate(() => {
+      const links = Array.from(document.querySelectorAll("#video-title"));
+
+      const data = links.map(link => ({
+        link: link.getAttribute("href"),
+        title: link.getAttribute("title")
+      }));
+
+      return data
+        .slice(0, 5)
+        .filter(f => f.link && f.link.includes("watch?v="))
+        .map(item => {
+          const videoId = item?.link?.match(/(?<=v=)[^&]+/)?.[0] ?? "";
+
+          if (videoId) {
+            return {
+              playlistId: "",
+              videoId,
+              videoThumbnail: `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
+              videoTitle: item.title,
+              videoUrl: ""
+            };
+          }
+        });
+    });
+
+    await browser.close();
+
+    const videos = searchData.map((video: any) => {
+      return {
+        _id: v4(),
+        ...video
+      };
+    });
+
+    res.status(200).json({
+      resultStatus: {
+        success: true,
+        errors: null,
+        responseCode: 200,
+        resultMessage: "Your request was successful."
+      },
+      result: {
+        videos
+      }
+    });
+  } catch (error: unknown) {
+    console.error(225, error);
+    res.status(404).json({
+      success: false,
+      errors: error,
+      responseCode: 404,
+      resultMessage: "Your request failed."
+    });
+  }
+});
+
+router.post(
+  "/addVideoToPlaylist",
+  verifyToken,
+  async (req: Request, res: Response) => {
+    const twitchAuth = await TwitchAuthModel.findOne({
+      userId: new ObjectId(res.locals.userId as string)
+    }).exec();
+
+    if (!twitchAuth) {
+      throw new Error("No Twitch Username");
+    }
+
+    try {
+      const newItem = await VideoPlaylistItemModel.findOneAndUpdate(
+        {
+          userId: new ObjectId(res.locals.userId),
+          viewerId: md5(twitchAuth.twitchUserName.toLowerCase()),
+          videoId: req.body.videoId
+        },
+        {
+          $set: {
+            playlistId: req.body.playlistId
+              ? new ObjectId(req.body.playlistId)
+              : null,
+            viewerUsername: twitchAuth.twitchUserName,
+            videoThumbnail: req.body.videoThumbnail,
+            videoTitle: req.body.videoTitle,
+            videoUrl: req.body.videoUrl
+          }
+        },
+        {
+          new: true,
+          upsert: true
+        }
+      );
+
+      if (!newItem) {
+        throw new Error("Error adding item to playlist");
+      }
+
+      res.status(200).json({
+        resultStatus: {
+          success: true,
+          errors: null,
+          responseCode: 200,
+          resultMessage: "Your request was successful."
+        },
+        result: {
+          _id: newItem._id,
+          username: newItem.viewerUsername
+        }
+      });
+    } catch (error) {
+      res.status(404).json({
+        success: false,
+        errors: error,
+        responseCode: 404,
+        resultMessage: "Your request failed."
+      });
+    }
+  }
+);
+
+router.post(
+  "/removeVideoFromPlaylist",
+  verifyToken,
+  async (req: Request, res: Response) => {
+    try {
+      await VideoPlaylistItemModel.deleteOne({
+        _id: new ObjectId(req.body._id),
+        userId: new ObjectId(res.locals.userId)
+      });
+
+      res.status(200).json({
+        resultStatus: {
+          success: true,
+          errors: null,
+          responseCode: 200,
+          resultMessage: "Your request was successful."
+        },
+        result: {
+          _id: req.body._id
+        }
+      });
+    } catch (error) {
+      res.status(404).json({
+        success: false,
+        errors: error,
+        responseCode: 404,
+        resultMessage: "Your request failed."
+      });
+    }
+  }
+);
+
+router.post(
+  "/getPlaylistItems",
+  verifyToken,
+  async (req: Request, res: Response) => {
+    console.log(270, req.body.playlistId);
+    try {
+      const playlistItems = await VideoPlaylistItemModel.find({
+        userId: new ObjectId(res.locals.userId),
+        playlistId:
+          req.body.playlistId === "default"
+            ? null
+            : new ObjectId(req.body.playlistId)
+      })
+        .select({ __v: 0 })
+        .exec();
+
+      res.status(200).json({
+        resultStatus: {
+          success: true,
+          errors: null,
+          responseCode: 200,
+          resultMessage: "Your request was successful."
+        },
+        result: {
+          playlistItems
+        }
+      });
+    } catch (error) {
+      console.log(383, error);
+      res.status(404).json({
+        success: false,
+        errors: error,
+        responseCode: 404,
+        resultMessage: "Your request failed."
+      });
+    }
+  }
+);
+
+router.post(
+  "/editPlaylist",
+  verifyToken,
+  async (req: Request, res: Response) => {
+    try {
+      const result = await VideoPlaylistModel.findOneAndUpdate(
+        {
+          userId: new ObjectId(res.locals.userId),
+          _id: new ObjectId(req.body.playlistId)
+        },
+        {
+          playlistName: req.body.playlistName
+        },
+        {
+          new: true
+        }
+      );
+
+      if (!result) {
+        throw new Error("Error updating playlist");
+      }
+
+      res.status(200).json({
+        resultStatus: {
+          success: true,
+          errors: null,
+          responseCode: 200,
+          resultMessage: "Your request was successful."
+        },
+        result: {
+          _id: result._id,
+          playlistName: result.playlistName
+        }
+      });
+    } catch (error) {
+      console.log(433, error);
+      res.status(404).json({
+        success: false,
+        errors: error,
+        responseCode: 404,
+        resultMessage: "Your request failed."
+      });
+    }
+  }
+);
+
+router.get(
+  "/createPlaylist",
+  verifyToken,
+  async (req: Request, res: Response) => {
+    try {
+      const newPlaylist = new VideoPlaylistModel({
+        userId: new ObjectId(res.locals.userId),
+        playlistName: "New Playlist"
+      });
+
+      const result = await newPlaylist.save();
+
+      if (!result) {
+        throw new Error("Error creating playlist");
+      }
+
+      res.status(200).json({
+        resultStatus: {
+          success: true,
+          errors: null,
+          responseCode: 200,
+          resultMessage: "Your request was successful."
+        },
+        result: {
+          _id: result._id,
+          playlistName: result.playlistName
+        }
+      });
+    } catch (error) {
+      console.log(453, error);
+      res.status(404).json({
+        success: false,
+        errors: error,
+        responseCode: 404,
+        resultMessage: "Your request failed."
+      });
+    }
+  }
+);
+
+router.post(
+  "/deletePlaylist",
+  verifyToken,
+  async (req: Request, res: Response) => {
+    try {
+      const result = await VideoPlaylistModel.deleteOne({
+        userId: new ObjectId(res.locals.userId),
+        _id: new ObjectId(req.body.playlistId as string)
+      });
+
+      const result2 = await VideoPlaylistItemModel.deleteMany({
+        userId: new ObjectId(res.locals.userId),
+        playlistId: new ObjectId(req.body.playlistId as string)
+      });
+
+      if (!result) {
+        throw new Error("Error deleting playlist");
+      }
+
+      res.status(200).json({
+        resultStatus: {
+          success: true,
+          errors: null,
+          responseCode: 200,
+          resultMessage: "Your request was successful."
+        },
+        result: {
+          _id: req.body.playlistId
+        }
+      });
+    } catch (error) {
+      console.log(512, error);
+      res.status(404).json({
+        success: false,
+        errors: error,
+        responseCode: 404,
+        resultMessage: "Your request failed."
+      });
+    }
+  }
+);
+
+router.post(
+  "/updatePlaylistItem",
+  verifyToken,
+  async (req: Request, res: Response) => {
+    try {
+      const result = await VideoPlaylistItemModel.findOneAndUpdate(
+        {
+          _id: new ObjectId(req.body._id),
+          userId: new ObjectId(res.locals.userId)
+        },
+        {
+          $set: {
+            videoTitle: req.body.videoTitle
+          }
+        },
+        {
+          new: true
+        }
+      );
+
+      if (!result) {
+        throw new Error("Error updating playlist item");
+      }
+
+      res.status(200).json({
+        resultStatus: {
+          success: true,
+          errors: null,
+          responseCode: 200,
+          resultMessage: "Your request was successful."
+        },
+        result: {
+          _id: result._id,
+          videoTitle: result.videoTitle,
+          videoThumbnail: result.videoThumbnail,
+          videoUrl: result.videoUrl
+        }
+      });
+    } catch (error) {
+      console.log(532, error);
+      res.status(404).json({
+        success: false,
+        errors: error,
+        responseCode: 404,
+        resultMessage: "Your request failed."
+      });
     }
   }
 );

@@ -93,8 +93,12 @@ export class TwitchBotter {
     } catch (error) {
       console.log(83, error);
     }
+    // TODO: This is a bug, it should be `await this?.client?.connect()`
 
-    await this?.client?.connect();
+    await this?.client
+      ?.connect()
+      .then(() => console.log(98, "chat reconnected"))
+      .catch(console.error);
   }
 
   private async getBotAccessToken() {
