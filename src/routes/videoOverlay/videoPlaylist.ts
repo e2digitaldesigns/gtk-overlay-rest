@@ -215,7 +215,6 @@ router.post("/searchYoutube", async (req: Request, res: Response) => {
       }));
 
       return data
-        .slice(0, 5)
         .filter(f => f.link && f.link.includes("watch?v="))
         .map(item => {
           const videoId = item?.link?.match(/(?<=v=)[^&]+/)?.[0] ?? "";
@@ -234,7 +233,7 @@ router.post("/searchYoutube", async (req: Request, res: Response) => {
 
     await browser.close();
 
-    const videos = searchData.map((video: any) => {
+    const videos = searchData.slice(0, 5).map((video: any) => {
       return {
         _id: v4(),
         ...video
