@@ -4,7 +4,7 @@ import mongoose from "mongoose";
 const ObjectId = mongoose.Types.ObjectId;
 const ytmp4 = require("ytmp4");
 import md5 from "md5";
-import puppeteer from "puppeteer";
+const { Client } = require("youtubei");
 
 import {
   VideoPlaylistModel,
@@ -15,7 +15,6 @@ import { TwitchAuthModel } from "../../models/twitch.model";
 
 import { verifyToken } from "../../middleware/verifyToken";
 import { fetchVideoFile } from "../../utils/videoRequest";
-import { update } from "lodash";
 
 const router = express.Router();
 
@@ -199,46 +198,18 @@ router.get(
 
 router.post("/searchYoutube", async (req: Request, res: Response) => {
   try {
+    const youtube = new Client();
     const searchTerm = req.body.searchTerm.trim().replace(/ /g, "+");
-    const youtubeSearchLink = `https://www.youtube.com/results?search_query=${searchTerm}`;
+    const youtubeSearch = await youtube.search(searchTerm, { type: "video" });
 
-    const browser = await puppeteer.launch();
-    const page = await browser.newPage();
-    await page.goto(youtubeSearchLink);
-
-    const searchData = await page.evaluate(() => {
-      const links = Array.from(document.querySelectorAll("#video-title"));
-
-      const data = links.map(link => ({
-        link: link.getAttribute("href"),
-        title: link.getAttribute("title")
-      }));
-
-      return data
-        .filter(f => f.link && f.link.includes("watch?v="))
-        .map(item => {
-          const videoId = item?.link?.match(/(?<=v=)[^&]+/)?.[0] ?? "";
-
-          if (videoId) {
-            return {
-              playlistId: "",
-              videoId,
-              videoThumbnail: `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
-              videoTitle: item.title,
-              videoUrl: ""
-            };
-          }
-        });
-    });
-
-    await browser.close();
-
-    const videos = searchData.slice(0, 5).map((video: any) => {
-      return {
-        _id: v4(),
-        ...video
-      };
-    });
+    const videos = youtubeSearch.items.slice(0, 5).map((video: any) => ({
+      _id: v4(),
+      playlistId: "",
+      videoId: video.id,
+      videoThumbnail: `https://i.ytimg.com/vi/${video.id}/hqdefault.jpg`,
+      videoTitle: video.title,
+      videoUrl: ""
+    }));
 
     res.status(200).json({
       resultStatus: {
