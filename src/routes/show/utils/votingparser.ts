@@ -1,7 +1,7 @@
 import { IEpisodeTopic } from "../../../models/episodes.model";
 
 export const votingParser = (topics: IEpisodeTopic[]) => {
-  topics.map(topic => {
+  topics?.map(topic => {
     if (topic?.desc) {
       topic.votingOptions = labelParser(topic.desc);
       topic.desc = topic.desc.replace(/{{VOTING::.*}}/g, "");

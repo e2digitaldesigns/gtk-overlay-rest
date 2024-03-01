@@ -97,8 +97,7 @@ export class TwitchBotter {
 
     await this?.client
       ?.connect()
-      .then(() => console.log(98, "chat reconnected"))
-      .catch(console.error);
+      .then(() => console.log(98, "chat reconnected"));
   }
 
   private async getBotAccessToken() {
