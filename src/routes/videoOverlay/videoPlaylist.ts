@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 const ObjectId = mongoose.Types.ObjectId;
 const ytmp4 = require("ytmp4");
 import md5 from "md5";
+import he from "he";
 const { Client } = require("youtubei");
 
 import {
@@ -15,6 +16,7 @@ import { TwitchAuthModel } from "../../models/twitch.model";
 
 import { verifyToken } from "../../middleware/verifyToken";
 import { fetchVideoFile } from "../../utils/videoRequest";
+import { videoIdSearch } from "../../utils/videoSearch/videoIdSearch";
 
 const router = express.Router();
 
@@ -544,5 +546,59 @@ router.post(
     }
   }
 );
+
+router.post("/videoRequest", async (req: Request, res: Response) => {
+  console.log(550, req.body);
+  console.log(552, req.body.uid);
+
+  try {
+    const videoId = await videoIdSearch(req.body.searchTerm);
+    if (!videoId) {
+      throw new Error("No videoId found");
+    }
+
+    const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
+    const videoData = await ytmp4(videoUrl);
+
+    if (videoData.success && videoData.urls.sd) {
+      const action =
+        req.body.command === "!pvr"
+          ? "priority-video-request"
+          : "video-request";
+
+      res.locals.io.emit("gtkVideoOverlayAction", {
+        action,
+        uid: req.body.uid,
+        data: {
+          _id: v4(),
+          action,
+          channel: req.body.channel,
+          date: new Date(),
+          hasPlayed: false,
+          isMod: req.body.isMod,
+          requestedBy: req.body.requestedBy,
+          videoExpire: videoData.urls.sd.match(/expire=([0-9]+)/).pop() * 1000,
+          videoId,
+          videoThumbnail: videoData.thumbnail,
+          videoTitle: he.decode(videoData.title),
+          videoUrl: videoData.urls.sd
+        }
+      });
+    } else {
+      throw new Error("No videoId found");
+    }
+  } catch (error) {
+    console.log(72, error);
+  } finally {
+    res.status(200).json({
+      resultStatus: {
+        success: true,
+        errors: null,
+        responseCode: 200,
+        resultMessage: "Your request was successful."
+      }
+    });
+  }
+});
 
 export const videoOverlayPlaylist = router;

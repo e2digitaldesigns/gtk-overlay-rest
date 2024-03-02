@@ -62,9 +62,26 @@ export async function chatCommandParser(
 
     // VIDEO REQUEST OVERLAY
     // VIDEO REQUEST OVERLAY
-    // VIDEO REQUEST OVERLAY
     case "!vr":
     case "!pvr":
+      socket.emit("gtkVideoOverlayAction", {
+        action: "playlist-return-video-request",
+        uid: gtkUserId,
+        data: {
+          action: "playlist-return-video-request",
+          channel: channel.slice(1),
+          isFollowing,
+          isMod:
+            tags.mod ||
+            channel.slice(1).toLowerCase() === tags.username.toLowerCase(),
+          requestedBy: tags.username,
+          searchTerm: message.split(" ").slice(1).join(" "),
+          command
+        }
+      });
+      break;
+
+    case "!vr_archive":
       await chatCommands.videoSearch(
         command,
         tags.username,
@@ -76,6 +93,8 @@ export async function chatCommandParser(
         isFollowing
       );
       break;
+    // VIDEO REQUEST OVERLAY
+    // VIDEO REQUEST OVERLAY
 
     case "!vremove":
       await chatCommands.videoRemove(channel, socket, tags.username);
