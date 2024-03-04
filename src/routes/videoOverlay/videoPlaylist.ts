@@ -334,7 +334,6 @@ router.post(
   "/getPlaylistItems",
   verifyToken,
   async (req: Request, res: Response) => {
-    console.log(270, req.body.playlistId);
     try {
       const playlistItems = await VideoPlaylistItemModel.find({
         userId: new ObjectId(res.locals.userId),
