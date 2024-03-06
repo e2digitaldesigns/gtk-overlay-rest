@@ -1,5 +1,5 @@
 export const topicImageParser = (topics: any[]) => {
-  const newTopics = topics.map((topic: any) => {
+  const newTopics = topics?.map((topic: any) => {
     const newTopic = { ...topic };
     newTopic.img = topic.img ? process.env.S3_CLOUD_IMAGES + topic.img : "";
     return newTopic;
