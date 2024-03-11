@@ -6,7 +6,7 @@ const JWT = require("jsonwebtoken");
 const { OAuth2Client } = require("google-auth-library");
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-import { UsersModel } from "../../models/users.model";
+import { IUser, UsersModel } from "../../models/users.model";
 import { HostModel } from "../../models/hosts.model";
 import { EpisodeModel } from "../../models/episodes.model";
 import { episodeObj } from "./episode";
@@ -24,6 +24,41 @@ async function verify(token: string) {
   const payload = ticket.getPayload();
   return payload;
 }
+
+router.post("/firebase", async (req: Request, res: Response) => {
+  const payload = req.body;
+  const secretKey = process.env.JWT_SECRET_TOKEN;
+  const options = { expiresIn: "24h" };
+
+  try {
+    const user = await MODEL.findOneAndUpdate(
+      { email: payload.email },
+      {
+        email: payload.email,
+        name: payload.name,
+        picture: payload.picture,
+        gtkAi: false
+      },
+      { new: true, upsert: true }
+    );
+
+    const token = JWT.sign(
+      {
+        _id: user._id,
+        name: user.name,
+        picture: user.picture,
+        gtkAi: !!user.gtkAi
+      },
+      secretKey,
+      options
+    );
+
+    res.status(200).send(token);
+  } catch (error) {
+    console.error(error);
+    res.status(404).send(error);
+  }
+});
 
 router.post("/", async (req: Request, res: Response) => {
   try {

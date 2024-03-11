@@ -1,7 +1,7 @@
 import { model, Schema } from "mongoose";
 import { gtkAi } from "./../routes/gtkAi/gtkAi";
 
-interface IUser {
+export interface IUser {
   email: string;
   name: string;
   picture?: string;
