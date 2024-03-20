@@ -1,5 +1,6 @@
 import { twitchChatParser } from "../../../../twitch/messageParser";
 import { Server as SocketServer } from "socket.io";
+import he from "he";
 
 export const chatRelayParser = async (
   gtkUserId: string,
@@ -14,7 +15,7 @@ export const chatRelayParser = async (
     _id: tags.id,
     broadcasterName: channel.replace("#", "").toLowerCase(),
     name: tags["display-name"] || tags.username,
-    msg: message,
+    msg: he.decode(message),
     msgEmotes: twitchChatParser(message, tags.emotes),
     url: image || "",
     fontColor: tags.color || "#ffffff",
