@@ -24,8 +24,9 @@ export async function refreshTwitchStreamerAccessTokenMethod(
       `https://id.twitch.tv/oauth2/token?grant_type=refresh_token&refresh_token=${refreshToken}&client_id=${process.env.TWITCH_CLIENT_ID}&client_secret=${process.env.TWITCH_CLIENT_SECRET}`
     );
 
-    if (response.status !== 200)
+    if (response.status !== 200) {
       throw new Error("26 refreshStreamerToken: Twitch Refresh Failed");
+    }
 
     await TwitchAuthModel.findOneAndUpdate(
       {

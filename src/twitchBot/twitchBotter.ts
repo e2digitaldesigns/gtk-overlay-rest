@@ -3,11 +3,14 @@ import axios from "axios";
 import { Server as SocketServer } from "socket.io";
 import { Client as TMIClient } from "tmi.js";
 import NodeCache from "node-cache";
-import { refreshTwitchAccessTokenMethod } from "./methods/refreshAccessToken";
+
 import { getTwitchChannels } from "./utils/getUsers";
 import { parseMessaging } from "./utils/parseMessaging/parseMessaging";
+
 import { GtkTwitchBotModel } from "../models/gtkBot.model";
 import { TwitchAuthModel } from "../models/twitch.model";
+
+import { refreshTwitchAccessTokenMethod } from "./methods/refreshAccessToken";
 import { refreshTwitchStreamerAccessTokenMethod } from "./methods/refreshStreamerToken";
 
 enum TwitchEndPoints {
@@ -129,6 +132,7 @@ export class TwitchBotter {
 
       return validate.status === 401 ? false : true;
     } catch (error: unknown) {
+      console.error(error);
       return false;
     }
   }

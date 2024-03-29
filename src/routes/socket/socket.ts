@@ -1,8 +1,6 @@
 import express, { Request, Response } from "express";
 const router = express.Router();
 
-var app = express();
-
 const _map = require("lodash/map");
 const _replace = require("lodash/replace");
 const _split = require("lodash/split");
@@ -45,10 +43,6 @@ router.post("/manual/:type", function (req: Request, res: Response) {
     req.params.type,
     req.body
   );
-
-  console.log(req.body);
-
-  console.log("nodeSendArray", nodeSendArray);
 
   res.json({ action, nodeSendArray });
   res.locals.io.emit(action, nodeSendArray);
