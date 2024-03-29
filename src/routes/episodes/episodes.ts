@@ -227,6 +227,7 @@ router.post("/", async (req: Request, res: Response) => {
           logo: 1,
           hosts: 1,
           number: 1,
+          podcastName: 1,
           socialNetworks: 1,
           sponsorImages: 1,
           ticker: 1,
