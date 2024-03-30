@@ -36,8 +36,7 @@ router.post("/firebase", async (req: Request, res: Response) => {
       {
         email: payload.email,
         name: payload.name,
-        picture: payload.picture,
-        gtkAi: false
+        picture: payload.picture
       },
       { new: true, upsert: true }
     );
