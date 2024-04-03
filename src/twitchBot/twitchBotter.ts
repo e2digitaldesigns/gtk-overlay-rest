@@ -63,7 +63,7 @@ export class TwitchBotter {
 
       this?.client?.on("disconnected", async (data: string) => {
         await this.refreshTwitchAccessToken();
-        await this.reconnectTwitchBot();
+        // await this.reconnectTwitchBot();
       });
     });
   }
