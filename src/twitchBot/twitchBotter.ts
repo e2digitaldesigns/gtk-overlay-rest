@@ -81,7 +81,7 @@ export class TwitchBotter {
 
       connection: {
         secure: true,
-        reconnect: false,
+        reconnect: true,
         maxReconnectAttempts: Infinity,
         reconnectInterval: 2000
       }
