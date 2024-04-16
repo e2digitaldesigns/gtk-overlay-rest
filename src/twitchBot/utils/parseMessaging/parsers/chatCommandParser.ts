@@ -56,6 +56,10 @@ export async function chatCommandParser(
       client.action(channel, "GamerToolkit Test Command");
       break;
 
+    case "!gtk2":
+      client.action(channel, "GamerToolkit Test Command 2");
+      break;
+
     case "!reply":
       client.action(channel, `@${tags.username}, heya!`);
       break;

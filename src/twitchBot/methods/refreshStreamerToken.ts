@@ -14,7 +14,9 @@ export async function refreshTwitchStreamerAccessTokenMethod(
       }).select({ refreshToken: 1 });
 
       if (!userdata?.refreshToken) {
-        throw new Error("15 refreshTwitchAccessToken: No Twitch Data");
+        // throw new Error("15 refreshTwitchAccessToken: No Twitch Data");
+        console.log("15 refreshTwitchAccessToken: No Twitch Data");
+        return "";
       } else {
         refreshToken = userdata.refreshToken;
       }
@@ -25,7 +27,9 @@ export async function refreshTwitchStreamerAccessTokenMethod(
     );
 
     if (response.status !== 200) {
-      throw new Error("26 refreshStreamerToken: Twitch Refresh Failed");
+      console.log("26 refreshStreamerToken: Twitch Refresh Failed");
+      // throw new Error("26 refreshStreamerToken: Twitch Refresh Failed");
+      return "";
     }
 
     await TwitchAuthModel.findOneAndUpdate(
@@ -44,7 +48,7 @@ export async function refreshTwitchStreamerAccessTokenMethod(
 
     return response.data.access_token;
   } catch (error) {
-    console.error(error);
+    console.error(49, error);
     return "";
   }
 }

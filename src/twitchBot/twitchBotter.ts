@@ -202,16 +202,16 @@ export class TwitchBotter {
         } else {
           const refreshedAccessToken =
             await refreshTwitchStreamerAccessTokenMethod(streamerChannel);
-          return this.isChatterFollowing(
-            streamerChannel,
-            chatterUserName,
-            chatterUserId,
-            refreshedAccessToken
-          );
+          // return this.isChatterFollowing(
+          //   streamerChannel,
+          //   chatterUserName,
+          //   chatterUserId,
+          //   refreshedAccessToken
+          // );
         }
       });
 
-    return isFollowing;
+    return true;
   };
 
   private getUserProfileImage = async (
