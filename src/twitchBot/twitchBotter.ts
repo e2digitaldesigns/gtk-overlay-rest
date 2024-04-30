@@ -115,7 +115,109 @@ export class TwitchBotter {
         if (message === "die") {
           this.resetBot();
         }
+
+        parseMessaging(
+          channel,
+          tags,
+          message,
+          self,
+          this.client,
+          this.socket,
+          this.getUserProfileImage,
+          this.isChatterFollowing
+        );
       }
     );
+
+    this?.client?.on("disconnected", async (data: string) => {
+      console.log(133, "chat disconnected", data);
+    });
   }
+
+  private getUserProfileImage = async (
+    username: string,
+    botAccessToken: string | null = null
+  ): Promise<string> => {
+    const cachedImage = this.twitchProfileImageCache.get(username);
+    if (cachedImage) return cachedImage as string;
+
+    const userImage: Promise<string> = await axios
+      .get(`${TwitchEndPoints.Users}${username}`, {
+        headers: {
+          "Client-ID": process.env.TWITCH_CLIENT_ID,
+          Authorization: `Bearer ${
+            botAccessToken || (await this.getBotAccessToken())
+          }`
+        }
+      })
+      .then(res => {
+        const image = res.data.data?.[0]?.profile_image_url || "";
+        if (image) this.twitchProfileImageCache.set(username, image);
+        return image;
+      })
+      .catch(async () => {
+        if (botAccessToken) {
+          return "";
+        } else {
+          const newAccessToken = await refreshTwitchAccessTokenMethod(
+            this.botName
+          );
+          await this.getUserProfileImage(username, newAccessToken);
+        }
+      });
+
+    return userImage;
+  };
+
+  private getStreamerData = async (streamerChannel: string) => {
+    const channel = streamerChannel.replace(/^#/, "");
+
+    const streamerData = await TwitchAuthModel.findOne({
+      twitchUserName: channel
+    }).select({ twitchUserId: 1, accessToken: 1, refreshToken: 1 });
+
+    return streamerData;
+  };
+
+  private isChatterFollowing = async (
+    streamerChannel: string,
+    chatterUserName: string,
+    chatterUserId: string,
+    streamerAccessToken: string | null = null
+  ): Promise<boolean> => {
+    const streamerData = await this.getStreamerData(streamerChannel);
+    if (!streamerData) return false;
+
+    const isFollowing = await axios
+      .get(
+        `${TwitchEndPoints.Followers}broadcaster_id=${streamerData.twitchUserId}&user_id=${chatterUserId}`,
+        {
+          headers: {
+            "Client-ID": process.env.TWITCH_CLIENT_ID,
+            Authorization: `Bearer ${
+              streamerAccessToken || streamerData.accessToken
+            }`
+          }
+        }
+      )
+      .then(res => {
+        return res.data.data.length > 0;
+      })
+      .catch(async () => {
+        if (streamerAccessToken) {
+          return false;
+        } else {
+          const refreshedAccessToken =
+            await refreshTwitchStreamerAccessTokenMethod(streamerChannel);
+          return this.isChatterFollowing(
+            streamerChannel,
+            chatterUserName,
+            chatterUserId,
+            refreshedAccessToken
+          );
+        }
+      });
+
+    return !!isFollowing;
+  };
 }
