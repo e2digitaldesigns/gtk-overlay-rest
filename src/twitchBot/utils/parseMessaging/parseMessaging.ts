@@ -1,5 +1,5 @@
 import { Server as SocketServer } from "socket.io";
-import { Client as TMIClient } from "tmi.js";
+import { ChatUserstate, Client as TMIClient } from "tmi.js";
 import { getGTKUserId, getIgnoreList } from "./utils/dbFecthers";
 import { chatRankParser } from "./parsers/chatRanks";
 import { chatRelayParser } from "./parsers/chatRelay";
@@ -10,7 +10,7 @@ import { chatGptParser } from "./parsers/chatGptParser/chatGptParser";
 
 export async function parseMessaging(
   channel: string,
-  tags: any,
+  tags: ChatUserstate,
   message: string,
   self: boolean,
   tmiClient: TMIClient | null,
@@ -22,7 +22,7 @@ export async function parseMessaging(
     chatterUserId: string
   ) => Promise<boolean>
 ) {
-  if (self) return; // Ignore messages from the bot
+  if (self || !tags.username) return; // Ignore messages from the bot
 
   const ignoreList = await getIgnoreList(channel);
 
@@ -40,7 +40,7 @@ export async function parseMessaging(
   const isFollowing = await isChatterFollowing(
     channel,
     tags.username,
-    tags["user-id"]
+    tags["user-id"] || ""
   );
 
   // Chat Command Parser

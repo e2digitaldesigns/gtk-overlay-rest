@@ -12,19 +12,8 @@ import { TwitchAuthModel } from "../models/twitch.model";
 
 import { refreshTwitchAccessTokenMethod } from "./methods/refreshAccessToken";
 import { refreshTwitchStreamerAccessTokenMethod } from "./methods/refreshStreamerToken";
+import { TwitchBotData, TwitchEndPoints } from "./types";
 
-enum TwitchEndPoints {
-  Validate = "https://id.twitch.tv/oauth2/validate",
-  Users = "https://api.twitch.tv/helix/users?login=",
-  Followers = "https://api.twitch.tv/helix/channels/followers?"
-}
-
-type TwitchBotData = {
-  accessToken: string;
-  expirationTime: number;
-  expiresIn: number;
-  refreshToken: string;
-};
 export class TwitchBotter {
   botName: string;
   socket: SocketServer;
@@ -100,34 +89,31 @@ export class TwitchBotter {
   private async botSetter() {
     this?.client
       ?.connect()
-      .then(() => console.log("chat connected"))
+      .then(() => console.log(103, "chat connected"))
       .catch((err: unknown) => {
-        console.log("err", err);
+        console.log(105, "err", err);
         if (err === "Login authentication failed") {
           this.resetBot();
         }
       });
 
-    this?.client?.on(
-      "message",
-      (channel: string, tags: any, message: string, self: boolean) => {
-        console.log("message", message);
-        if (message === "die") {
-          this.resetBot();
-        }
-
-        parseMessaging(
-          channel,
-          tags,
-          message,
-          self,
-          this.client,
-          this.socket,
-          this.getUserProfileImage,
-          this.isChatterFollowing
-        );
+    this?.client?.on("message", (channel, userstate, message, self) => {
+      console.log("message", message);
+      if (message === "die") {
+        this.resetBot();
       }
-    );
+
+      parseMessaging(
+        channel,
+        userstate,
+        message,
+        self,
+        this.client,
+        this.socket,
+        this.getUserProfileImage,
+        this.isChatterFollowing
+      );
+    });
 
     this?.client?.on("disconnected", async (data: string) => {
       console.log(133, "chat disconnected", data);
@@ -186,7 +172,7 @@ export class TwitchBotter {
     streamerAccessToken: string | null = null
   ): Promise<boolean> => {
     const streamerData = await this.getStreamerData(streamerChannel);
-    if (!streamerData) return false;
+    if (!streamerData || !chatterUserId) return false;
 
     const isFollowing = await axios
       .get(
