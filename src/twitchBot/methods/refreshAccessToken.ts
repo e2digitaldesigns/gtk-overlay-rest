@@ -5,20 +5,17 @@ export async function refreshTwitchAccessTokenMethod(
   botName: string,
   refreshToken: string = ""
 ): Promise<string> {
-  console.log(8, "refresh bot token: refreshTwitchAccessTokenMethod");
+  console.log(8, "Refresh Access Token: refreshTwitchAccessTokenMethod");
   try {
     if (!refreshToken) {
       const botData = await GtkTwitchBotModel.findOne({
         twitchUserName: botName
       }).select({ refreshToken: 1 });
 
-      console.log(
-        15,
-        `refresh bot token: refreshTwitchAccessTokenMethod refreshToken: ${botData?.refreshToken}`
-      );
+      console.log(15, `Refresh Access Token: rToken: ${botData?.refreshToken}`);
 
       if (!botData?.refreshToken) {
-        throw new Error("15 refreshTwitchAccessToken: No Twitch Data");
+        console.log(18, `Refresh Access Token: No Twitch Data`);
       } else {
         refreshToken = botData.refreshToken;
       }
@@ -29,8 +26,7 @@ export async function refreshTwitchAccessTokenMethod(
     );
 
     if (response.status !== 200) {
-      console.log("32 refreshBotToken: Twitch Refresh Failed");
-      // throw new Error("26 refreshBotToken: Twitch Refresh Failed");
+      console.log(29, "Refresh Access Token: Twitch Refresh Failed");
       return "";
     }
 
@@ -51,8 +47,13 @@ export async function refreshTwitchAccessTokenMethod(
 
     return response.data.access_token;
   } catch (error) {
-    console.log(46, "refreshTwitchAccessTokenMethod error");
+    console.log(50, "Refresh Access Token error");
+    console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+    console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+    console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
     console.error(error);
+    console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+    console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
     console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
     return "";
   }
