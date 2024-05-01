@@ -98,11 +98,6 @@ export class TwitchBotter {
       });
 
     this?.client?.on("message", (channel, userstate, message, self) => {
-      console.log("message", message);
-      if (message === "die") {
-        this.resetBot();
-      }
-
       parseMessaging(
         channel,
         userstate,
