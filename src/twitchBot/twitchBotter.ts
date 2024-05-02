@@ -50,6 +50,7 @@ export class TwitchBotter {
         reconnectInterval: 2000
       }
     });
+
     return client;
   }
 
@@ -89,9 +90,9 @@ export class TwitchBotter {
   private async botSetter() {
     this?.client
       ?.connect()
-      .then(() => console.log(103, "chat connected"))
+      .then(() => console.log(93, "chat connected"))
       .catch((err: unknown) => {
-        console.log(105, "err", err);
+        console.error(95, "err", err);
         if (err === "Login authentication failed") {
           this.resetBot();
         }
@@ -111,8 +112,10 @@ export class TwitchBotter {
     });
 
     this?.client?.on("disconnected", async (data: string) => {
-      console.log(133, "chat disconnected", data);
+      console.log(115, "chat disconnected", data);
     });
+
+    this.expressApp.set("twitchClient", this.client);
   }
 
   private getUserProfileImage = async (
