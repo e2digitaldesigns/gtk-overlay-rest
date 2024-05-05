@@ -41,8 +41,8 @@ function parseAction(command: string): string | undefined {
   let actionValue = undefined;
 
   const actionObj: { [key: string]: string } = {
-    "!1": "one",
-    "!2": "two",
+    "!1": "1",
+    "!2": "2",
     "!v": "add",
     "!sv": "super",
     "!d": "remove",
