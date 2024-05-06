@@ -133,11 +133,12 @@ router.get("/showRunner/:_id", async (req: Request, res: Response) => {
   try {
     const result = await EpisodeModel.findById(req.params._id)
       .select({
-        topics: 1,
         airDate: 1,
-        number: 1,
+        logo: 1,
         name: 1,
-        logo: 1
+        number: 1,
+        podcastName: 1,
+        topics: 1
       })
       .exec();
 
@@ -148,6 +149,7 @@ router.get("/showRunner/:_id", async (req: Request, res: Response) => {
           logo: result.logo,
           name: result.name,
           number: result.number,
+          podcastName: result.podcastName,
           topics: sortTopics(result.topics)
         }
       : {};
