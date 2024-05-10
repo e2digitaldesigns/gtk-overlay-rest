@@ -34,7 +34,7 @@
     "socket.io": "^4.5.3",
     "tmi.js": "^1.8.5",
     "uuid": "^9.0.0",
-    "youtube-transcript": "^1.0.6",
+    "youtube-transcript": "^1.2.1",
     "youtubei": "github:suspiciouslookingowl/youtubei#dist",
     "ytmp4": "^1.0.2"
   },

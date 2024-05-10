@@ -13,17 +13,8 @@ router.use(verifyToken);
 router.post("/", async (req: Request, res: Response) => {
   try {
     const openai = new OpenAI();
-
     const videoUrl = req.body.videoUrl;
-
-    const videoInfo = await ytmp4(videoUrl)
-      .then((res: any) => {
-        return res;
-      })
-      .catch((err: unknown) => {
-        console.log(err);
-      });
-
+    const videoInfo = await ytmp4(videoUrl);
     const videoTranscript = await YoutubeTranscript.fetchTranscript(videoUrl);
 
     const parsedVideoTranscript = videoTranscript
@@ -65,7 +56,6 @@ router.post("/", async (req: Request, res: Response) => {
 
     res.status(200).json(data);
   } catch (error) {
-    console.log(error);
     res.status(404).send(error);
   }
 });
