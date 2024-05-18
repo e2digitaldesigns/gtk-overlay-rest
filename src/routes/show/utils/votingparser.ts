@@ -3,7 +3,9 @@ import { IEpisodeTopic } from "../../../models/episodes.model";
 export const votingParser = (topics: IEpisodeTopic[]) => {
   topics?.map(topic => {
     if (topic?.desc) {
-      topic.votingOptions = labelParser(topic.desc);
+      const votingOptions = labelParser(topic.desc);
+      topic.voting = !!(votingOptions.length > 0);
+      topic.votingOptions = votingOptions;
       topic.desc = topic.desc.replace(/{{VOTING::.*}}/g, "");
     }
   });
