@@ -1,6 +1,7 @@
 import { model, Schema, Types } from "mongoose";
 
 interface IChatLog {
+  tagId: string;
   gtkUserId: Types.ObjectId;
   channel: string;
   platform: string;
@@ -12,6 +13,7 @@ interface IChatLog {
 }
 
 const ChatLogSchema = new Schema<IChatLog>({
+  tagId: { type: String, required: true },
   gtkUserId: { type: Schema.Types.ObjectId, required: true },
   channel: { type: String, required: true },
   platform: { type: String, required: true },

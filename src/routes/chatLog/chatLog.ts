@@ -38,4 +38,37 @@ router.get("/:userId/", async (req: Request, res: Response) => {
   }
 });
 
+router.post("/:sendMessageToOverlay/", async (req: Request, res: Response) => {
+  try {
+    const result = await MODEL.findOne({ tagId: req.body._id });
+
+    if (!result) {
+      throw new Error("No chat message found");
+    }
+
+    const nodeSendArray = {
+      tid: req.body.tid,
+      uid: req.body.uid,
+      action: "showChatMessage",
+      message: {
+        _id: result?._id,
+        broadcasterName: "ddc27764-8d64-4035-8a4f-0c5000d2c9e9",
+        name: result?.username,
+        msg: result?.message,
+        url: result?.image,
+        fontColor: req.body.fontColor,
+        showTime: req.body.showTime,
+        transition: req.body.transition
+      },
+      data: {}
+    };
+
+    res.locals.io.emit("gtkChatDisplay", nodeSendArray);
+
+    res.status(200).send({ success: true });
+  } catch (error) {
+    res.status(404).send({ success: false, error });
+  }
+});
+
 export const chatLog = router;

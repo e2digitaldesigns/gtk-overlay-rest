@@ -9,6 +9,7 @@ export async function chatLogParser(
 ) {
   try {
     await ChatLogModel.create({
+      tagId: tags.id,
       gtkUserId,
       platform: "twitch",
       channel: channel.replace("#", "").toLowerCase(),
