@@ -109,6 +109,7 @@ router.get(
 
       const result = {
         ...epData,
+        active: true,
         logo: logoImageParser(epData?.logo),
         hosts: hostParser(epData.availableHosts, epData.hosts),
         sponsorImages: sponsorImageParser(epData?.sponsorImages),
@@ -116,7 +117,7 @@ router.get(
           epData.databaseSocials,
           epData.socialNetworks
         ),
-        topics: sortTopics(topicImageParser(epData?.topics))
+        topics: sortTopics(topicImageParser(votingParser(epData?.topics)))
       };
 
       delete result.availableHosts;
