@@ -11,6 +11,7 @@ export const chatRelayParser = async (
   image: string | null
 ) => {
   socket.emit("gtkChatRelay", {
+    action: "new-chat-message",
     uid: gtkUserId,
     _id: tags.id,
     broadcasterName: channel.replace("#", "").toLowerCase(),

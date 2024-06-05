@@ -75,8 +75,8 @@ router.post("/:episodeId", async (req: Request, res: Response) => {
         $push: {
           topics: {
             _id: topicId,
-            name: `New Topic ${order}`,
-            desc: "New Topic Description",
+            name: `Untitled Topic`,
+            desc: "Untitled Topic Description",
             order
           }
         }
@@ -222,6 +222,61 @@ router.delete("/:episodeId/:topicId", async (req: Request, res: Response) => {
     );
 
     res.status(200).json(result);
+  } catch (error) {
+    res.status(404).send(error);
+  }
+});
+
+router.post("/:episodeId/:topicId", async (req: Request, res: Response) => {
+  try {
+    const episode = await MODEL.findOne({
+      _id: new ObjectId(req.params.episodeId),
+      userId: new ObjectId(res.locals.userId),
+      "topics._id": new ObjectId(req.params.topicId)
+    }).select({
+      topics: { $elemMatch: { _id: new ObjectId(req.params.topicId) } }
+    });
+
+    if (!episode?.topics[0]) {
+      throw new Error("Topic not found");
+    }
+
+    const originalTopic = episode.topics[0];
+
+    const newTopic = {
+      _id: new ObjectId(),
+      desc: originalTopic.desc,
+      img: "",
+      isChild: originalTopic.isChild,
+      isParent: false,
+      name: originalTopic.name,
+      order: episode?.topics.length,
+      parentId: originalTopic.parentId,
+      timer: originalTopic.timer,
+      articles: originalTopic.articles,
+      video: originalTopic.video,
+      notes: originalTopic.notes,
+      chat: originalTopic.chat,
+      voting: originalTopic.voting
+    };
+
+    const result = await MODEL.updateOne(
+      {
+        _id: new ObjectId(req.params.episodeId),
+        userId: new ObjectId(res.locals.userId)
+      },
+      {
+        $push: {
+          topics: newTopic
+        }
+      }
+    );
+
+    if (result.modifiedCount === 1) {
+      res.status(200).json(newTopic);
+    } else {
+      throw new Error("No document was updated");
+    }
   } catch (error) {
     res.status(404).send(error);
   }
