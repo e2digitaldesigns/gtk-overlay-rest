@@ -43,7 +43,7 @@ router.get("/connect/:username", async (req: Request, res: Response) => {
 router.get("/status", async (req: Request, res: Response) => {
   const twitchClient = req.app.get("twitchClient");
 
-  res.send(`TMI state: ${twitchClient.readyState()}`);
+  res.send(`TMI state: ${twitchClient?.readyState() || "n/a"}`);
 });
 
 router.get("/isConnected", verifyToken, async (req: Request, res: Response) => {
@@ -160,6 +160,21 @@ router.get("/twitchUsername/:userId", async (req: Request, res: Response) => {
     res.status(200).json({ twitchUsername: twitchUser.twitchUserName });
   } catch (error) {
     res.status(404).send(error);
+  }
+});
+
+router.get("/discoBot", verifyToken, async (req: Request, res: Response) => {
+  try {
+    req.app
+      .get("twitchClient")
+      .disconnect()
+      .catch((err: unknown) => {
+        if (err) throw new Error("Error Disconnecting Bot");
+      });
+
+    res.send({ success: true, message: "Twitch Chat Disconnected" });
+  } catch (error) {
+    res.send({ success: false, message: "bad" });
   }
 });
 

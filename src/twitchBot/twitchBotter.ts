@@ -34,6 +34,29 @@ export class TwitchBotter {
       );
       await this.botSetter();
     })();
+
+    (async () => {
+      await this.botChecker();
+    })();
+  }
+
+  private async botChecker() {
+    // check bot status every 5 minutes
+    setInterval(async () => {
+      if (!this.client) {
+        console.log(77, "bot not connected");
+        this.client = await this.createTwitchClient(
+          await this.getBotAccessToken()
+        );
+        await this.botSetter();
+        await this?.client?.action(
+          "icon33",
+          "GamerToolkit Chat is back online"
+        );
+      } else {
+        console.log(82, "bot connected");
+      }
+    }, 5 * 60 * 1000);
   }
 
   async createTwitchClient(accessToken: string) {
@@ -48,6 +71,9 @@ export class TwitchBotter {
         reconnect: true,
         maxReconnectAttempts: Infinity,
         reconnectInterval: 2000
+      },
+      options: {
+        debug: true
       }
     });
 
@@ -76,11 +102,20 @@ export class TwitchBotter {
     }
   }
 
+  async disconnectBot() {
+    try {
+      await this.client?.disconnect();
+    } finally {
+      this.expressApp.set("twitchClient", null);
+      this.client = null;
+    }
+  }
+
   private async resetBot() {
     const newAccessToken = await refreshTwitchAccessTokenMethod(this.botName);
 
     try {
-      await this.client?.disconnect();
+      await this.disconnectBot();
     } catch (error) {}
 
     this.client = await this.createTwitchClient(newAccessToken);
@@ -113,6 +148,8 @@ export class TwitchBotter {
 
     this?.client?.on("disconnected", async (data: string) => {
       console.log(115, "chat disconnected", data);
+      this.expressApp.set("twitchClient", null);
+      this.client = null;
     });
 
     this.expressApp.set("twitchClient", this.client);
