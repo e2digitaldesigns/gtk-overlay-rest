@@ -229,19 +229,32 @@ router.delete("/:episodeId/:topicId", async (req: Request, res: Response) => {
 
 router.post("/:episodeId/:topicId", async (req: Request, res: Response) => {
   try {
-    const episode = await MODEL.findOne({
-      _id: new ObjectId(req.params.episodeId),
-      userId: new ObjectId(res.locals.userId),
-      "topics._id": new ObjectId(req.params.topicId)
-    }).select({
-      topics: { $elemMatch: { _id: new ObjectId(req.params.topicId) } }
-    });
+    const episode = await MODEL.aggregate([
+      {
+        $match: {
+          _id: new ObjectId(req.params.episodeId),
+          userId: new ObjectId(res.locals.userId)
+        }
+      },
+      {
+        $project: {
+          topics: {
+            $filter: {
+              input: "$topics",
+              as: "topic",
+              cond: { $eq: ["$$topic._id", new ObjectId(req.params.topicId)] }
+            }
+          },
+          totalTopics: { $size: "$topics" }
+        }
+      }
+    ]);
 
-    if (!episode?.topics[0]) {
+    if (!episode?.[0]?.topics?.[0]) {
       throw new Error("Topic not found");
     }
 
-    const originalTopic = episode.topics[0];
+    const originalTopic = episode[0].topics[0];
 
     const newTopic = {
       _id: new ObjectId(),
@@ -250,7 +263,7 @@ router.post("/:episodeId/:topicId", async (req: Request, res: Response) => {
       isChild: originalTopic.isChild,
       isParent: false,
       name: originalTopic.name,
-      order: episode?.topics.length,
+      order: episode[0].totalTopics + 1,
       parentId: originalTopic.parentId,
       timer: originalTopic.timer,
       articles: originalTopic.articles,
