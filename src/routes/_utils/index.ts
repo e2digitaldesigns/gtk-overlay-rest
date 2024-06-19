@@ -67,18 +67,26 @@ export async function imageSizeParserManual(
   return data;
 }
 
-export function pushToS3(fileBuffer: Buffer | undefined, fileName: string) {
+const s3BucketsObj: { [key: string]: string } = {
+  image: "images/user-images/",
+  video: "videos/user-videos/"
+};
+
+export function pushToS3(
+  fileBuffer: Buffer | File | undefined,
+  fileName: string
+) {
   return new Promise((resolve, reject) => {
-    const imgParams = {
+    const contentParams = {
       Bucket: process.env.AWS_SECRET_S3_BUCKET || "",
       Key: fileName,
-      ContentType: "image/png",
+      ContentType: fileBuffer instanceof File ? fileBuffer.type : "image/png",
       Body: fileBuffer,
       ACL: "public-read"
     };
 
     s3bucket.upload(
-      imgParams,
+      contentParams,
       function (err: unknown, data: S3.ManagedUpload.SendData) {
         if (err) {
           reject(err);
@@ -90,11 +98,11 @@ export function pushToS3(fileBuffer: Buffer | undefined, fileName: string) {
   });
 }
 
-export function deleteFromS3(fileName: string) {
+export function deleteFromS3(fileName: string, bucketKey: string = "image") {
   return new Promise((resolve, reject) => {
     const imgParams = {
       Bucket: process.env.AWS_SECRET_S3_BUCKET || "",
-      Key: `images/user-images/${fileName}`
+      Key: `${s3BucketsObj[bucketKey]}${fileName}`
     };
 
     s3bucket.deleteObject(imgParams, function (err: unknown, data: any) {

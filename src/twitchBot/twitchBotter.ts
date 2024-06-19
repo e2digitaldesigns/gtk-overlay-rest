@@ -48,6 +48,9 @@ export class TwitchBotter {
         this.client = await this.createTwitchClient(
           await this.getBotAccessToken()
         );
+
+        await this.disconnectBot();
+
         await this.botSetter();
         await this?.client?.action(
           "icon33",
@@ -68,7 +71,7 @@ export class TwitchBotter {
       },
       connection: {
         secure: true,
-        reconnect: true,
+        reconnect: false,
         maxReconnectAttempts: Infinity,
         reconnectInterval: 2000
       },

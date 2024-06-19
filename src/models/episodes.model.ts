@@ -21,6 +21,11 @@ export interface IEpisodeTopicVotingOptions {
   value: string;
 }
 
+// export type TopicContent = {
+//   type: string | null;
+//   file: string;
+// };
+
 export interface IEpisodeTopic {
   _id: Types.ObjectId;
   desc: string;
@@ -37,7 +42,13 @@ export interface IEpisodeTopic {
   chat: string;
   voting: boolean;
   votingOptions?: IEpisodeTopicVotingOptions[];
+  // content: TopicContent;
 }
+
+export type SponsorImages = {
+  _id: Types.ObjectId;
+  url: string;
+};
 
 export interface IEpisode {
   _id: Types.ObjectId;
@@ -55,7 +66,7 @@ export interface IEpisode {
   topics: IEpisodeTopic[];
   contentBoxes: any[];
   sponsorBoxes: any[];
-  sponsorImages: string[];
+  sponsorImages: SponsorImages[];
   logo: string;
 }
 
@@ -78,6 +89,10 @@ const EpisodeTopicSchema = new Schema<IEpisodeTopic>({
   notes: { type: String, required: false, default: "" },
   chat: { type: String, required: false, default: "" },
   voting: { type: Boolean, required: true, default: false }
+});
+
+const SponsorSchema = new Schema<SponsorImages>({
+  url: { type: String, required: true, default: "" }
 });
 
 const EpisodeSchema = new Schema<IEpisode>({
@@ -109,7 +124,7 @@ const EpisodeSchema = new Schema<IEpisode>({
   topics: { type: [EpisodeTopicSchema], required: true, default: [] },
   contentBoxes: { type: [], required: true, default: [] },
   sponsorBoxes: { type: [], required: true, default: [] },
-  sponsorImages: { type: [], required: true, default: [] },
+  sponsorImages: { type: [SponsorSchema], required: true, default: [] },
   logo: { type: String, default: "" }
 });
 

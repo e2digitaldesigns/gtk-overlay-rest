@@ -7,12 +7,9 @@ import { EpisodeModel } from "../../models/episodes.model";
 import { socialParser } from "./utils/socialParser";
 import { sortTopics } from "./utils/sortTopics";
 import { hostParser } from "./utils/hostParser";
-import {
-  logoImageParser,
-  sponsorImageParser,
-  topicImageParser
-} from "./utils/imageParsers";
+import { logoImageParser, sponsorImageShowParser } from "./utils/imageParsers";
 import { votingParser } from "./utils/votingparser";
+import { topicContentParser } from "./utils/contentParser";
 
 const router = express.Router();
 
@@ -52,12 +49,12 @@ router.get(
         ...epData,
         logo: logoImageParser(epData?.logo),
         hosts: hostParser(epData?.availableHosts, epData?.hosts),
-        sponsorImages: sponsorImageParser(epData?.sponsorImages),
+        sponsorImages: sponsorImageShowParser(epData?.sponsorImages),
         socialNetworks: socialParser(
           epData?.databaseSocials,
           epData?.socialNetworks
         ),
-        topics: sortTopics(topicImageParser(votingParser(epData?.topics)))
+        topics: sortTopics(topicContentParser(votingParser(epData?.topics)))
       };
 
       delete result.availableHosts;
@@ -112,12 +109,12 @@ router.get(
         active: true,
         logo: logoImageParser(epData?.logo),
         hosts: hostParser(epData.availableHosts, epData.hosts),
-        sponsorImages: sponsorImageParser(epData?.sponsorImages),
+        sponsorImages: sponsorImageShowParser(epData?.sponsorImages),
         socialNetworks: socialParser(
           epData.databaseSocials,
           epData.socialNetworks
         ),
-        topics: sortTopics(topicImageParser(votingParser(epData?.topics)))
+        topics: sortTopics(topicContentParser(votingParser(epData?.topics)))
       };
 
       delete result.availableHosts;
@@ -143,17 +140,22 @@ router.get("/showRunner/:_id", async (req: Request, res: Response) => {
       })
       .exec();
 
-    const data = result
-      ? {
-          _id: result._id,
-          airDate: result.airDate,
-          logo: result.logo,
-          name: result.name,
-          number: result.number,
-          podcastName: result.podcastName,
-          topics: sortTopics(result.topics)
-        }
-      : {};
+    let data = {};
+
+    if (result) {
+      const theResult = result.toObject();
+      data = {
+        _id: result._id,
+        airDate: result.airDate,
+        logo: result.logo,
+        name: result.name,
+        number: result.number,
+        podcastName: result.podcastName,
+        topics: !theResult?.topics
+          ? []
+          : sortTopics(topicContentParser(theResult.topics))
+      };
+    }
 
     res.status(200).json(data);
   } catch (error) {

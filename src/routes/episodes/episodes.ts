@@ -1,7 +1,11 @@
 import express, { Request, Response } from "express";
 import mongoose from "mongoose";
 import { verifyToken } from "../../middleware/verifyToken";
-import { EpisodeModel, IEpisodeTopic } from "../../models/episodes.model";
+import {
+  EpisodeModel,
+  IEpisodeTopic,
+  SponsorImages
+} from "../../models/episodes.model";
 import { ITemplate } from "../../models/templates.model";
 import { IEpisode } from "./../../models/episodes.model";
 import { s3ObjectCopy, s3ObjectCopyVideo } from "../../utils/imageCopy";
@@ -235,11 +239,15 @@ router.post("/", async (req: Request, res: Response) => {
         })
       : null;
 
-    const newSponsorImages: string[] = [];
+    const newSponsorImages: SponsorImages[] = [];
     currentState?.sponsors &&
-      lastEpisode?.sponsorImages?.map((item: string) => {
-        const newItem = s3ObjectCopy(item);
-        newItem && newSponsorImages.push(newItem);
+      lastEpisode?.sponsorImages?.map((item: SponsorImages) => {
+        const newItem = s3ObjectCopy(item.url);
+        newItem &&
+          newSponsorImages.push({
+            _id: new ObjectId(),
+            url: newItem
+          });
       });
 
     const episode = {
@@ -326,7 +334,9 @@ router.delete("/:_id", async (req: Request, res: Response) => {
 
     const imageArray: string[] = [];
     episode?.logo && imageArray.push(episode.logo);
-    episode?.sponsorImages?.map((item: string) => imageArray.push(item));
+    episode?.sponsorImages?.map((item: SponsorImages) =>
+      imageArray.push(item.url)
+    );
 
     episode?.topics?.map(
       (item: IEpisodeTopic) => item?.img && imageArray.push(item.img)

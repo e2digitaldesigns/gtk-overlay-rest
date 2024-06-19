@@ -35,8 +35,15 @@ const s3bucket = new S3({
 
 router.post("/update", upload, async (req: Request, res: Response) => {
   try {
-    const fileName = `${v4()}.png`;
+    // get file extension of the uploaded file
+    const fileExtension = path
+      .extname((req as any).file.originalname)
+      .split(".")[1];
+
+    const fileName = `${v4()}.${fileExtension}`;
     if (!process.env.AWS_SECRET_S3_BUCKET) throw new Error("No AWS S3 Bucket");
+
+    let imageId: mongoose.Types.ObjectId | null = null;
 
     const template = await EpisodeModel.aggregate([
       {
@@ -84,6 +91,34 @@ router.post("/update", upload, async (req: Request, res: Response) => {
         );
         break;
 
+      case "content":
+        const episodeContentTopics = await EpisodeModel.findOneAndUpdate(
+          {
+            _id: new ObjectId(req.body.episodeId),
+            "topics._id": new ObjectId(req.body.topicId)
+          },
+          {
+            $set: {
+              "topics.$.video": fileName,
+              "topics.$.content": {
+                file: fileName,
+                type: "image"
+              }
+            }
+          },
+          {
+            returnOriginal: true,
+            projection: { "topics.$": 1 }
+          }
+        );
+
+        const deleteFile = episodeContentTopics?.topics?.[0].video;
+
+        if (deleteFile) {
+          await deleteFromS3(deleteFile);
+        }
+        break;
+
       case "topic":
         const episodeTopics = await EpisodeModel.findOneAndUpdate(
           {
@@ -107,10 +142,12 @@ router.post("/update", upload, async (req: Request, res: Response) => {
         break;
 
       case "sponsors":
+        imageId = new ObjectId();
         await EpisodeModel.findOneAndUpdate(
           { _id: new ObjectId(req.body.episodeId) },
-          { $push: { sponsorImages: fileName } }
+          { $push: { sponsorImages: { _id: imageId, url: fileName } } }
         );
+
         break;
 
       default:
@@ -119,12 +156,85 @@ router.post("/update", upload, async (req: Request, res: Response) => {
 
     res.send({
       success: 1,
-      fileName: process.env.S3_CLOUD_IMAGES + fileName
+      _id: req.body.imageType === "sponsors" ? imageId : null,
+      fileName,
+      url: process.env.S3_CLOUD_IMAGES + fileName
     });
   } catch (error) {
     res.send(error);
   }
 });
+
+router.post(
+  "/update/topic-content",
+  upload,
+  async (req: Request, res: Response) => {
+    try {
+      const fileExtension = path
+        .extname((req as any).file.originalname)
+        .split(".")[1];
+
+      const fileName = `${v4()}.${fileExtension}`;
+
+      if (!process.env.AWS_SECRET_S3_BUCKET)
+        throw new Error("No AWS S3 Bucket");
+
+      const vidArray = ["mp4", "webm", "ogg"];
+
+      const dir = vidArray.includes(fileExtension)
+        ? "videos/user-videos"
+        : "images/user-images";
+
+      const type = vidArray.includes(fileExtension) ? "video" : "image";
+      const clouds =
+        type === "video"
+          ? process.env.S3_CLOUD_VIDEOS
+          : process.env.S3_CLOUD_IMAGES;
+
+      console.log("dir", dir);
+
+      const formFile = (req as any).file;
+      const s3Push = await pushToS3(formFile.buffer, `${dir}/${fileName}`);
+      if (!s3Push) throw new Error("S3 Push failed");
+
+      const episodeContentTopics = await EpisodeModel.findOneAndUpdate(
+        {
+          _id: new ObjectId(req.body.episodeId),
+          "topics._id": new ObjectId(req.body.topicId)
+        },
+        {
+          $set: {
+            "topics.$.video": fileName,
+            "topics.$.content": {
+              file: fileName,
+              type
+            }
+          }
+        },
+        {
+          returnOriginal: true,
+          projection: { "topics.$": 1 }
+        }
+      );
+
+      const deleteFile = episodeContentTopics?.topics?.[0].video;
+
+      if (deleteFile) {
+        await deleteFromS3(deleteFile);
+      }
+
+      res.send({
+        success: 1,
+        type,
+        fileName,
+        url: clouds + fileName
+      });
+    } catch (error) {
+      console.error(error);
+      res.send(error);
+    }
+  }
+);
 
 router.post("/", upload, async (req: Request, res: Response) => {
   const theFile = (req as any).file;
@@ -206,33 +316,42 @@ router.delete("/:_id", async (req: Request, res: Response) => {
 });
 
 router.delete(
-  "/update/:episodeId/:imageType/:imageName",
+  "/update/:episodeId/:imageType/:imageId",
   async (req: Request, res: Response) => {
-    try {
-      if (!process.env.AWS_SECRET_S3_BUCKET)
-        throw new Error("No AWS S3 Bucket");
-      deleteFromS3(req.params.imageName);
+    let fileToDelete: string | undefined = "";
+    let isImage = true;
 
+    try {
       switch (req.params.imageType) {
         case "logo":
-          await EpisodeModel.findOneAndUpdate(
+          const topicLogoDelete = await EpisodeModel.findOneAndUpdate(
             { _id: new ObjectId(req.params.episodeId) },
             { $unset: { logo: "" } }
           );
+
+          fileToDelete = topicLogoDelete?.logo;
+          console.log("fileToDelete", fileToDelete);
           break;
 
         case "sponsors":
-          await EpisodeModel.findOneAndUpdate(
+          const topicSponsorDelete = await EpisodeModel.findOneAndUpdate(
             { _id: new ObjectId(req.params.episodeId) },
-            { $pull: { sponsorImages: req.params.imageName } }
+            {
+              $pull: {
+                sponsorImages: { _id: new ObjectId(req.params.imageId) }
+              }
+            }
           );
-          break;
+
+          fileToDelete = topicSponsorDelete?.sponsorImages?.find(
+            f => f._id.toString() === req.params.imageId
+          )?.url;
 
         case "topic":
-          await EpisodeModel.findOneAndUpdate(
+          const topicImageDelete = await EpisodeModel.findOneAndUpdate(
             {
               _id: new ObjectId(req.params.episodeId),
-              "topics._id": new ObjectId(req.query.topicId as string)
+              "topics._id": new ObjectId(req.params.imageId as string)
             },
             {
               $set: {
@@ -241,11 +360,47 @@ router.delete(
             }
           );
 
+          fileToDelete = topicImageDelete?.topics?.find(
+            f => f._id.toString() === req.params.imageId
+          )?.img;
+          break;
+
+        case "content":
+          const topicContentDelete = await EpisodeModel.findOneAndUpdate(
+            {
+              _id: new ObjectId(req.params.episodeId),
+              "topics._id": new ObjectId(req.params.imageId as string)
+            },
+            {
+              $set: {
+                "topics.$.video": " ",
+                "topics.$.content": { file: " ", type: null }
+              }
+            }
+          );
+
+          fileToDelete = topicContentDelete?.topics?.find(
+            f => f._id.toString() === req.params.imageId
+          )?.video;
+
+          const ext = fileToDelete?.split(".").pop();
+          isImage = ["jpg", "jpeg", "png", "svg", "webp"].includes(
+            ext as string
+          );
+
           break;
 
         default:
           break;
       }
+
+      if (!process.env.AWS_SECRET_S3_BUCKET) {
+        throw new Error("No AWS S3 Bucket");
+      }
+      if (fileToDelete) {
+        deleteFromS3(fileToDelete, isImage ? "image" : "video");
+      }
+
       res.json({
         success: 1
       });
@@ -268,6 +423,8 @@ router.post("/youtube-video", upload, async (req: Request, res: Response) => {
       }
     );
 
+    const videoLink = data.body.videoUrl.split("user-videos/").pop();
+
     const episode = await EpisodeModel.findOneAndUpdate(
       {
         _id: new ObjectId(episodeId),
@@ -275,7 +432,7 @@ router.post("/youtube-video", upload, async (req: Request, res: Response) => {
       },
       {
         $set: {
-          "topics.$.video": data.body.videoUrl
+          "topics.$.video": videoLink
         }
       },
       {
@@ -297,7 +454,8 @@ router.post("/youtube-video", upload, async (req: Request, res: Response) => {
 
     res.json({
       success: 1,
-      videoUrl: data.body.videoUrl
+      url: data.body.videoUrl,
+      fileName: videoLink
     });
   } catch (error) {
     res.send("error");

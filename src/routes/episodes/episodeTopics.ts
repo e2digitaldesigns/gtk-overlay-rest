@@ -2,13 +2,12 @@ import express, { Request, Response } from "express";
 import mongoose from "mongoose";
 import { verifyToken } from "../../middleware/verifyToken";
 import { EpisodeModel } from "../../models/episodes.model";
-import { ITemplate } from "../../models/templates.model";
 import { IEpisode } from "../../models/episodes.model";
 import { deleteFromS3 } from "../fileUpload/s3Delete";
 const ObjectId = mongoose.Types.ObjectId;
 
 import _sortBy from "lodash/sortBy";
-import { topicImageParser } from "../show/utils/imageParsers";
+import { topicContentParser } from "../show/utils/contentParser";
 
 const router = express.Router();
 router.use(verifyToken);
@@ -44,7 +43,7 @@ router.get("/:episodeId", async (req: Request, res: Response) => {
       templateId: result[0].templateId,
       images: result[0].template[0].images.topic,
       topics: result?.[0]?.topics
-        ? _sortBy(topicImageParser(result[0].topics), "order")
+        ? _sortBy(topicContentParser(result[0].topics), "order")
         : []
     });
   } catch (error) {
