@@ -29,6 +29,8 @@ import { videoOverlay } from "./videoOverlay/videoOverlay";
 import { videoOverlayPlaylist } from "./videoOverlay/videoPlaylist";
 import { chatSender } from "./chatSender/chatSender";
 
+import { upgrade } from "./upgrade/upgrade";
+
 export const routing = (app: Express) => {
   const prefix = "/api/v1/";
   app.use(express.json());
@@ -62,4 +64,6 @@ export const routing = (app: Express) => {
   app.use(`${prefix}videoOverlay`, videoOverlay);
   app.use(`${prefix}videoOverlayPlaylist`, videoOverlayPlaylist);
   app.use(`${prefix}chatSender`, chatSender);
+
+  app.use(`${prefix}upgrade`, upgrade);
 };
