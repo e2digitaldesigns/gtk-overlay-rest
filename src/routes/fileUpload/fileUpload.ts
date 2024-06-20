@@ -346,6 +346,7 @@ router.delete(
           fileToDelete = topicSponsorDelete?.sponsorImages?.find(
             f => f._id.toString() === req.params.imageId
           )?.url;
+          break;
 
         case "topic":
           const topicImageDelete = await EpisodeModel.findOneAndUpdate(
