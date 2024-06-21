@@ -1,7 +1,9 @@
 import { v4 } from "uuid";
 import { Server as SocketServer } from "socket.io";
-import { getGTKUserId, getGTKTemplateId } from "../../utils/dbFecthers";
+import { getGTKUserId, getGTKTemplateId } from "../../../utils/dbFecthers";
 import { Client as TMIClient } from "tmi.js";
+import { generateRandomCount } from "../../../../../../utils/generateRandomCount";
+import { randomEmoji } from "./randomEmoji";
 
 export async function overlayVoting(
   command: string,
@@ -11,14 +13,28 @@ export async function overlayVoting(
   client?: TMIClient | null
 ): Promise<void> {
   const parsedChannel = channel.startsWith("#") ? channel.slice(1) : channel;
+
   const uid = await getGTKUserId(parsedChannel);
   const tid = uid ? await getGTKTemplateId(uid) : null;
-
   if (!uid || !tid) return;
 
   const action = parseAction(command);
-
   if (!action) return;
+
+  const superEmojiCount = generateRandomCount(12, 18);
+  const normalEmojiCount = generateRandomCount(3, 5);
+  const emojiCount = action === "super" ? superEmojiCount : normalEmojiCount;
+  const emojiArray = [];
+
+  for (let i = 0; i < emojiCount; i++) {
+    emojiArray.push({
+      _id: v4(),
+      action,
+      createdAt: new Date(),
+      emoji: randomEmoji(action),
+      start: generateRandomCount(1, 20)
+    });
+  }
 
   socket.emit("gtkVoting", {
     _id: v4(),
@@ -28,7 +44,8 @@ export async function overlayVoting(
     host: command.charAt(command.length - 1),
     tid,
     uid,
-    createdAt: new Date()
+    createdAt: new Date(),
+    emojis: emojiArray
   });
 
   if (client) {
