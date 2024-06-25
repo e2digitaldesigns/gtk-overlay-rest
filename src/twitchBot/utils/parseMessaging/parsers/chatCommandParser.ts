@@ -166,6 +166,46 @@ export async function chatCommandParser(
           client
         )
       ),
+    "!win1": () =>
+      handleSubscriberCommand(() =>
+        chatCommands.overlayVoting(
+          command,
+          tags.username,
+          channel,
+          socket,
+          client
+        )
+      ),
+    "!win2": () =>
+      handleSubscriberCommand(() =>
+        chatCommands.overlayVoting(
+          command,
+          tags.username,
+          channel,
+          socket,
+          client
+        )
+      ),
+    "!win3": () =>
+      handleSubscriberCommand(() =>
+        chatCommands.overlayVoting(
+          command,
+          tags.username,
+          channel,
+          socket,
+          client
+        )
+      ),
+    "!win4": () =>
+      handleSubscriberCommand(() =>
+        chatCommands.overlayVoting(
+          command,
+          tags.username,
+          channel,
+          socket,
+          client
+        )
+      ),
     "!topic": () => chatCommands.getTopic(tags.username, client, channel),
     "!true": () =>
       chatCommands.overlayVoting(

@@ -51,10 +51,24 @@ export function randomEmoji(action: string): string {
     "💫"
   ];
 
+  const winEmojis = [
+    "🎉",
+    "🎊",
+    "🎈",
+    "🎆",
+    "🎇",
+    "🎁",
+    "🎀",
+    "🧨",
+    "🪅",
+    "🎄"
+  ];
+
   const emojiSets: { [key: string]: string[] } = {
     add: addEmojis,
     remove: removeEmojis,
-    super: superEmojis.concat(addEmojis)
+    super: superEmojis.concat(addEmojis),
+    win: superEmojis.concat(addEmojis).concat(winEmojis)
   };
 
   const emojis = emojiSets[action];

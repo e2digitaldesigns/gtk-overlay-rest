@@ -21,9 +21,14 @@ export async function overlayVoting(
   const action = parseAction(command);
   if (!action) return;
 
-  const superEmojiCount = generateRandomCount(12, 18);
-  const normalEmojiCount = generateRandomCount(3, 5);
-  const emojiCount = action === "super" ? superEmojiCount : normalEmojiCount;
+  const emojiCountObj: { [key: string]: number } = {
+    add: generateRandomCount(3, 5),
+    remove: generateRandomCount(3, 5),
+    super: generateRandomCount(12, 18),
+    win: generateRandomCount(25, 50)
+  };
+
+  const emojiCount = emojiCountObj[action];
   const emojiArray = [];
 
   for (let i = 0; i < emojiCount; i++) {
@@ -66,7 +71,8 @@ function parseAction(command: string): string | undefined {
     "!true": "true",
     "!false": "false",
     "!yes": "yes",
-    "!no": "no"
+    "!no": "no",
+    "!win": "win"
   };
 
   const keys = Object.keys(actionObj);

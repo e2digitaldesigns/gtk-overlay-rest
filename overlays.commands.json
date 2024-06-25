@@ -468,5 +468,45 @@
     "users": [],
     "description": "Add users playlist to the playing list.",
     "usage": "!vplayMe"
+  },
+  {
+    "_id": {
+      "$oid": "6677378e361db60a7f5665e8"
+    },
+    "command": "!win1",
+    "type": "podcastOverlays",
+    "subType": "hostVoting",
+    "users": [],
+    "description": "Host 1 wins topic"
+  },
+  {
+    "_id": {
+      "$oid": "667737a1361db60a7f5665ea"
+    },
+    "command": "!win2",
+    "type": "podcastOverlays",
+    "subType": "hostVoting",
+    "users": [],
+    "description": "Host 2 wins topic"
+  },
+  {
+    "_id": {
+      "$oid": "667737ac361db60a7f5665ec"
+    },
+    "command": "!win3",
+    "type": "podcastOverlays",
+    "subType": "hostVoting",
+    "users": [],
+    "description": "Host 3 wins topic"
+  },
+  {
+    "_id": {
+      "$oid": "667737b6361db60a7f5665ee"
+    },
+    "command": "!win4",
+    "type": "podcastOverlays",
+    "subType": "hostVoting",
+    "users": [],
+    "description": "Host 4 wins topic"
   }
 ]
