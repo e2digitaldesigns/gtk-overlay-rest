@@ -29,9 +29,7 @@ export class TwitchBotter {
     this.expressApp = expressApp;
 
     (async () => {
-      this.client = await this.createTwitchClient(
-        await this.getBotAccessToken()
-      );
+      this.client = await this.createTwitchClient(await this.getBotAccessToken());
       await this.botSetter();
     })();
 
@@ -45,17 +43,12 @@ export class TwitchBotter {
     setInterval(async () => {
       if (!this.client) {
         console.log(77, "bot not connected");
-        this.client = await this.createTwitchClient(
-          await this.getBotAccessToken()
-        );
+        this.client = await this.createTwitchClient(await this.getBotAccessToken());
 
         await this.disconnectBot();
 
         await this.botSetter();
-        await this?.client?.action(
-          "icon33",
-          "GamerToolkit Chat is back online"
-        );
+        await this?.client?.action("icon33", "GamerToolkit Chat is back online");
       } else {
         console.log(82, "bot connected");
       }
@@ -71,7 +64,7 @@ export class TwitchBotter {
       },
       connection: {
         secure: true,
-        reconnect: false,
+        reconnect: true,
         maxReconnectAttempts: Infinity,
         reconnectInterval: 2000
       },
@@ -169,9 +162,7 @@ export class TwitchBotter {
       .get(`${TwitchEndPoints.Users}${username}`, {
         headers: {
           "Client-ID": process.env.TWITCH_CLIENT_ID,
-          Authorization: `Bearer ${
-            botAccessToken || (await this.getBotAccessToken())
-          }`
+          Authorization: `Bearer ${botAccessToken || (await this.getBotAccessToken())}`
         }
       })
       .then(res => {
@@ -183,9 +174,7 @@ export class TwitchBotter {
         if (botAccessToken) {
           return "";
         } else {
-          const newAccessToken = await refreshTwitchAccessTokenMethod(
-            this.botName
-          );
+          const newAccessToken = await refreshTwitchAccessTokenMethod(this.botName);
           await this.getUserProfileImage(username, newAccessToken);
         }
       });
@@ -218,9 +207,7 @@ export class TwitchBotter {
         {
           headers: {
             "Client-ID": process.env.TWITCH_CLIENT_ID,
-            Authorization: `Bearer ${
-              streamerAccessToken || streamerData.accessToken
-            }`
+            Authorization: `Bearer ${streamerAccessToken || streamerData.accessToken}`
           }
         }
       )
@@ -231,8 +218,9 @@ export class TwitchBotter {
         if (streamerAccessToken) {
           return false;
         } else {
-          const refreshedAccessToken =
-            await refreshTwitchStreamerAccessTokenMethod(streamerChannel);
+          const refreshedAccessToken = await refreshTwitchStreamerAccessTokenMethod(
+            streamerChannel
+          );
           return this.isChatterFollowing(
             streamerChannel,
             chatterUserName,
