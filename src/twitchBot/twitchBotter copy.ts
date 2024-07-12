@@ -10,8 +10,8 @@ import { parseMessaging } from "./utils/parseMessaging/parseMessaging";
 import { GtkTwitchBotModel } from "../models/gtkBot.model";
 import { TwitchAuthModel } from "../models/twitch.model";
 
-import * as methods from "./methods";
-
+import { refreshTwitchAccessTokenMethod } from "./methods/refreshAccessToken";
+import { refreshTwitchStreamerAccessTokenMethod } from "./methods/refreshStreamerToken";
 import { TwitchBotData, TwitchEndPoints } from "./types";
 
 export class TwitchBotter {
@@ -29,17 +29,38 @@ export class TwitchBotter {
     this.expressApp = expressApp;
 
     (async () => {
-      this.client = await this.createTwitchClient();
+      this.client = await this.createTwitchClient(await this.getBotAccessToken());
       await this.botSetter();
+    })();
+
+    (async () => {
+      await this.botChecker();
     })();
   }
 
-  async createTwitchClient() {
+  private async botChecker() {
+    // check bot status every 5 minutes
+    setInterval(async () => {
+      if (!this.client) {
+        console.log(77, "bot not connected");
+        this.client = await this.createTwitchClient(await this.getBotAccessToken());
+
+        await this.disconnectBot();
+
+        await this.botSetter();
+        await this?.client?.action("icon33", "GamerToolkit Chat is back online");
+      } else {
+        console.log(82, "bot connected");
+      }
+    }, 5 * 60 * 1000);
+  }
+
+  async createTwitchClient(accessToken: string) {
     const client = new TMIClient({
       channels: [...(await getTwitchChannels())],
       identity: {
         username: this.botName,
-        password: await methods.refreshTwitchAccessTokenMethod(this.botName)
+        password: accessToken
       },
       connection: {
         secure: true,
@@ -77,12 +98,35 @@ export class TwitchBotter {
     }
   }
 
+  async disconnectBot() {
+    try {
+      await this.client?.disconnect();
+    } finally {
+      this.expressApp.set("twitchClient", null);
+      this.client = null;
+    }
+  }
+
+  private async resetBot() {
+    const newAccessToken = await refreshTwitchAccessTokenMethod(this.botName);
+
+    try {
+      await this.disconnectBot();
+    } catch (error) {}
+
+    this.client = await this.createTwitchClient(newAccessToken);
+    await this.botSetter();
+  }
+
   private async botSetter() {
     this?.client
       ?.connect()
-      .then(() => console.log(83, "chat connected"))
+      .then(() => console.log(93, "chat connected"))
       .catch((err: unknown) => {
-        console.error(85, "err", err);
+        console.error(95, "err", err);
+        if (err === "Login authentication failed") {
+          this.resetBot();
+        }
       });
 
     this?.client?.on("message", (channel, userstate, message, self) => {
@@ -99,7 +143,7 @@ export class TwitchBotter {
     });
 
     this?.client?.on("disconnected", async (data: string) => {
-      console.error(102, "chat disconnected", data);
+      console.log(115, "chat disconnected", data);
       this.expressApp.set("twitchClient", null);
       this.client = null;
     });
@@ -130,7 +174,7 @@ export class TwitchBotter {
         if (botAccessToken) {
           return "";
         } else {
-          const newAccessToken = await methods.refreshTwitchAccessTokenMethod(this.botName);
+          const newAccessToken = await refreshTwitchAccessTokenMethod(this.botName);
           await this.getUserProfileImage(username, newAccessToken);
         }
       });
@@ -174,7 +218,7 @@ export class TwitchBotter {
         if (streamerAccessToken) {
           return false;
         } else {
-          const refreshedAccessToken = await methods.refreshTwitchStreamerAccessTokenMethod(
+          const refreshedAccessToken = await refreshTwitchStreamerAccessTokenMethod(
             streamerChannel
           );
           return this.isChatterFollowing(

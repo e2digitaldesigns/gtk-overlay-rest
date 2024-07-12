@@ -1,4 +1,5 @@
 export const socials = [
+  { _id: "0", color: "", bgColor: "", site: "Aka" },
   { _id: "1", color: "", bgColor: "", site: "Discord" },
   { _id: "2", color: "", bgColor: "", site: "Facebook" },
   { _id: "3", color: "", bgColor: "", site: "Instagram" },
