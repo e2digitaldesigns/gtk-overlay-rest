@@ -38,11 +38,7 @@ router.get("/manual/:type", function (req: Request, res: Response) {
 });
 
 router.post("/manual/:type", function (req: Request, res: Response) {
-  const { action, nodeSendArray } = parseParams(
-    req.url,
-    req.params.type,
-    req.body
-  );
+  const { action, nodeSendArray } = parseParams(req.url, req.params.type, req.body);
 
   res.json({ action, nodeSendArray });
   res.locals.io.emit(action, nodeSendArray);

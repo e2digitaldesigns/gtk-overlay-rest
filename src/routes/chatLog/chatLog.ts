@@ -40,7 +40,7 @@ router.get("/:userId/", async (req: Request, res: Response) => {
 
 router.post("/:sendMessageToOverlay/", async (req: Request, res: Response) => {
   try {
-    const result = await MODEL.findOne({ tagId: req.body._id });
+    const result = await MODEL.findOne({ _id: new ObjectId(req.body._id) });
 
     if (!result) {
       throw new Error("No chat message found");
@@ -67,7 +67,66 @@ router.post("/:sendMessageToOverlay/", async (req: Request, res: Response) => {
 
     res.status(200).send({ success: true });
   } catch (error) {
-    res.status(404).send({ success: false, error });
+    console.error(error);
+    res.status(200).send({ success: true });
+  }
+});
+
+router.get("/messages/:userId/", async (req: Request, res: Response) => {
+  try {
+    const result = await MODEL.find({
+      gtkUserId: new ObjectId(req.params.userId),
+      isDeleted: { $ne: true }
+    })
+      .sort({
+        date: -1
+      })
+      .limit(50);
+
+    const messages = result.map(message => ({
+      _id: message._id,
+      broadcasterName: message.channel,
+      fontColor: message.fontColor,
+      msg: message.message,
+      msgEmotes: message.msgEmotes,
+      name: message.username,
+      url: message.image
+    }));
+
+    res.status(200).json({ messages: messages.reverse() });
+  } catch (error) {
+    res.status(404).json({ messages: [] });
+  }
+});
+
+router.patch("/messages/:userId/remove/", async (req: Request, res: Response) => {
+  const { templateId, userId, messageId } = req.body;
+  try {
+    const result = await MODEL.findOneAndUpdate(
+      {
+        _id: new ObjectId(messageId),
+        gtkUserId: new ObjectId(userId)
+      },
+      {
+        isDeleted: true
+      }
+    );
+
+    if (!result) {
+      throw new Error("No chat message found");
+    }
+
+    res.locals.io.emit("gtkChatRelay", {
+      action: "delete-message-by-id",
+      tid: templateId,
+      uid: userId,
+      _id: messageId,
+      data: {}
+    });
+
+    res.status(200).send({ success: true });
+  } catch (error) {
+    res.status(404).send(error);
   }
 });
 

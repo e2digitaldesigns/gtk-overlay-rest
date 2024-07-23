@@ -6,11 +6,9 @@ import mongoose from "mongoose";
 
 const ObjectId = mongoose.Types.ObjectId;
 
-const validatedCommand = async (
-  gtkUserId: string,
-  command: string
-): Promise<boolean> => {
-  const exceptions = ["!gtk", "!reply"];
+const validatedCommand = async (gtkUserId: string, command: string): Promise<boolean> => {
+  console.log(10, command);
+  const exceptions = ["!gtk", "!reply", "!cb"];
   if (exceptions.includes(command)) return true;
 
   const data = await UserCommandsModel.findOne({
@@ -36,217 +34,71 @@ export async function chatCommandParser(
   const commandPrefixes = ["!", "1", "2", "true", "false", "yes", "no"];
   const trimmedMessage = message.trim();
 
-  if (!commandPrefixes.some(prefix => trimmedMessage.startsWith(prefix)))
-    return;
+  if (!commandPrefixes.some(prefix => trimmedMessage.startsWith(prefix))) return;
 
   const [typedCommand, ...args] = trimmedMessage.split(" ");
-  const command = typedCommand.startsWith("!")
-    ? typedCommand
-    : `!${typedCommand}`;
-  const isCommandValid = await validatedCommand(
-    gtkUserId,
-    typedCommand.toLowerCase()
-  );
+  const command = typedCommand.startsWith("!") ? typedCommand : `!${typedCommand}`;
+  const isCommandValid = await validatedCommand(gtkUserId, typedCommand.toLowerCase());
 
   if (!isCommandValid) {
     if (!typedCommand.startsWith("!")) return;
     return;
   }
 
-  const userIsMod =
-    tags.mod || channel.slice(1).toLowerCase() === tags.username.toLowerCase();
+  const userIsMod = tags.mod || channel.slice(1).toLowerCase() === tags.username.toLowerCase();
 
   const commandActions: { [key: string]: Function } = {
-    "!1": () =>
-      chatCommands.overlayVoting(
-        command,
-        tags.username,
-        channel,
-        socket,
-        client
-      ),
-    "!2": () =>
-      chatCommands.overlayVoting(
-        command,
-        tags.username,
-        channel,
-        socket,
-        client
-      ),
-    "!d1": () =>
-      chatCommands.overlayVoting(
-        command,
-        tags.username,
-        channel,
-        socket,
-        client
-      ),
-    "!d2": () =>
-      chatCommands.overlayVoting(
-        command,
-        tags.username,
-        channel,
-        socket,
-        client
-      ),
-    "!d3": () =>
-      chatCommands.overlayVoting(
-        command,
-        tags.username,
-        channel,
-        socket,
-        client
-      ),
-    "!d4": () =>
-      chatCommands.overlayVoting(
-        command,
-        tags.username,
-        channel,
-        socket,
-        client
-      ),
-    "!false": () =>
-      chatCommands.overlayVoting(
-        command,
-        tags.username,
-        channel,
-        socket,
-        client
-      ),
+    "!1": () => chatCommands.overlayVoting(command, tags.username, channel, socket, client),
+    "!2": () => chatCommands.overlayVoting(command, tags.username, channel, socket, client),
+    "!d1": () => chatCommands.overlayVoting(command, tags.username, channel, socket, client),
+    "!d2": () => chatCommands.overlayVoting(command, tags.username, channel, socket, client),
+    "!d3": () => chatCommands.overlayVoting(command, tags.username, channel, socket, client),
+    "!d4": () => chatCommands.overlayVoting(command, tags.username, channel, socket, client),
+    "!false": () => chatCommands.overlayVoting(command, tags.username, channel, socket, client),
     "!gtk": () => client.action(channel, "GamerToolkit Test Command"),
     "!gtk2": () => client.action(channel, "GamerToolkit Test Command 2"),
-    "!no": () =>
-      chatCommands.overlayVoting(
-        command,
-        tags.username,
-        channel,
-        socket,
-        client
-      ),
+    "!no": () => chatCommands.overlayVoting(command, tags.username, channel, socket, client),
     "!pvr": () => handleVideoRequestOverlay("playlist-return-video-request"),
     "!rank": () => chatCommands.getRankByUser(tags.username, client, channel),
     "!reply": () => client.action(channel, `@${tags.username}, heya!`),
     "!sv1": () =>
       handleSubscriberCommand(() =>
-        chatCommands.overlayVoting(
-          command,
-          tags.username,
-          channel,
-          socket,
-          client
-        )
+        chatCommands.overlayVoting(command, tags.username, channel, socket, client)
       ),
     "!sv2": () =>
       handleSubscriberCommand(() =>
-        chatCommands.overlayVoting(
-          command,
-          tags.username,
-          channel,
-          socket,
-          client
-        )
+        chatCommands.overlayVoting(command, tags.username, channel, socket, client)
       ),
     "!sv3": () =>
       handleSubscriberCommand(() =>
-        chatCommands.overlayVoting(
-          command,
-          tags.username,
-          channel,
-          socket,
-          client
-        )
+        chatCommands.overlayVoting(command, tags.username, channel, socket, client)
       ),
     "!sv4": () =>
       handleSubscriberCommand(() =>
-        chatCommands.overlayVoting(
-          command,
-          tags.username,
-          channel,
-          socket,
-          client
-        )
+        chatCommands.overlayVoting(command, tags.username, channel, socket, client)
       ),
     "!win1": () =>
       handleSubscriberCommand(() =>
-        chatCommands.overlayVoting(
-          command,
-          tags.username,
-          channel,
-          socket,
-          client
-        )
+        chatCommands.overlayVoting(command, tags.username, channel, socket, client)
       ),
     "!win2": () =>
       handleSubscriberCommand(() =>
-        chatCommands.overlayVoting(
-          command,
-          tags.username,
-          channel,
-          socket,
-          client
-        )
+        chatCommands.overlayVoting(command, tags.username, channel, socket, client)
       ),
     "!win3": () =>
       handleSubscriberCommand(() =>
-        chatCommands.overlayVoting(
-          command,
-          tags.username,
-          channel,
-          socket,
-          client
-        )
+        chatCommands.overlayVoting(command, tags.username, channel, socket, client)
       ),
     "!win4": () =>
       handleSubscriberCommand(() =>
-        chatCommands.overlayVoting(
-          command,
-          tags.username,
-          channel,
-          socket,
-          client
-        )
+        chatCommands.overlayVoting(command, tags.username, channel, socket, client)
       ),
     "!topic": () => chatCommands.getTopic(tags.username, client, channel),
-    "!true": () =>
-      chatCommands.overlayVoting(
-        command,
-        tags.username,
-        channel,
-        socket,
-        client
-      ),
-    "!v1": () =>
-      chatCommands.overlayVoting(
-        command,
-        tags.username,
-        channel,
-        socket,
-        client
-      ),
-    "!v2": () =>
-      chatCommands.overlayVoting(
-        command,
-        tags.username,
-        channel,
-        socket,
-        client
-      ),
-    "!v3": () =>
-      chatCommands.overlayVoting(
-        command,
-        tags.username,
-        channel,
-        socket,
-        client
-      ),
-    "!v4": () =>
-      chatCommands.overlayVoting(
-        command,
-        tags.username,
-        channel,
-        socket,
-        client
-      ),
+    "!true": () => chatCommands.overlayVoting(command, tags.username, channel, socket, client),
+    "!v1": () => chatCommands.overlayVoting(command, tags.username, channel, socket, client),
+    "!v2": () => chatCommands.overlayVoting(command, tags.username, channel, socket, client),
+    "!v3": () => chatCommands.overlayVoting(command, tags.username, channel, socket, client),
+    "!v4": () => chatCommands.overlayVoting(command, tags.username, channel, socket, client),
     "!vadd": () =>
       handleModOrSubscriberCommand(() =>
         chatCommands.videoPassThrough(command, channel, socket, tags.username)
@@ -263,8 +115,7 @@ export async function chatCommandParser(
       handleModOrSubscriberCommand(() =>
         chatCommands.videoPassThrough(command, channel, socket, tags.username)
       ),
-    "!vhot": () =>
-      chatCommands.videoVoting(command, tags.username, channel, socket),
+    "!vhot": () => chatCommands.videoVoting(command, tags.username, channel, socket),
     "!vnext": () =>
       handleModOrSubscriberCommand(() =>
         chatCommands.videoPassThrough(command, channel, socket, tags.username)
@@ -273,8 +124,7 @@ export async function chatCommandParser(
       handleModOrSubscriberCommand(() =>
         chatCommands.videoPassThrough(command, channel, socket, tags.username)
       ),
-    "!vnot": () =>
-      chatCommands.videoVoting(command, tags.username, channel, socket),
+    "!vnot": () => chatCommands.videoVoting(command, tags.username, channel, socket),
     "!vpause": () =>
       handleModOrSubscriberCommand(() =>
         chatCommands.videoPassThrough(command, channel, socket, tags.username)
@@ -289,13 +139,7 @@ export async function chatCommandParser(
       ),
     "!vplayme": () =>
       handleModOrSubscriberCommand(() =>
-        chatCommands.videoPlaylistFetcher(
-          command,
-          tags.username,
-          channel,
-          message,
-          socket
-        )
+        chatCommands.videoPlaylistFetcher(command, tags.username, channel, message, socket)
       ),
     "!vprev": () =>
       handleModOrSubscriberCommand(() =>
@@ -306,8 +150,7 @@ export async function chatCommandParser(
       handleModOrSubscriberCommand(() =>
         chatCommands.videoPassThrough(command, channel, socket, tags.username)
       ),
-    "!vskip": () =>
-      chatCommands.videoVoting(command, tags.username, channel, socket),
+    "!vskip": () => chatCommands.videoVoting(command, tags.username, channel, socket),
     "!vsmall": () =>
       handleModOrSubscriberCommand(() =>
         chatCommands.videoPassThrough(command, channel, socket, tags.username)
@@ -340,14 +183,7 @@ export async function chatCommandParser(
         socket,
         isFollowing
       ),
-    "!yes": () =>
-      chatCommands.overlayVoting(
-        command,
-        tags.username,
-        channel,
-        socket,
-        client
-      )
+    "!yes": () => chatCommands.overlayVoting(command, tags.username, channel, socket, client)
   };
 
   if (commandActions[command]) {
@@ -380,10 +216,7 @@ export async function chatCommandParser(
 
   function handleSubscriberCommand(callback: Function) {
     if (!tags.subscriber) {
-      client?.action(
-        channel,
-        `@${tags.username}, you must be a subscriber to use super votes!`
-      );
+      client?.action(channel, `@${tags.username}, you must be a subscriber to use super votes!`);
       return;
     }
     callback();

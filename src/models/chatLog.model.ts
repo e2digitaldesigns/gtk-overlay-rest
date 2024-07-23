@@ -1,27 +1,33 @@
 import { model, Schema, Types } from "mongoose";
 
 interface IChatLog {
-  tagId: string;
-  gtkUserId: Types.ObjectId;
   channel: string;
+  date: Date;
+  fontColor: string;
+  gtkUserId: Types.ObjectId;
+  image: string;
+  isDeleted: boolean;
+  message: string;
+  msgEmotes: string;
   platform: string;
+  tagId: string;
   userId: string;
   username: string;
-  date: Date;
-  message: string;
-  image: string;
 }
 
 const ChatLogSchema = new Schema<IChatLog>({
-  tagId: { type: String, required: true },
-  gtkUserId: { type: Schema.Types.ObjectId, required: true },
   channel: { type: String, required: true },
-  platform: { type: String, required: true },
-  userId: { type: String, required: true },
-  username: { type: String, required: true },
   date: { type: Date, required: true, default: Date.now },
+  fontColor: { type: String, default: "" },
+  gtkUserId: { type: Schema.Types.ObjectId, required: true },
+  image: { type: String, default: "" },
+  isDeleted: { type: Boolean, default: false },
   message: { type: String, required: true },
-  image: { type: String, default: "" }
+  msgEmotes: { type: String, required: true },
+  platform: { type: String, required: true },
+  tagId: { type: String, required: true },
+  userId: { type: String, required: true },
+  username: { type: String, required: true }
 });
 
 export const ChatLogModel = model("chatLogs", ChatLogSchema);

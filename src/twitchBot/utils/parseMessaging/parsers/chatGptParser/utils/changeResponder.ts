@@ -13,19 +13,19 @@ export const changeResponder = (
   const responder: Responder = messageCache.get(CacheKeys.Responder) || {};
   const newResponder = message.split(" ")[1];
 
+  console.log("newResponder", newResponder);
+
   if (!Object.keys(responseType).includes(newResponder)) return;
 
   responder[channel] = newResponder;
   messageCache.set(CacheKeys.Responder, responder);
 
-  const previousMessages: ChatResponse =
-    messageCache.get(CacheKeys.ChatGptParser) || {};
+  const previousMessages: ChatResponse = messageCache.get(CacheKeys.ChatGptParser) || {};
 
   previousMessages[channel] = [];
   messageCache.set(CacheKeys.ChatGptParser, previousMessages);
 
   const name = parseName(responseType[responder[channel]].name);
 
-  client &&
-    client.action(channel, `${name} is now the responder for ${channel}`);
+  client && client.action(channel, `${name} is now the responder for ${channel}`);
 };
