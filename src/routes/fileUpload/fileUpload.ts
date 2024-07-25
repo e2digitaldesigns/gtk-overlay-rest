@@ -12,12 +12,8 @@ import { v4 } from "uuid";
 import { EpisodeModel } from "../../models/episodes.model";
 import axios from "axios";
 import { deleteFromS3Multi } from "./s3Delete";
-import {
-  deleteFromS3,
-  imageSizeParser,
-  imageSizeParser2,
-  pushToS3
-} from "../_utils";
+import { deleteFromS3, imageSizeParser, imageSizeParser2, pushToS3 } from "../_utils";
+import { youtubeUpload } from "./youtuber";
 
 const router = express.Router();
 router.use(verifyToken);
@@ -36,9 +32,7 @@ const s3bucket = new S3({
 router.post("/update", upload, async (req: Request, res: Response) => {
   try {
     // get file extension of the uploaded file
-    const fileExtension = path
-      .extname((req as any).file.originalname)
-      .split(".")[1];
+    const fileExtension = path.extname((req as any).file.originalname).split(".")[1];
 
     const fileName = `${v4()}.${fileExtension}`;
     if (!process.env.AWS_SECRET_S3_BUCKET) throw new Error("No AWS S3 Bucket");
@@ -165,76 +159,64 @@ router.post("/update", upload, async (req: Request, res: Response) => {
   }
 });
 
-router.post(
-  "/update/topic-content",
-  upload,
-  async (req: Request, res: Response) => {
-    try {
-      const fileExtension = path
-        .extname((req as any).file.originalname)
-        .split(".")[1];
+router.post("/update/topic-content", upload, async (req: Request, res: Response) => {
+  try {
+    const fileExtension = path.extname((req as any).file.originalname).split(".")[1];
 
-      const fileName = `${v4()}.${fileExtension}`;
+    const fileName = `${v4()}.${fileExtension}`;
 
-      if (!process.env.AWS_SECRET_S3_BUCKET)
-        throw new Error("No AWS S3 Bucket");
+    if (!process.env.AWS_SECRET_S3_BUCKET) throw new Error("No AWS S3 Bucket");
 
-      const vidArray = ["mp4", "webm", "ogg"];
+    const vidArray = ["mp4", "webm", "ogg"];
 
-      const dir = vidArray.includes(fileExtension)
-        ? "videos/user-videos"
-        : "images/user-images";
+    const dir = vidArray.includes(fileExtension) ? "videos/user-videos" : "images/user-images";
 
-      const type = vidArray.includes(fileExtension) ? "video" : "image";
-      const clouds =
-        type === "video"
-          ? process.env.S3_CLOUD_VIDEOS
-          : process.env.S3_CLOUD_IMAGES;
+    const type = vidArray.includes(fileExtension) ? "video" : "image";
+    const clouds = type === "video" ? process.env.S3_CLOUD_VIDEOS : process.env.S3_CLOUD_IMAGES;
 
-      console.log("dir", dir);
+    console.log("dir", dir);
 
-      const formFile = (req as any).file;
-      const s3Push = await pushToS3(formFile.buffer, `${dir}/${fileName}`);
-      if (!s3Push) throw new Error("S3 Push failed");
+    const formFile = (req as any).file;
+    const s3Push = await pushToS3(formFile.buffer, `${dir}/${fileName}`);
+    if (!s3Push) throw new Error("S3 Push failed");
 
-      const episodeContentTopics = await EpisodeModel.findOneAndUpdate(
-        {
-          _id: new ObjectId(req.body.episodeId),
-          "topics._id": new ObjectId(req.body.topicId)
-        },
-        {
-          $set: {
-            "topics.$.video": fileName,
-            "topics.$.content": {
-              file: fileName,
-              type
-            }
+    const episodeContentTopics = await EpisodeModel.findOneAndUpdate(
+      {
+        _id: new ObjectId(req.body.episodeId),
+        "topics._id": new ObjectId(req.body.topicId)
+      },
+      {
+        $set: {
+          "topics.$.video": fileName,
+          "topics.$.content": {
+            file: fileName,
+            type
           }
-        },
-        {
-          returnOriginal: true,
-          projection: { "topics.$": 1 }
         }
-      );
-
-      const deleteFile = episodeContentTopics?.topics?.[0].video;
-
-      if (deleteFile) {
-        await deleteFromS3(deleteFile);
+      },
+      {
+        returnOriginal: true,
+        projection: { "topics.$": 1 }
       }
+    );
 
-      res.send({
-        success: 1,
-        type,
-        fileName,
-        url: clouds + fileName
-      });
-    } catch (error) {
-      console.error(error);
-      res.send(error);
+    const deleteFile = episodeContentTopics?.topics?.[0].video;
+
+    if (deleteFile) {
+      await deleteFromS3(deleteFile);
     }
+
+    res.send({
+      success: 1,
+      type,
+      fileName,
+      url: clouds + fileName
+    });
+  } catch (error) {
+    console.error(error);
+    res.send(error);
   }
-);
+});
 
 router.post("/", upload, async (req: Request, res: Response) => {
   const theFile = (req as any).file;
@@ -315,151 +297,95 @@ router.delete("/:_id", async (req: Request, res: Response) => {
   }
 });
 
-router.delete(
-  "/update/:episodeId/:imageType/:imageId",
-  async (req: Request, res: Response) => {
-    let fileToDelete: string | undefined = "";
-    let isImage = true;
-
-    try {
-      switch (req.params.imageType) {
-        case "logo":
-          const topicLogoDelete = await EpisodeModel.findOneAndUpdate(
-            { _id: new ObjectId(req.params.episodeId) },
-            { $unset: { logo: "" } }
-          );
-
-          fileToDelete = topicLogoDelete?.logo;
-          console.log("fileToDelete", fileToDelete);
-          break;
-
-        case "sponsors":
-          const topicSponsorDelete = await EpisodeModel.findOneAndUpdate(
-            { _id: new ObjectId(req.params.episodeId) },
-            {
-              $pull: {
-                sponsorImages: { _id: new ObjectId(req.params.imageId) }
-              }
-            }
-          );
-
-          fileToDelete = topicSponsorDelete?.sponsorImages?.find(
-            f => f._id.toString() === req.params.imageId
-          )?.url;
-          break;
-
-        case "topic":
-          const topicImageDelete = await EpisodeModel.findOneAndUpdate(
-            {
-              _id: new ObjectId(req.params.episodeId),
-              "topics._id": new ObjectId(req.params.imageId as string)
-            },
-            {
-              $set: {
-                "topics.$.img": ""
-              }
-            }
-          );
-
-          fileToDelete = topicImageDelete?.topics?.find(
-            f => f._id.toString() === req.params.imageId
-          )?.img;
-          break;
-
-        case "content":
-          const topicContentDelete = await EpisodeModel.findOneAndUpdate(
-            {
-              _id: new ObjectId(req.params.episodeId),
-              "topics._id": new ObjectId(req.params.imageId as string)
-            },
-            {
-              $set: {
-                "topics.$.video": " ",
-                "topics.$.content": { file: " ", type: null }
-              }
-            }
-          );
-
-          fileToDelete = topicContentDelete?.topics?.find(
-            f => f._id.toString() === req.params.imageId
-          )?.video;
-
-          const ext = fileToDelete?.split(".").pop();
-          isImage = ["jpg", "jpeg", "png", "svg", "webp"].includes(
-            ext as string
-          );
-
-          break;
-
-        default:
-          break;
-      }
-
-      if (!process.env.AWS_SECRET_S3_BUCKET) {
-        throw new Error("No AWS S3 Bucket");
-      }
-      if (fileToDelete) {
-        deleteFromS3(fileToDelete, isImage ? "image" : "video");
-      }
-
-      res.json({
-        success: 1
-      });
-    } catch (error) {
-      console.error(error);
-      res.send(error);
-    }
-  }
-);
-
-router.post("/youtube-video", upload, async (req: Request, res: Response) => {
-  const { episodeId, topicId, videoUrl } = req.body;
+router.delete("/update/:episodeId/:imageType/:imageId", async (req: Request, res: Response) => {
+  let fileToDelete: string | undefined = "";
+  let isImage = true;
 
   try {
-    const { data } = await axios.post(
-      "https://a7zjx8u1lf.execute-api.us-east-1.amazonaws.com/prod/video",
-      {
-        topicId,
-        videoUrl
-      }
-    );
+    switch (req.params.imageType) {
+      case "logo":
+        const topicLogoDelete = await EpisodeModel.findOneAndUpdate(
+          { _id: new ObjectId(req.params.episodeId) },
+          { $unset: { logo: "" } }
+        );
 
-    const videoLink = data.body.videoUrl.split("user-videos/").pop();
+        fileToDelete = topicLogoDelete?.logo;
+        console.log("fileToDelete", fileToDelete);
+        break;
 
-    const episode = await EpisodeModel.findOneAndUpdate(
-      {
-        _id: new ObjectId(episodeId),
-        "topics._id": new ObjectId(topicId)
-      },
-      {
-        $set: {
-          "topics.$.video": videoLink
-        }
-      },
-      {
-        returnNewDocument: true // Return the updated document
-      }
-    );
+      case "sponsors":
+        const topicSponsorDelete = await EpisodeModel.findOneAndUpdate(
+          { _id: new ObjectId(req.params.episodeId) },
+          {
+            $pull: {
+              sponsorImages: { _id: new ObjectId(req.params.imageId) }
+            }
+          }
+        );
 
-    // get topic by id
-    const currentTopic = episode?.topics?.find(
-      (topic: any) => topic._id.toString() === topicId
-    );
+        fileToDelete = topicSponsorDelete?.sponsorImages?.find(
+          f => f._id.toString() === req.params.imageId
+        )?.url;
+        break;
 
-    if (currentTopic?.video) {
-      await deleteFromS3Multi(
-        [currentTopic.video.split("/").pop() as string],
-        "videos/user-videos"
-      );
+      case "topic":
+        const topicImageDelete = await EpisodeModel.findOneAndUpdate(
+          {
+            _id: new ObjectId(req.params.episodeId),
+            "topics._id": new ObjectId(req.params.imageId as string)
+          },
+          {
+            $set: {
+              "topics.$.img": ""
+            }
+          }
+        );
+
+        fileToDelete = topicImageDelete?.topics?.find(
+          f => f._id.toString() === req.params.imageId
+        )?.img;
+        break;
+
+      case "content":
+        const topicContentDelete = await EpisodeModel.findOneAndUpdate(
+          {
+            _id: new ObjectId(req.params.episodeId),
+            "topics._id": new ObjectId(req.params.imageId as string)
+          },
+          {
+            $set: {
+              "topics.$.video": " ",
+              "topics.$.content": { file: " ", type: null }
+            }
+          }
+        );
+
+        fileToDelete = topicContentDelete?.topics?.find(
+          f => f._id.toString() === req.params.imageId
+        )?.video;
+
+        const ext = fileToDelete?.split(".").pop();
+        isImage = ["jpg", "jpeg", "png", "svg", "webp"].includes(ext as string);
+
+        break;
+
+      default:
+        break;
+    }
+
+    if (!process.env.AWS_SECRET_S3_BUCKET) {
+      throw new Error("No AWS S3 Bucket");
+    }
+    if (fileToDelete) {
+      deleteFromS3(fileToDelete, isImage ? "image" : "video");
     }
 
     res.json({
-      success: 1,
-      url: data.body.videoUrl,
-      fileName: videoLink
+      success: 1
     });
   } catch (error) {
-    res.send("error");
+    console.error(error);
+    res.send(error);
   }
 });
 
@@ -467,13 +393,9 @@ router.delete(
   "/youtube-video/:episodeId/:topicId/:videoName",
   async (req: Request, res: Response) => {
     try {
-      if (!process.env.AWS_SECRET_S3_BUCKET)
-        throw new Error("No AWS S3 Bucket");
+      if (!process.env.AWS_SECRET_S3_BUCKET) throw new Error("No AWS S3 Bucket");
 
-      await deleteFromS3Multi(
-        [req.params.videoName as string],
-        "videos/user-videos"
-      );
+      await deleteFromS3Multi([req.params.videoName as string], "videos/user-videos");
 
       await EpisodeModel.findOneAndUpdate(
         {
@@ -566,6 +488,50 @@ router.post("/openAi-img", upload, async (req: Request, res: Response) => {
           fileName: process.env.S3_CLOUD_IMAGES + fileName
         });
       }
+    });
+  } catch (error) {
+    res.send(error);
+  }
+});
+
+router.post("/youtube-video", upload, async (req: Request, res: Response) => {
+  const { episodeId, topicId, videoUrl } = req.body;
+
+  try {
+    const { fileName, fileLocation } = await youtubeUpload(videoUrl);
+
+    if (!fileLocation) {
+      throw new Error("Video not found");
+    }
+
+    const episode = await EpisodeModel.findOneAndUpdate(
+      {
+        _id: new ObjectId(episodeId),
+        "topics._id": new ObjectId(topicId)
+      },
+      {
+        $set: {
+          "topics.$.video": fileName
+        }
+      },
+      {
+        returnNewDocument: true
+      }
+    );
+
+    const currentTopic = episode?.topics?.find((topic: any) => topic._id.toString() === topicId);
+
+    if (currentTopic?.video) {
+      await deleteFromS3Multi(
+        [currentTopic.video.split("/").pop() as string],
+        "videos/user-videos"
+      );
+    }
+
+    res.json({
+      success: 1,
+      url: fileLocation,
+      fileName
     });
   } catch (error) {
     res.send(error);

@@ -25,6 +25,7 @@
     "md5": "^2.3.0",
     "mongoose": "^7.0.1",
     "multer": "^1.4.5-lts.1",
+    "nayan-media-downloader": "^2.4.5",
     "node-cache": "^5.1.2",
     "node-schedule": "^2.1.1",
     "npm": "^10.4.0",
