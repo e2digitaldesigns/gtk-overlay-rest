@@ -7,6 +7,7 @@ interface IChatLog {
   gtkUserId: Types.ObjectId;
   image: string;
   isDeleted: boolean;
+  isRankReset: boolean;
   message: string;
   msgEmotes: string;
   platform: string;
@@ -22,6 +23,7 @@ const ChatLogSchema = new Schema<IChatLog>({
   gtkUserId: { type: Schema.Types.ObjectId, required: true },
   image: { type: String, default: "" },
   isDeleted: { type: Boolean, default: false },
+  isRankReset: { type: Boolean, default: false },
   message: { type: String, required: true },
   msgEmotes: { type: String, required: true },
   platform: { type: String, required: true },

@@ -30,6 +30,10 @@ import { videoOverlayPlaylist } from "./videoOverlay/videoPlaylist";
 import { chatSender } from "./chatSender/chatSender";
 
 import { upgrade } from "./upgrade/upgrade";
+import { chatLikes } from "./chatLikes/chatLikes";
+import { chatRank } from "./chatRank/chatRank";
+import { chatRelay } from "./chatRelay/chatRelay";
+import { chatDisplay } from "./chatDisplay/chatDisplay";
 
 export const routing = (app: Express) => {
   const prefix = "/api/v1/";
@@ -66,4 +70,9 @@ export const routing = (app: Express) => {
   app.use(`${prefix}chatSender`, chatSender);
 
   app.use(`${prefix}upgrade`, upgrade);
+
+  app.use(`${prefix}chatLikes`, chatLikes);
+  app.use(`${prefix}chatRank`, chatRank);
+  app.use(`${prefix}chatRelay`, chatRelay);
+  app.use(`${prefix}chatDisplay`, chatDisplay);
 };

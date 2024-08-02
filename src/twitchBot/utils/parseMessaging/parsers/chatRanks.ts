@@ -15,14 +15,12 @@ export async function chatRankParser(socket: SocketServer, channel: string) {
     return;
   }
 
-  const twentyFourHoursAgo = new Date();
-  twentyFourHoursAgo.setDate(twentyFourHoursAgo.getDate() - 1);
-
   const result = await ChatLogModel.aggregate([
     {
       $match: {
         gtkUserId: new ObjectId(uid),
-        date: { $gte: twentyFourHoursAgo }
+        isDeleted: { $ne: true },
+        isRankReset: { $ne: true }
       }
     },
     {
