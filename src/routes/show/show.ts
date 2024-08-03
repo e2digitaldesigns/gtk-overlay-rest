@@ -154,30 +154,49 @@ router.get("/controlCenter/:uid/:tid", async (req: Request, res: Response) => {
   let data = {};
 
   try {
-    const result = await EpisodeModel.findOne({
-      templateId: new ObjectId(req.params.tid),
-      userId: new ObjectId(req.params.uid),
-      current: true
-    }).select({
-      airDate: 1,
-      logo: 1,
-      name: 1,
-      number: 1,
-      topics: 1
+    const result = await EpisodeModel.aggregate([
+      {
+        $match: {
+          templateId: new ObjectId(req.params.tid),
+          userId: new ObjectId(req.params.uid),
+          current: true
+        }
+      },
+      {
+        $lookup: {
+          from: "hosts",
+          localField: "userId",
+          foreignField: "userId",
+          as: "availableHosts"
+        }
+      },
+      {
+        $project: {
+          __v: 0
+        }
+      }
+    ]);
+
+    const epData = result[0];
+
+    const hosts = hostParser(epData.availableHosts, epData.hosts);
+    const theHosts = hosts.map(host => {
+      return {
+        seatNum: String(host.seatNum),
+        hostName: host.name
+      };
     });
 
-    if (result) {
-      const theResult = result.toObject();
-      data = {
-        _id: result._id,
-        airDate: result.airDate,
-        logo: result.logo,
-        name: result.name,
-        number: result.number,
-        podcastName: result.podcastName,
-        topics: !theResult?.topics ? [] : sortTopics(topicContentParser(theResult.topics))
-      };
-    }
+    const data = {
+      _id: epData._id,
+      airDate: epData.airDate,
+      logo: epData.logo,
+      name: epData.name,
+      number: epData.number,
+      podcastName: epData.podcastName,
+      topics: !epData?.topics ? [] : sortTopics(topicContentParser(epData.topics)),
+      hosts: theHosts
+    };
 
     res.status(200).json(data);
   } catch (error) {
