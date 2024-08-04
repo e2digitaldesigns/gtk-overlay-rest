@@ -39,7 +39,16 @@ export async function parseMessaging(
   const isFollowing = await isChatterFollowing(channel, tags.username, tags["user-id"] || "");
 
   // Chat Command Parser
-  chatCommandParser(gtkUserId, tmiClient, socket, message.trim(), channel, tags, isFollowing);
+  chatCommandParser(
+    gtkUserId,
+    tmiClient,
+    socket,
+    message.trim(),
+    channel,
+    tags,
+    isFollowing,
+    getUserProfileImage
+  );
 
   //Chat Log Parser
   chatLogParser(gtkUserId, socket, channel, tags, message, twitchUserImage);

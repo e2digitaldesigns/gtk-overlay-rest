@@ -96,7 +96,7 @@ router.patch("/reset/:userId", async (req: Request, res: Response) => {
 
 export const chatLikes = router;
 
-async function getChatLikes(userId: string) {
+export async function getChatLikes(userId: string) {
   try {
     return await MODEL.aggregate([
       {

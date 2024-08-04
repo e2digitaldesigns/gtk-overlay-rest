@@ -27,7 +27,8 @@ export async function chatCommandParser(
   message: string,
   channel: string,
   tags: any,
-  isFollowing: boolean
+  isFollowing: boolean,
+  getUserProfileImage: (username: string) => Promise<string>
 ) {
   if (!client) return;
 
@@ -61,6 +62,26 @@ export async function chatCommandParser(
     "!pvr": () => handleVideoRequestOverlay("playlist-return-video-request"),
     "!rank": () => chatCommands.getRankByUser(tags.username, client, channel),
     "!reply": () => client.action(channel, `@${tags.username}, heya!`),
+    "!uv": () =>
+      chatCommands.chatterVoting(
+        command,
+        message,
+        tags.username,
+        channel,
+        socket,
+        getUserProfileImage,
+        client
+      ),
+    "!dv": () =>
+      chatCommands.chatterVoting(
+        command,
+        message,
+        tags.username,
+        channel,
+        socket,
+        getUserProfileImage,
+        client
+      ),
     "!sv1": () =>
       handleSubscriberCommand(() =>
         chatCommands.overlayVoting(command, tags.username, channel, socket, client)
