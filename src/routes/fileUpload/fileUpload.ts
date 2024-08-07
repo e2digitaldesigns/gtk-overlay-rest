@@ -13,7 +13,6 @@ import { EpisodeModel } from "../../models/episodes.model";
 import axios from "axios";
 import { deleteFromS3Multi } from "./s3Delete";
 import { deleteFromS3, imageSizeParser, imageSizeParser2, pushToS3 } from "../_utils";
-import { youtubeUpload } from "./youtuber";
 
 const router = express.Router();
 router.use(verifyToken);
@@ -498,7 +497,15 @@ router.post("/youtube-video", upload, async (req: Request, res: Response) => {
   const { episodeId, topicId, videoUrl } = req.body;
 
   try {
-    const { fileName, fileLocation } = await youtubeUpload(videoUrl);
+    const { data } = await axios.post(
+      "https://a7zjx8u1lf.execute-api.us-east-1.amazonaws.com/prod/video",
+      {
+        topicId,
+        videoUrl
+      }
+    );
+
+    const { fileLocation, fileName } = data.result;
 
     if (!fileLocation) {
       throw new Error("Video not found");
