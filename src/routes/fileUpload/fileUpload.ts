@@ -1,6 +1,6 @@
 import express, { NextFunction, Request, Response } from "express";
 import mongoose from "mongoose";
-const ObjectId = mongoose.Types.ObjectId;
+const ObjectId = mongoose.Types.ObjectId; // to generate new ids
 
 import { verifyToken } from "../../middleware/verifyToken";
 
