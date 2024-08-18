@@ -35,6 +35,7 @@ import { chatRank } from "./chatRank/chatRank";
 import { chatRelay } from "./chatRelay/chatRelay";
 import { chatDisplay } from "./chatDisplay/chatDisplay";
 import { overlayControls } from "./controls/controls";
+import { cannedMessages } from "./cannedMessages/cannedMessages";
 
 export const routing = (app: Express) => {
   const prefix = "/api/v1/";
@@ -77,4 +78,5 @@ export const routing = (app: Express) => {
   app.use(`${prefix}chatRelay`, chatRelay);
   app.use(`${prefix}chatDisplay`, chatDisplay);
   app.use(`${prefix}overlayControls`, overlayControls);
+  app.use(`${prefix}cannedMessages`, cannedMessages);
 };
