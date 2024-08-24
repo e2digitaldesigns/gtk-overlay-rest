@@ -98,7 +98,7 @@ export const chatLikes = router;
 
 export async function getChatLikes(userId: string) {
   try {
-    return await MODEL.aggregate([
+    const result = await MODEL.aggregate([
       {
         $match: {
           gtkUserId: new ObjectId(userId),
@@ -116,6 +116,14 @@ export async function getChatLikes(userId: string) {
       { $sort: { votes: -1, date: 1 } },
       { $limit: dataLimit }
     ]).exec();
+
+    if (result?.length > 0) {
+      result.forEach((element, index) => {
+        element.rank = index + 1;
+      });
+    }
+
+    return result || [];
   } catch (error) {
     return error;
   }

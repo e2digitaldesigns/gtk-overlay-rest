@@ -49,7 +49,7 @@ export const chatRank = router;
 
 async function getChatRank(userId: string) {
   try {
-    return await MODEL.aggregate([
+    const result = await MODEL.aggregate([
       {
         $match: {
           gtkUserId: new ObjectId(userId),
@@ -68,6 +68,14 @@ async function getChatRank(userId: string) {
       { $sort: { messageCount: -1, date: 1 } },
       { $limit: 50 }
     ]).exec();
+
+    if (result?.length > 0) {
+      result.forEach((element, index) => {
+        element.rank = index + 1;
+      });
+    }
+
+    return result || [];
   } catch (error) {
     return error;
   }

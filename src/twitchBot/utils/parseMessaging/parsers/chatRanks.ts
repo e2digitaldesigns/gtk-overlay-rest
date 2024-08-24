@@ -32,8 +32,14 @@ export async function chatRankParser(socket: SocketServer, channel: string) {
       }
     },
     { $sort: { messageCount: -1, date: 1 } },
-    { $limit: 10 }
+    { $limit: 50 }
   ]);
+
+  if (result?.length > 0) {
+    result.forEach((element, index) => {
+      element.rank = index + 1;
+    });
+  }
 
   const obj = {
     action: "chatRankUpdate",
