@@ -10,6 +10,7 @@ import { hostParser } from "./utils/hostParser";
 import { logoImageParser, sponsorImageShowParser } from "./utils/imageParsers";
 import { votingParser } from "./utils/votingparser";
 import { topicContentParser } from "./utils/contentParser";
+import { verifyToken } from "../../middleware/verifyToken";
 
 const router = express.Router();
 
@@ -150,15 +151,13 @@ router.get("/showRunner/:_id", async (req: Request, res: Response) => {
   }
 });
 
-router.get("/controlCenter/:uid/:tid", async (req: Request, res: Response) => {
-  let data = {};
-
+router.get("/controlCenter/:tid", verifyToken, async (req: Request, res: Response) => {
   try {
     const result = await EpisodeModel.aggregate([
       {
         $match: {
           templateId: new ObjectId(req.params.tid),
-          userId: new ObjectId(req.params.uid),
+          userId: new ObjectId(res.locals.userId),
           current: true
         }
       },

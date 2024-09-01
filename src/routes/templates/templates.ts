@@ -1,11 +1,8 @@
 import express, { Request, Response } from "express";
 import mongoose from "mongoose";
-import { verifyToken } from "../../middleware/verifyToken";
 import { TemplateModel } from "../../models/templates.model";
 
 const router = express.Router();
-
-// router.use(verifyToken);
 
 const MODEL = TemplateModel;
 

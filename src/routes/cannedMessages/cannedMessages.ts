@@ -5,10 +5,11 @@ import { CannedMessageModel } from "../../models/cannedMessages.model";
 const ObjectId = mongoose.Types.ObjectId;
 
 const router = express.Router();
+router.use(verifyToken);
 
 const MODEL = CannedMessageModel;
 
-router.get("/s/:page/:sort/:sortby", verifyToken, async (req: Request, res: Response) => {
+router.get("/s/:page/:sort/:sortby", async (req: Request, res: Response) => {
   const { page, sort, sortby } = req.params;
   const searchTerm = req.query?.st || "";
   const documentsPerPage = 10;
@@ -51,9 +52,9 @@ router.get("/s/:page/:sort/:sortby", verifyToken, async (req: Request, res: Resp
   }
 });
 
-router.get("/:userId", async (req: Request, res: Response) => {
+router.get("/", async (req: Request, res: Response) => {
   try {
-    const result = await MODEL.find({ userId: new ObjectId(req.params.userId) });
+    const result = await MODEL.find({ userId: new ObjectId(res.locals.userId) });
 
     res.status(200).json({
       resultStatus: {
@@ -77,7 +78,7 @@ router.get("/:userId", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/", verifyToken, async (req: Request, res: Response) => {
+router.post("/", async (req: Request, res: Response) => {
   try {
     const { message, name } = req.body;
     const result = await MODEL.create({
@@ -110,7 +111,7 @@ router.post("/", verifyToken, async (req: Request, res: Response) => {
   }
 });
 
-router.delete("/:messageId", verifyToken, async (req: Request, res: Response) => {
+router.delete("/:messageId", async (req: Request, res: Response) => {
   try {
     await MODEL.deleteOne({ _id: new ObjectId(req.params.messageId) });
 
@@ -129,7 +130,7 @@ router.delete("/:messageId", verifyToken, async (req: Request, res: Response) =>
   }
 });
 
-router.put("/:messageId", verifyToken, async (req: Request, res: Response) => {
+router.put("/:messageId", async (req: Request, res: Response) => {
   try {
     const { message, name } = req.body;
     const result = await MODEL.findOneAndUpdate(

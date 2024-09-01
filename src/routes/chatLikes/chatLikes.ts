@@ -6,6 +6,7 @@ const ObjectId = mongoose.Types.ObjectId;
 import { ChatLikeModel } from "../../models/chatLike.model";
 import { ChatLogModel } from "../../models/chatLog.model";
 import { getGTKTemplateId } from "../../twitchBot/utils/parseMessaging/utils/dbFecthers";
+import { verifyToken } from "../../middleware/verifyToken";
 
 const router = express.Router();
 const MODEL = ChatLikeModel;
@@ -19,9 +20,10 @@ const voteValues: { [key: string]: number } = {
   winner: 10
 };
 
-router.get("/:userId/", async (req: Request, res: Response) => {
+router.get("/", verifyToken, async (req: Request, res: Response) => {
+  console.log(24, "chatLikes", res.locals.userId);
   try {
-    const result = await getChatLikes(req.params.userId);
+    const result = await getChatLikes(res.locals.userId);
 
     res.status(200).json(result);
   } catch (error) {
