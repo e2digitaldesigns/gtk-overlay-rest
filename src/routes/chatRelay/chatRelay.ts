@@ -52,6 +52,27 @@ router.patch("/:userId/remove/", async (req: Request, res: Response) => {
 
 export const chatRelay = router;
 
+router.patch("/reset/:userId", async (req: Request, res: Response) => {
+  try {
+    const result = await MODEL.updateMany(
+      { gtkUserId: new ObjectId(req.params.userId) },
+      { isDeleted: true }
+    );
+
+    res.locals.io.emit("gtkChatRelay", {
+      tid: await getGTKTemplateId(req.params.userId),
+      uid: req.params.userId,
+      action: "clear-chat-messages"
+    });
+
+    res.status(200).json(result);
+
+    res.status(200);
+  } catch (error) {
+    res.status(404).send(error);
+  }
+});
+
 async function getChatMessage(userId: string) {
   try {
     const result = await MODEL.find({
