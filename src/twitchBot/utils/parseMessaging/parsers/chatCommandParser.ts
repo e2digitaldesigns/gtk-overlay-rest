@@ -7,12 +7,11 @@ import mongoose from "mongoose";
 const ObjectId = mongoose.Types.ObjectId;
 
 const validatedCommand = async (gtkUserId: string, command: string): Promise<boolean> => {
-  console.log(10, command);
   const exceptions = ["!gtk", "!reply", "!cb"];
   if (exceptions.includes(command)) return true;
 
   const data = await UserCommandsModel.findOne({
-    command: { $regex: new RegExp(`^${command}$`, "i") }
+    command: command
   }).select("users");
 
   if (!data) return false;
