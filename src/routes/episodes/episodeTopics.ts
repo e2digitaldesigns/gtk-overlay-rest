@@ -42,9 +42,7 @@ router.get("/:episodeId", async (req: Request, res: Response) => {
     res.status(200).json({
       templateId: result[0].templateId,
       images: result[0].template[0].images.topic,
-      topics: result?.[0]?.topics
-        ? _sortBy(topicContentParser(result[0].topics), "order")
-        : []
+      topics: result?.[0]?.topics ? _sortBy(topicContentParser(result[0].topics), "order") : []
     });
   } catch (error) {
     console.error(error);
@@ -120,7 +118,6 @@ router.put("/:episodeId", async (req: Request, res: Response) => {
           "topics.$.parentId": req.body.parentId,
           "topics.$.timer": req.body.timer,
           "topics.$.articles": req.body.articles,
-          "topics.$.video": req.body.video,
           "topics.$.notes": req.body.notes,
           "topics.$.chat": req.body.chat,
           "topics.$.voting": req.body.voting
@@ -143,9 +140,7 @@ router.put("/:episodeId", async (req: Request, res: Response) => {
           }
         },
         {
-          arrayFilters: [
-            { "elem.isChild": true, "elem.parentId": req.params.topicId }
-          ]
+          arrayFilters: [{ "elem.isChild": true, "elem.parentId": req.params.topicId }]
         }
       );
     }
@@ -204,9 +199,7 @@ router.delete("/:episodeId/:topicId", async (req: Request, res: Response) => {
         }
       },
       {
-        arrayFilters: [
-          { "elem.isChild": true, "elem.parentId": req.params.topicId }
-        ]
+        arrayFilters: [{ "elem.isChild": true, "elem.parentId": req.params.topicId }]
       }
     );
 
