@@ -1,5 +1,3 @@
-import { IEpisodeTopic } from "../../../../_backer/2023-10-28/src/models/episodes.model";
-
 const imageExtenstions = ["jpg", "jpeg", "png", "gif", "svg", "webp"];
 const videoExtenstions = ["mp4", "webm", "ogg"];
 

@@ -13,6 +13,7 @@ import { EpisodeModel } from "../../models/episodes.model";
 import axios from "axios";
 import { deleteFromS3Multi } from "./s3Delete";
 import { deleteFromS3, imageSizeParser, imageSizeParser2, pushToS3 } from "../_utils";
+import { s3ObjectCopy } from "../../utils/imageCopy";
 
 const router = express.Router();
 router.use(verifyToken);
@@ -154,6 +155,57 @@ router.post("/update", upload, async (req: Request, res: Response) => {
       url: process.env.S3_CLOUD_IMAGES + fileName
     });
   } catch (error) {
+    res.send(error);
+  }
+});
+
+router.post("/update/topic-content-transparent", upload, async (req: Request, res: Response) => {
+  try {
+    const clouds = process.env.S3_CLOUD_IMAGES;
+    const type = "image";
+
+    // copy file to s3
+    const fileName = s3ObjectCopy("blank.png");
+    console.log("fileName", fileName);
+
+    if (!fileName) throw new Error("S3 Copy failed");
+
+    // save to db
+    const episodeContentTopics = await EpisodeModel.findOneAndUpdate(
+      {
+        _id: new ObjectId(req.body.episodeId),
+        "topics._id": new ObjectId(req.body.topicId)
+      },
+      {
+        $set: {
+          "topics.$.video": fileName,
+          "topics.$.content": {
+            file: fileName,
+            type
+          }
+        }
+      },
+      {
+        returnOriginal: true,
+        projection: { "topics.$": 1 }
+      }
+    );
+
+    // delete old file
+    const deleteFile = episodeContentTopics?.topics?.[0].video;
+
+    if (deleteFile) {
+      await deleteFromS3(deleteFile);
+    }
+
+    res.send({
+      success: 1,
+      type,
+      fileName,
+      url: clouds + fileName
+    });
+  } catch (error) {
+    console.error(error);
     res.send(error);
   }
 });
