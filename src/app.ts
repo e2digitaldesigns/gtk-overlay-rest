@@ -20,12 +20,7 @@ const server: Server = app.listen(PORT, () =>
 
 connectMongo();
 const io = socketMaker(server);
-
 new TwitchBotter(app, io);
-
-app.get("/", async (req: Request, res: Response) => {
-  res.send("GTK REST Service");
-});
 
 app.use((req: Request, res: Response, next: NextFunction) => {
   res.locals.io = io;
@@ -33,3 +28,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 });
 
 routing(app);
+
+app.get("/", async (req: Request, res: Response) => {
+  res.send("GTK REST Service");
+});

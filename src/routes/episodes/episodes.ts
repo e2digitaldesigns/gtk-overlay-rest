@@ -1,15 +1,12 @@
 import express, { Request, Response } from "express";
 import mongoose from "mongoose";
 import { verifyToken } from "../../middleware/verifyToken";
-import { EpisodeModel, IEpisodeTopic } from "../../models/episodes.model";
+import { EpisodeModel, IEpisodeTopic, SponsorImages } from "../../models/episodes.model";
 import { ITemplate } from "../../models/templates.model";
 import { IEpisode } from "./../../models/episodes.model";
 import { s3ObjectCopy, s3ObjectCopyVideo } from "../../utils/imageCopy";
 import { deleteFromS3Multi } from "../fileUpload/s3Delete";
-import {
-  logoImageParser,
-  sponsorImageParser
-} from "../show/utils/imageParsers";
+import { logoImageParser, sponsorImageParser } from "../show/utils/imageParsers";
 const ObjectId = mongoose.Types.ObjectId;
 
 const router = express.Router();
@@ -78,9 +75,7 @@ router.get("/:page/:sort/:sortby", async (req: Request, res: Response) => {
   const { page, sort, sortby } = req.params;
   const searchTerm = req.query?.st || "";
 
-  const templateId = req.query?.tid
-    ? new ObjectId(req.query.tid as string)
-    : "";
+  const templateId = req.query?.tid ? new ObjectId(req.query.tid as string) : "";
 
   const documentsPerPage = 10;
   const skip = (Number(page) - 1) * documentsPerPage;
@@ -135,9 +130,7 @@ router.get("/:page/:sort/:sortby", async (req: Request, res: Response) => {
 
   try {
     const totalDocumentCount = await MODEL.aggregate(pipeline).exec();
-    const totalPageCount = Math.ceil(
-      totalDocumentCount.length / documentsPerPage
-    );
+    const totalPageCount = Math.ceil(totalDocumentCount.length / documentsPerPage);
 
     pipeline.push(
       { $sort: { [sort]: sortby === "asc" ? 1 : -1 } },
@@ -227,6 +220,7 @@ router.post("/", async (req: Request, res: Response) => {
           logo: 1,
           hosts: 1,
           number: 1,
+          podcastName: 1,
           socialNetworks: 1,
           sponsorImages: 1,
           ticker: 1,
@@ -234,11 +228,15 @@ router.post("/", async (req: Request, res: Response) => {
         })
       : null;
 
-    const newSponsorImages: string[] = [];
+    const newSponsorImages: SponsorImages[] = [];
     currentState?.sponsors &&
-      lastEpisode?.sponsorImages?.map((item: string) => {
-        const newItem = s3ObjectCopy(item);
-        newItem && newSponsorImages.push(newItem);
+      lastEpisode?.sponsorImages?.map((item: SponsorImages) => {
+        const newItem = s3ObjectCopy(item.url);
+        newItem &&
+          newSponsorImages.push({
+            _id: new ObjectId(),
+            url: newItem
+          });
       });
 
     const episode = {
@@ -247,22 +245,15 @@ router.post("/", async (req: Request, res: Response) => {
       active: false,
       current: lastEpisode ? false : true,
       hosts: currentState.hosts && lastEpisode?.hosts ? lastEpisode.hosts : [],
-      logo:
-        currentState.logo && lastEpisode?.logo
-          ? s3ObjectCopy(lastEpisode.logo)
-          : "",
+      logo: currentState.logo && lastEpisode?.logo ? s3ObjectCopy(lastEpisode.logo) : "",
       number: lastEpisode?.number ? Number(lastEpisode.number) + 1 : 1,
       socialNetworks:
         currentState.socialNetworks && lastEpisode?.socialNetworks
           ? lastEpisode?.socialNetworks
           : [],
       templateId,
-      ticker:
-        currentState.news && lastEpisode?.ticker ? lastEpisode.ticker : [],
-      topics: await lastEpisodeTopicParser(
-        currentState.topics,
-        lastEpisode?.topics
-      ),
+      ticker: currentState.news && lastEpisode?.ticker ? lastEpisode.ticker : [],
+      topics: await lastEpisodeTopicParser(currentState.topics, lastEpisode?.topics),
       contentBoxes: [],
       sponsorBoxes: [],
       sponsorImages: newSponsorImages,
@@ -325,11 +316,9 @@ router.delete("/:_id", async (req: Request, res: Response) => {
 
     const imageArray: string[] = [];
     episode?.logo && imageArray.push(episode.logo);
-    episode?.sponsorImages?.map((item: string) => imageArray.push(item));
+    episode?.sponsorImages?.map((item: SponsorImages) => imageArray.push(item.url));
 
-    episode?.topics?.map(
-      (item: IEpisodeTopic) => item?.img && imageArray.push(item.img)
-    );
+    episode?.topics?.map((item: IEpisodeTopic) => item?.img && imageArray.push(item.img));
 
     if (imageArray.length) {
       deleteFromS3Multi(imageArray, "images/user-images");
@@ -361,10 +350,7 @@ router.delete("/:_id", async (req: Request, res: Response) => {
 
 export const episodes = router;
 
-const lastEpisodeTopicParser = async (
-  useCurrent: boolean,
-  topics?: IEpisodeTopic[]
-) => {
+const lastEpisodeTopicParser = async (useCurrent: boolean, topics?: IEpisodeTopic[]) => {
   if (useCurrent && topics) {
     const newTopics = topics.map((item: IEpisodeTopic) => {
       const newItem = {

@@ -14,7 +14,11 @@ export async function refreshTwitchStreamerAccessTokenMethod(
       }).select({ refreshToken: 1 });
 
       if (!userdata?.refreshToken) {
-        throw new Error("15 refreshTwitchAccessToken: No Twitch Data");
+        console.log(
+          17,
+          "refreshStreamerToken.ts: No Twitch refreshToken in db"
+        );
+        return "";
       } else {
         refreshToken = userdata.refreshToken;
       }
@@ -24,8 +28,10 @@ export async function refreshTwitchStreamerAccessTokenMethod(
       `https://id.twitch.tv/oauth2/token?grant_type=refresh_token&refresh_token=${refreshToken}&client_id=${process.env.TWITCH_CLIENT_ID}&client_secret=${process.env.TWITCH_CLIENT_SECRET}`
     );
 
-    if (response.status !== 200)
-      throw new Error("26 refreshStreamerToken: Twitch Refresh Failed");
+    if (response.status !== 200) {
+      console.log(29, "refreshStreamerToken.ts: Refreshed failed");
+      return "";
+    }
 
     await TwitchAuthModel.findOneAndUpdate(
       {
@@ -43,7 +49,7 @@ export async function refreshTwitchStreamerAccessTokenMethod(
 
     return response.data.access_token;
   } catch (error) {
-    console.error(error);
+    console.error(49, error);
     return "";
   }
 }

@@ -14,15 +14,13 @@ export async function getRankByUser(
 
   if (!uid || !client) return;
 
-  const twentyFourHoursAgo = new Date();
-  twentyFourHoursAgo.setDate(twentyFourHoursAgo.getDate() - 1);
-
   try {
     const result = await ChatLogModel.aggregate([
       {
         $match: {
           gtkUserId: new ObjectId(uid),
-          date: { $gte: twentyFourHoursAgo }
+          isDeleted: { $ne: true },
+          isRankReset: { $ne: true }
         }
       },
       {
@@ -37,8 +35,7 @@ export async function getRankByUser(
       { $limit: 99999 }
     ]);
 
-    const userRank =
-      result.findIndex(user => user.username.toLowerCase() === username) + 1;
+    const userRank = result.findIndex(user => user.username.toLowerCase() === username) + 1;
 
     const message =
       userRank === 0

@@ -2,13 +2,12 @@ import express, { Request, Response } from "express";
 import mongoose from "mongoose";
 import { verifyToken } from "../../middleware/verifyToken";
 import { EpisodeModel } from "../../models/episodes.model";
-import { ITemplate } from "../../models/templates.model";
 import { IEpisode } from "../../models/episodes.model";
 import { deleteFromS3 } from "../fileUpload/s3Delete";
 const ObjectId = mongoose.Types.ObjectId;
 
 import _sortBy from "lodash/sortBy";
-import { topicImageParser } from "../show/utils/imageParsers";
+import { topicContentParser } from "../show/utils/contentParser";
 
 const router = express.Router();
 router.use(verifyToken);
@@ -43,9 +42,7 @@ router.get("/:episodeId", async (req: Request, res: Response) => {
     res.status(200).json({
       templateId: result[0].templateId,
       images: result[0].template[0].images.topic,
-      topics: result?.[0]?.topics
-        ? _sortBy(topicImageParser(result[0].topics), "order")
-        : []
+      topics: result?.[0]?.topics ? _sortBy(topicContentParser(result[0].topics), "order") : []
     });
   } catch (error) {
     console.error(error);
@@ -75,8 +72,8 @@ router.post("/:episodeId", async (req: Request, res: Response) => {
         $push: {
           topics: {
             _id: topicId,
-            name: `New Topic ${order}`,
-            desc: "New Topic Description",
+            name: `Untitled Topic`,
+            desc: "Untitled Topic Description",
             order
           }
         }
@@ -121,7 +118,6 @@ router.put("/:episodeId", async (req: Request, res: Response) => {
           "topics.$.parentId": req.body.parentId,
           "topics.$.timer": req.body.timer,
           "topics.$.articles": req.body.articles,
-          "topics.$.video": req.body.video,
           "topics.$.notes": req.body.notes,
           "topics.$.chat": req.body.chat,
           "topics.$.voting": req.body.voting
@@ -144,9 +140,7 @@ router.put("/:episodeId", async (req: Request, res: Response) => {
           }
         },
         {
-          arrayFilters: [
-            { "elem.isChild": true, "elem.parentId": req.params.topicId }
-          ]
+          arrayFilters: [{ "elem.isChild": true, "elem.parentId": req.params.topicId }]
         }
       );
     }
@@ -205,9 +199,7 @@ router.delete("/:episodeId/:topicId", async (req: Request, res: Response) => {
         }
       },
       {
-        arrayFilters: [
-          { "elem.isChild": true, "elem.parentId": req.params.topicId }
-        ]
+        arrayFilters: [{ "elem.isChild": true, "elem.parentId": req.params.topicId }]
       }
     );
 
@@ -222,6 +214,74 @@ router.delete("/:episodeId/:topicId", async (req: Request, res: Response) => {
     );
 
     res.status(200).json(result);
+  } catch (error) {
+    res.status(404).send(error);
+  }
+});
+
+router.post("/:episodeId/:topicId", async (req: Request, res: Response) => {
+  try {
+    const episode = await MODEL.aggregate([
+      {
+        $match: {
+          _id: new ObjectId(req.params.episodeId),
+          userId: new ObjectId(res.locals.userId)
+        }
+      },
+      {
+        $project: {
+          topics: {
+            $filter: {
+              input: "$topics",
+              as: "topic",
+              cond: { $eq: ["$$topic._id", new ObjectId(req.params.topicId)] }
+            }
+          },
+          totalTopics: { $size: "$topics" }
+        }
+      }
+    ]);
+
+    if (!episode?.[0]?.topics?.[0]) {
+      throw new Error("Topic not found");
+    }
+
+    const originalTopic = episode[0].topics[0];
+
+    const newTopic = {
+      _id: new ObjectId(),
+      desc: originalTopic.desc,
+      img: "",
+      isChild: originalTopic.isChild,
+      isParent: false,
+      name: originalTopic.name,
+      order: episode[0].totalTopics + 1,
+      parentId: originalTopic.parentId,
+      timer: originalTopic.timer,
+      articles: originalTopic.articles,
+      video: originalTopic.video,
+      notes: originalTopic.notes,
+      chat: originalTopic.chat,
+      voting: originalTopic.voting
+    };
+
+    const result = await MODEL.updateOne(
+      {
+        _id: new ObjectId(req.params.episodeId),
+        userId: new ObjectId(res.locals.userId)
+      },
+      {
+        $push: {
+          topics: newTopic
+        }
+      }
+    );
+
+    if (result.modifiedCount === 1) {
+      res.status(200).json(newTopic);
+    } else {
+      throw new Error("No document was updated");
+    }
   } catch (error) {
     res.status(404).send(error);
   }

@@ -39,7 +39,7 @@ export async function videoPassThrough(
 
   const commandMap: { [key: string]: string } = {
     "!vdel": "playlist-delete-last",
-    "!vfs": "video-fullscreen",
+    "!vfull": "video-size-fullscreen",
     "!vnext": "playlist-next",
     "!vnormal": "video-size-normal",
     "!vpause": "video-pause",
@@ -51,7 +51,12 @@ export async function videoPassThrough(
     "!vstop": "video-stop",
 
     "!vadd": "playlist-return-now-playing",
-    "!vplayme": "playlist-load"
+    "!vplayme": "playlist-load",
+
+    "!vvolup": "video-volume-up",
+    "!vvoldown": "video-volume-down",
+
+    "!vdnp": "playlist-delete-now-playing-video"
   };
 
   socket.emit("gtkVideoOverlayAction", {
@@ -103,8 +108,6 @@ export async function videoRemove(
     }
   });
 }
-
-// !vmyplaylist chill
 
 export async function videoPlaylistFetcher(
   command: string,

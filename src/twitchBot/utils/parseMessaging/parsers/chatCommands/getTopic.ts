@@ -1,4 +1,4 @@
-import { CurrentTopicModel } from "../../../../../models/currentTopic";
+import { CurrentTopicModel } from "../../../../../models";
 import mongoose from "mongoose";
 const ObjectId = mongoose.Types.ObjectId;
 import { Client as TMIClient } from "tmi.js";
@@ -19,11 +19,7 @@ export async function getTopic(
       userId: new ObjectId(uid)
     });
 
-    // console.log(22, "getTopic.ts", result);
-
-    const message = result
-      ? `Current Topic: ${String(result.chat)}`
-      : "No topic set";
+    const message = result ? `Current Topic: ${String(result.chat)}` : "No topic set";
     client.action(channel, `@${username}, ${message}`);
   } catch (error) {
     console.error(error);

@@ -8,6 +8,7 @@ const ObjectId = mongoose.Types.ObjectId;
 import { TwitchAuthModel } from "../../models/twitch.model";
 import { verifyToken } from "../../middleware/verifyToken";
 import { isUserConnected } from "../../twitchBot/utils/isUserConnected";
+import { changeStreamData } from "./changeStreamData";
 
 const router = express.Router();
 
@@ -43,7 +44,7 @@ router.get("/connect/:username", async (req: Request, res: Response) => {
 router.get("/status", async (req: Request, res: Response) => {
   const twitchClient = req.app.get("twitchClient");
 
-  res.send(`TMI state: ${twitchClient.readyState()}`);
+  res.send(`TMI state: ${twitchClient?.readyState() || "n/a"}`);
 });
 
 router.get("/isConnected", verifyToken, async (req: Request, res: Response) => {
@@ -56,10 +57,7 @@ router.get("/isConnected", verifyToken, async (req: Request, res: Response) => {
 
     if (!user?.twitchUserName) throw new Error("No User Found");
 
-    const isConnected = await isUserConnected(
-      twitchClient,
-      user.twitchUserName
-    );
+    const isConnected = await isUserConnected(twitchClient, user.twitchUserName);
 
     res.send({ isConnected });
   } catch (error) {
@@ -96,15 +94,12 @@ router.post("/initChat", verifyToken, async (req: Request, res: Response) => {
     if (!process.env.TWITCH_CLIENT_ID || !process.env.TWITCH_CLIENT_SECRET)
       throw new Error("No Twitch Client ID or Secret");
 
-    const { data: userData } = await axios.get(
-      "https://api.twitch.tv/helix/users",
-      {
-        headers: {
-          "Client-ID": process.env.TWITCH_CLIENT_ID,
-          Authorization: `Bearer ${req.body.access_token}`
-        }
+    const { data: userData } = await axios.get("https://api.twitch.tv/helix/users", {
+      headers: {
+        "Client-ID": process.env.TWITCH_CLIENT_ID,
+        Authorization: `Bearer ${req.body.access_token}`
       }
-    );
+    });
 
     const tokenData = {
       accessToken: req.body.access_token,
@@ -127,10 +122,7 @@ router.post("/initChat", verifyToken, async (req: Request, res: Response) => {
     );
 
     // check if user is already connected to chat
-    const isConnected = await isUserConnected(
-      twitchClient,
-      userData.data[0].login
-    );
+    const isConnected = await isUserConnected(twitchClient, userData.data[0].login);
 
     // if not, connect to chat
     if (!isConnected) {
@@ -160,6 +152,46 @@ router.get("/twitchUsername/:userId", async (req: Request, res: Response) => {
     res.status(200).json({ twitchUsername: twitchUser.twitchUserName });
   } catch (error) {
     res.status(404).send(error);
+  }
+});
+
+router.get("/discoBot", verifyToken, async (req: Request, res: Response) => {
+  try {
+    req.app
+      .get("twitchClient")
+      .disconnect()
+      .catch((err: unknown) => {
+        if (err) throw new Error("Error Disconnecting Bot");
+      });
+
+    res.send({ success: true, message: "Twitch Chat Disconnected" });
+  } catch (error) {
+    res.send({ success: false, message: "bad" });
+  }
+});
+
+router.patch("/channelUpdate", verifyToken, async (req: Request, res: Response) => {
+  try {
+    await changeStreamData(res.locals.userId, req.body);
+
+    res.status(200).json({
+      resultStatus: {
+        success: true,
+        errors: null,
+        responseCode: 200,
+        resultMessage: "Your request was successful."
+      },
+      result: {
+        response: "Channel Updated"
+      }
+    });
+  } catch (error) {
+    res.status(404).json({
+      success: false,
+      errors: error,
+      responseCode: 404,
+      resultMessage: "Your request failed."
+    });
   }
 });
 

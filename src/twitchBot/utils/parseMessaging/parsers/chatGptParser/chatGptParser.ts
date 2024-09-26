@@ -4,14 +4,7 @@ import NodeCache from "node-cache";
 import { responseType } from "./responders";
 import { parseName } from "./utils/nameParser";
 import { changeResponder } from "./utils/changeResponder";
-import {
-  BotStatus,
-  CacheKeys,
-  ChatCount,
-  ChatResponse,
-  Frequency,
-  Responder
-} from "./utils/types";
+import { BotStatus, CacheKeys, ChatCount, ChatResponse, Frequency, Responder } from "./utils/types";
 import { changeFrequency } from "./utils/changeFrequency";
 import { changeStatus } from "./utils/changeStatus";
 
@@ -35,6 +28,7 @@ export async function chatGptParser(
   if (!botStatus[channel]) return;
 
   if (message.startsWith("!cb")) {
+    console.log(31);
     changeResponder(messageCache, client, channel, message);
     return;
   }
@@ -56,8 +50,7 @@ export async function chatGptParser(
   const responder: Responder = messageCache.get(CacheKeys.Responder) || {};
   responder[channel] = responder?.[channel] || responseType.normal.key;
 
-  const previousMessages: ChatResponse =
-    messageCache.get(CacheKeys.ChatGptParser) || {};
+  const previousMessages: ChatResponse = messageCache.get(CacheKeys.ChatGptParser) || {};
 
   previousMessages[channel] = previousMessages[channel] || [];
 
@@ -92,8 +85,7 @@ export async function chatGptParser(
         .replace(/\n/g, "")}`;
     }
 
-    const messageArray: ChatResponse =
-      messageCache.get(CacheKeys.ChatGptParser) || {};
+    const messageArray: ChatResponse = messageCache.get(CacheKeys.ChatGptParser) || {};
     messageArray[channel] = messageArray[channel] || [];
     messageArray[channel].push(message);
 
@@ -115,11 +107,7 @@ export async function chatGptParser(
   }
 }
 
-function shouldSendMessage(
-  channel: string,
-  message: string | undefined,
-  messageCache: NodeCache
-) {
+function shouldSendMessage(channel: string, message: string | undefined, messageCache: NodeCache) {
   if (!message) return false;
 
   const messageCount: ChatCount = messageCache.get(CacheKeys.Count) || {};
@@ -128,8 +116,7 @@ function shouldSendMessage(
   const frequency: Frequency = messageCache.get(CacheKeys.Frequency) || {};
   frequency[channel] = frequency[channel] || 8;
 
-  const shouldSend =
-    messageCount[channel] % frequency[channel] === 0 ? true : false;
+  const shouldSend = messageCount[channel] % frequency[channel] === 0 ? true : false;
 
   console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
   console.log(125, "channel", channel);

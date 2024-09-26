@@ -6,17 +6,20 @@ import { Client as TMIClient } from "tmi.js";
 import { getGTKUserId } from "../../../utils/dbFecthers";
 import axios from "axios";
 import { Server as SocketServer } from "socket.io";
+import { gtkVideoSearch } from "./utils/gtkVideoSearch";
 const ytmp4 = require("ytmp4");
 const { Client } = require("youtubei");
 
 const regex = /^\S{11}$/;
 
-const getIdFromUrl = (string: string) => {
+const getIdFromUrl = (string: string): string => {
   const reg = new RegExp("^(http(s)?://)?((w){3}.)?youtu(be|.be)?(.com)?/.+");
-  if (reg.test(string)) {
-    return string.split("v=")[1].split("&")[0];
-  }
-  return string;
+
+  if (!reg.test(string)) return string;
+  let starter = string.split("v=")[1] || string.split(".be/")[1];
+  starter = starter.split(/[&?]/)[0];
+
+  return starter.trim();
 };
 
 export async function videoSearch(
@@ -51,13 +54,24 @@ export async function videoSearch(
   const query = getIdFromUrl(messageSplit);
 
   try {
-    let videoId: string = "";
+    let videoId: string | undefined;
 
     if (regex.test(query.trim())) {
       videoId = query.trim();
     } else {
       const youtubeSearch = await youtube.search(query, { type: "video" });
-      videoId = youtubeSearch.items[0].id;
+      videoId = youtubeSearch?.items?.[0]?.id;
+
+      if (!videoId) {
+        const search = await gtkVideoSearch(query);
+        videoId = search ? search : "";
+      }
+    }
+
+    if (!videoId) {
+      throw new Error("No videoId found");
+    } else {
+      console.log(80, { videoId });
     }
 
     const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
@@ -93,6 +107,15 @@ export async function videoSearch(
     }
   } catch (error: any) {
     console.error(72, error?.message);
+
+    console.log("xxxxx xxxxx xxxxx xxxxx xxxxx");
+    console.log("xxxxx xxxxx xxxxx xxxxx xxxxx");
+    console.error(error);
+    console.log("xxxxx xxxxx xxxxx xxxxx xxxxx");
+    console.log("xxxxx xxxxx xxxxx xxxxx xxxxx");
+
+    if (error?.message === "72 Status code: 410") return;
+
     client.action(
       channel,
       `@${username}, sorry, there was an error processing your request!`

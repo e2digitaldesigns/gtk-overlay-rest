@@ -1,8 +1,7 @@
 import { Server as SocketServer } from "socket.io";
-import { Client as TMIClient } from "tmi.js";
+import { ChatUserstate, Client as TMIClient } from "tmi.js";
 import { getGTKUserId, getIgnoreList } from "./utils/dbFecthers";
 import { chatRankParser } from "./parsers/chatRanks";
-import { chatRelayParser } from "./parsers/chatRelay";
 import { emojiParser } from "./parsers/emojiParser";
 import { chatCommandParser } from "./parsers/chatCommandParser";
 import { chatLogParser } from "./parsers/chatLogParser";
@@ -10,7 +9,7 @@ import { chatGptParser } from "./parsers/chatGptParser/chatGptParser";
 
 export async function parseMessaging(
   channel: string,
-  tags: any,
+  tags: ChatUserstate,
   message: string,
   self: boolean,
   tmiClient: TMIClient | null,
@@ -22,7 +21,7 @@ export async function parseMessaging(
     chatterUserId: string
   ) => Promise<boolean>
 ) {
-  if (self) return; // Ignore messages from the bot
+  if (self || !tags.username) return; // Ignore messages from the bot
 
   const ignoreList = await getIgnoreList(channel);
 
@@ -37,11 +36,7 @@ export async function parseMessaging(
   const twitchUserImage = await getUserProfileImage(tags.username);
 
   // Is chat sender following the channel
-  const isFollowing = await isChatterFollowing(
-    channel,
-    tags.username,
-    tags["user-id"]
-  );
+  const isFollowing = await isChatterFollowing(channel, tags.username, tags["user-id"] || "");
 
   // Chat Command Parser
   chatCommandParser(
@@ -51,21 +46,19 @@ export async function parseMessaging(
     message.trim(),
     channel,
     tags,
-    isFollowing
+    isFollowing,
+    getUserProfileImage
   );
 
   //Chat Log Parser
-  chatLogParser(gtkUserId, channel, tags, message, twitchUserImage);
+  chatLogParser(gtkUserId, socket, channel, tags, message, twitchUserImage);
 
   //Chat Rank Parser
   chatRankParser(socket, channel);
-
-  //Chat Relay Parser
-  chatRelayParser(gtkUserId, socket, message, channel, tags, twitchUserImage);
 
   //Emoji Parser
   emojiParser(socket, message, channel);
 
   //Chat GPT Parser
-  // chatGptParser(channel, tmiClient, tags, message);
+  chatGptParser(channel, tmiClient, tags, message);
 }

@@ -13,19 +13,70 @@ router.get("/", async (req: Request, res: Response) => {
   res.send("Video Overlay");
 });
 
+router.post("/updateAllVideoVideos", async (req: Request, res: Response) => {
+  try {
+    const { videos } = req.body;
+
+    const updatedVideos = await Promise.all(
+      videos.map(async (video: any) => {
+        if (video.videoExpire > Date.now()) return video;
+        const videoData = await ytmp4(
+          `https://www.youtube.com/watch?v=${video.videoId}`
+        );
+
+        video.videoUrl = videoData.urls.sd;
+        video.videoExpire =
+          videoData.urls.sd.match(/expire=([0-9]+)/).pop() * 1000;
+        return video;
+      })
+    );
+
+    res.status(200).json({
+      resultStatus: {
+        success: true,
+        errors: null,
+        responseCode: 200,
+        resultMessage: "Your request was successful."
+      },
+      result: {
+        videos: updatedVideos
+      }
+    });
+  } catch (error) {
+    res.status(404).json({
+      success: false,
+      errors: error,
+      responseCode: 404,
+      resultMessage: "Your request failed."
+    });
+  }
+});
+
 router.get("/updateVideo/:ytId", async (req: Request, res: Response) => {
   try {
     const video = await ytmp4(
       `https://www.youtube.com/watch?v=${req.params.ytId}`
     );
 
-    res.json({
-      success: video.success,
-      videoUrl: video.urls.sd,
-      videoExpire: video.urls.sd.match(/expire=([0-9]+)/).pop() * 1000
+    res.status(200).json({
+      resultStatus: {
+        success: true,
+        errors: null,
+        responseCode: 200,
+        resultMessage: "Your request was successful."
+      },
+      result: {
+        videoUrl: video.urls.sd,
+        videoExpire: video.urls.sd.match(/expire=([0-9]+)/).pop() * 1000
+      }
     });
   } catch (error) {
-    res.json({ success: false, error });
+    res.status(404).json({
+      success: false,
+      errors: error,
+      responseCode: 404,
+      resultMessage: "Your request failed."
+    });
   }
 });
 
@@ -50,7 +101,9 @@ router.get("/settings", verifyToken, async (req: Request, res: Response) => {
         seekBackwardSeconds: result.seekBackwardSeconds,
         seekForwardSeconds: result.seekForwardSeconds,
         skipCount: result.skipCount,
-        userVideoQueueCount: result.userVideoQueueCount
+        userVideoQueueCount: result.userVideoQueueCount,
+        volumeUpIncrement: result.volumeUpIncrement,
+        volumeDownIncrement: result.volumeDownIncrement
       }
     });
   } catch (error) {
@@ -73,18 +126,32 @@ router.get("/settings/:userId", async (req: Request, res: Response) => {
     }).exec();
 
     res.status(200).json({
-      success: true,
-      twitchChannel: twitchAuth?.twitchUserName,
-      settings: {
-        onFireCount: result.onFireCount,
-        seekBackwardSeconds: result.seekBackwardSeconds,
-        seekForwardSeconds: result.seekForwardSeconds,
-        skipCount: result.skipCount,
-        userVideoQueueCount: result.userVideoQueueCount
+      resultStatus: {
+        success: true,
+        errors: null,
+        responseCode: 200,
+        resultMessage: "Your request was successful."
+      },
+      result: {
+        twitchChannel: twitchAuth?.twitchUserName,
+        settings: {
+          onFireCount: result.onFireCount,
+          seekBackwardSeconds: result.seekBackwardSeconds,
+          seekForwardSeconds: result.seekForwardSeconds,
+          skipCount: result.skipCount,
+          userVideoQueueCount: result.userVideoQueueCount,
+          volumeUpIncrement: result.volumeUpIncrement,
+          volumeDownIncrement: result.volumeDownIncrement
+        }
       }
     });
   } catch (error) {
-    res.status(404).send(error);
+    res.status(404).json({
+      success: false,
+      errors: error,
+      responseCode: 404,
+      resultMessage: "Your request failed."
+    });
   }
 });
 
@@ -95,7 +162,9 @@ router.put("/settings", verifyToken, async (req: Request, res: Response) => {
       seekBackwardSeconds,
       seekForwardSeconds,
       skipCount,
-      userVideoQueueCount
+      userVideoQueueCount,
+      volumeUpIncrement,
+      volumeDownIncrement
     } = req.body;
     const result = await VideoOverlaySettingsModel.findOneAndUpdate(
       { userId: res.locals.userId },
@@ -104,7 +173,9 @@ router.put("/settings", verifyToken, async (req: Request, res: Response) => {
         seekBackwardSeconds,
         seekForwardSeconds,
         skipCount,
-        userVideoQueueCount
+        userVideoQueueCount,
+        volumeUpIncrement,
+        volumeDownIncrement
       },
       { new: true }
     );

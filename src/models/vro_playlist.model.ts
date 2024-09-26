@@ -2,16 +2,12 @@ import { model, Schema, Types } from "mongoose";
 
 export type VRO_Playlist = {
   userId: Types.ObjectId;
-  playlistId: Types.ObjectId;
   playlistName: string;
-  default: boolean;
 };
 
 const VideoOverlayPlaylistSchema = new Schema<VRO_Playlist>({
   userId: { type: Schema.Types.ObjectId },
-  playlistId: { type: Schema.Types.ObjectId },
-  playlistName: { type: String, required: true, default: "Playlist" },
-  default: { type: Boolean, required: true, default: false }
+  playlistName: { type: String, required: true, default: "Playlist" }
 });
 
 export const VideoPlaylistModel = model(
@@ -23,7 +19,7 @@ export type VRO_PlaylistItem = {
   userId: Types.ObjectId;
   viewerUsername: string;
   viewerId: string;
-  playlistId: Types.ObjectId;
+  playlistId: Types.ObjectId | null;
 
   date: Date;
   requestedBy: string;
@@ -38,7 +34,7 @@ const VideoOverlayPlaylistItemSchema = new Schema<VRO_PlaylistItem>({
   userId: { type: Schema.Types.ObjectId },
   viewerUsername: { type: String },
   viewerId: { type: String },
-  playlistId: { type: Schema.Types.ObjectId },
+  playlistId: { type: Schema.Types.ObjectId, default: null },
 
   date: { type: Date },
   videoId: { type: String, required: true },

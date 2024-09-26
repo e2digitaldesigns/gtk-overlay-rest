@@ -1,3 +1,5 @@
+import he from "he";
+
 type StringReplacement = {
   stringToReplace: string;
   replacement: string;
@@ -41,5 +43,6 @@ export function twitchChatParser(
       message
     );
   });
-  return messageHTML;
+
+  return he.decode(messageHTML);
 }

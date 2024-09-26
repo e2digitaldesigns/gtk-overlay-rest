@@ -3,24 +3,20 @@ import { Server as SocketServer } from "socket.io";
 import * as chatCommands from "./chatCommands";
 import { UserCommandsModel } from "../../../../models/commands.model";
 import mongoose from "mongoose";
+
 const ObjectId = mongoose.Types.ObjectId;
 
-const validatedCommand = async (
-  gtkUserId: string,
-  command: string
-): Promise<boolean> => {
-  const exceptions = ["!gtk", "!reply"];
+const validatedCommand = async (gtkUserId: string, command: string): Promise<boolean> => {
+  const exceptions = ["!gtk", "!reply", "!cb"];
   if (exceptions.includes(command)) return true;
 
   const data = await UserCommandsModel.findOne({
-    command: { $regex: new RegExp(`^${command}$`, "i") }
+    command: command
   }).select("users");
 
   if (!data) return false;
 
-  const isUserInArray = data?.users.includes(new ObjectId(gtkUserId));
-
-  return isUserInArray;
+  return data.users.includes(new ObjectId(gtkUserId));
 };
 
 export async function chatCommandParser(
@@ -30,42 +26,174 @@ export async function chatCommandParser(
   message: string,
   channel: string,
   tags: any,
-  isFollowing: boolean
+  isFollowing: boolean,
+  getUserProfileImage: (username: string) => Promise<string>
 ) {
   if (!client) return;
 
   const commandPrefixes = ["!", "1", "2", "true", "false", "yes", "no"];
-  if (!commandPrefixes.some(prefix => message.trim().startsWith(prefix))) {
-    return;
-  }
+  const trimmedMessage = message.trim();
 
-  const typedCommand = message.split(" ")[0].toLowerCase();
-  const command = typedCommand.startsWith("!")
-    ? typedCommand
-    : `!${typedCommand}`;
+  if (!commandPrefixes.some(prefix => trimmedMessage.startsWith(prefix))) return;
 
-  const isCommandValid = await validatedCommand(gtkUserId, typedCommand);
+  const [typedCommand, ...args] = trimmedMessage.split(" ");
+  const command = typedCommand.startsWith("!") ? typedCommand : `!${typedCommand}`;
+  const isCommandValid = await validatedCommand(gtkUserId, typedCommand.toLowerCase());
 
   if (!isCommandValid) {
     if (!typedCommand.startsWith("!")) return;
     return;
   }
 
-  switch (command) {
-    case "!gtk":
-      client.action(channel, "GamerToolkit Test Command");
-      break;
+  const userIsMod = tags.mod || channel.slice(1).toLowerCase() === tags.username.toLowerCase();
 
-    case "!reply":
-      client.action(channel, `@${tags.username}, heya!`);
-      break;
-
-    // VIDEO REQUEST OVERLAY
-    // VIDEO REQUEST OVERLAY
-    // VIDEO REQUEST OVERLAY
-    case "!vr":
-    case "!pvr":
-      await chatCommands.videoSearch(
+  const commandActions: { [key: string]: Function } = {
+    "!1": () => chatCommands.overlayVoting(command, tags.username, channel, socket, client),
+    "!2": () => chatCommands.overlayVoting(command, tags.username, channel, socket, client),
+    "!d1": () => chatCommands.overlayVoting(command, tags.username, channel, socket, client),
+    "!d2": () => chatCommands.overlayVoting(command, tags.username, channel, socket, client),
+    "!d3": () => chatCommands.overlayVoting(command, tags.username, channel, socket, client),
+    "!d4": () => chatCommands.overlayVoting(command, tags.username, channel, socket, client),
+    "!false": () => chatCommands.overlayVoting(command, tags.username, channel, socket, client),
+    "!gtk": () => client.action(channel, "GamerToolkit Test Command"),
+    "!gtk2": () => client.action(channel, "GamerToolkit Test Command 2"),
+    "!no": () => chatCommands.overlayVoting(command, tags.username, channel, socket, client),
+    "!pvr": () => handleVideoRequestOverlay("playlist-return-video-request"),
+    "!rank": () => chatCommands.getRankByUser(tags.username, client, channel),
+    "!reply": () => client.action(channel, `@${tags.username}, heya!`),
+    "!uv": () =>
+      chatCommands.chatterVoting(
+        command,
+        message,
+        tags.username,
+        channel,
+        socket,
+        getUserProfileImage,
+        client
+      ),
+    "!dv": () =>
+      chatCommands.chatterVoting(
+        command,
+        message,
+        tags.username,
+        channel,
+        socket,
+        getUserProfileImage,
+        client
+      ),
+    "!sv1": () =>
+      handleSubscriberCommand(() =>
+        chatCommands.overlayVoting(command, tags.username, channel, socket, client)
+      ),
+    "!sv2": () =>
+      handleSubscriberCommand(() =>
+        chatCommands.overlayVoting(command, tags.username, channel, socket, client)
+      ),
+    "!sv3": () =>
+      handleSubscriberCommand(() =>
+        chatCommands.overlayVoting(command, tags.username, channel, socket, client)
+      ),
+    "!sv4": () =>
+      handleSubscriberCommand(() =>
+        chatCommands.overlayVoting(command, tags.username, channel, socket, client)
+      ),
+    "!win1": () =>
+      handleSubscriberCommand(() =>
+        chatCommands.overlayVoting(command, tags.username, channel, socket, client)
+      ),
+    "!win2": () =>
+      handleSubscriberCommand(() =>
+        chatCommands.overlayVoting(command, tags.username, channel, socket, client)
+      ),
+    "!win3": () =>
+      handleSubscriberCommand(() =>
+        chatCommands.overlayVoting(command, tags.username, channel, socket, client)
+      ),
+    "!win4": () =>
+      handleSubscriberCommand(() =>
+        chatCommands.overlayVoting(command, tags.username, channel, socket, client)
+      ),
+    "!topic": () => chatCommands.getTopic(tags.username, client, channel),
+    "!true": () => chatCommands.overlayVoting(command, tags.username, channel, socket, client),
+    "!v1": () => chatCommands.overlayVoting(command, tags.username, channel, socket, client),
+    "!v2": () => chatCommands.overlayVoting(command, tags.username, channel, socket, client),
+    "!v3": () => chatCommands.overlayVoting(command, tags.username, channel, socket, client),
+    "!v4": () => chatCommands.overlayVoting(command, tags.username, channel, socket, client),
+    "!vadd": () =>
+      handleModOrSubscriberCommand(() =>
+        chatCommands.videoPassThrough(command, channel, socket, tags.username)
+      ),
+    "!vdel": () =>
+      handleModOrSubscriberCommand(() =>
+        chatCommands.videoPassThrough(command, channel, socket, tags.username)
+      ),
+    "!vdnp": () =>
+      handleModOrSubscriberCommand(() =>
+        chatCommands.videoPassThrough(command, channel, socket, tags.username)
+      ),
+    "!vfull": () =>
+      handleModOrSubscriberCommand(() =>
+        chatCommands.videoPassThrough(command, channel, socket, tags.username)
+      ),
+    "!vhot": () => chatCommands.videoVoting(command, tags.username, channel, socket),
+    "!vnext": () =>
+      handleModOrSubscriberCommand(() =>
+        chatCommands.videoPassThrough(command, channel, socket, tags.username)
+      ),
+    "!vnormal": () =>
+      handleModOrSubscriberCommand(() =>
+        chatCommands.videoPassThrough(command, channel, socket, tags.username)
+      ),
+    "!vnot": () => chatCommands.videoVoting(command, tags.username, channel, socket),
+    "!vpause": () =>
+      handleModOrSubscriberCommand(() =>
+        chatCommands.videoPassThrough(command, channel, socket, tags.username)
+      ),
+    "!vpclear": () =>
+      handleModOrSubscriberCommand(() =>
+        chatCommands.videoPassThrough(command, channel, socket, tags.username)
+      ),
+    "!vplay": () =>
+      handleModOrSubscriberCommand(() =>
+        chatCommands.videoPassThrough(command, channel, socket, tags.username)
+      ),
+    "!vplayme": () =>
+      handleModOrSubscriberCommand(() =>
+        chatCommands.videoPlaylistFetcher(command, tags.username, channel, message, socket)
+      ),
+    "!vprev": () =>
+      handleModOrSubscriberCommand(() =>
+        chatCommands.videoPassThrough(command, channel, socket, tags.username)
+      ),
+    "!vremove": () => chatCommands.videoRemove(channel, socket, tags.username),
+    "!vreset": () =>
+      handleModOrSubscriberCommand(() =>
+        chatCommands.videoPassThrough(command, channel, socket, tags.username)
+      ),
+    "!vskip": () => chatCommands.videoVoting(command, tags.username, channel, socket),
+    "!vsmall": () =>
+      handleModOrSubscriberCommand(() =>
+        chatCommands.videoPassThrough(command, channel, socket, tags.username)
+      ),
+    "!vstop": () =>
+      handleModOrSubscriberCommand(() =>
+        chatCommands.videoPassThrough(command, channel, socket, tags.username)
+      ),
+    "!vvol": () =>
+      handleModOrSubscriberCommand(() =>
+        chatCommands.videoVolume(command, channel, socket, message)
+      ),
+    "!vvoldown": () =>
+      handleModOrSubscriberCommand(() =>
+        chatCommands.videoPassThrough(command, channel, socket, tags.username)
+      ),
+    "!vvolup": () =>
+      handleModOrSubscriberCommand(() =>
+        chatCommands.videoPassThrough(command, channel, socket, tags.username)
+      ),
+    "!vr": () => handleVideoRequestOverlay("playlist-return-video-request"),
+    "!vr_archive": () =>
+      chatCommands.videoSearch(
         command,
         tags.username,
         tags.mod,
@@ -74,128 +202,43 @@ export async function chatCommandParser(
         message,
         socket,
         isFollowing
-      );
-      break;
+      ),
+    "!yes": () => chatCommands.overlayVoting(command, tags.username, channel, socket, client)
+  };
 
-    case "!vremove":
-      await chatCommands.videoRemove(channel, socket, tags.username);
+  if (commandActions[command]) {
+    await commandActions[command]();
+  } else {
+    console.log("chatCommandParser.ts", "No command found");
+  }
 
-    case "!vhot":
-    case "!vnot":
-    case "!vskip":
-      await chatCommands.videoVoting(command, tags.username, channel, socket);
-      break;
-
-    case "!vvol":
-      if (tags.mod || tags.subscriber) {
-        console.log(tags);
-        await chatCommands.videoVolume(command, channel, socket, message);
+  function handleVideoRequestOverlay(action: string) {
+    socket.emit("gtkVideoOverlayAction", {
+      action,
+      uid: gtkUserId,
+      data: {
+        action,
+        channel: channel.slice(1),
+        isFollowing,
+        isMod: userIsMod,
+        requestedBy: tags.username,
+        searchTerm: args.join(" "),
+        command
       }
-      break;
+    });
+  }
 
-    case "!vdel":
+  function handleModOrSubscriberCommand(callback: Function) {
+    if (tags.mod || tags.subscriber) {
+      callback();
+    }
+  }
 
-    case "!vnormal":
-    case "!vsmall":
-    case "!vfs":
-
-    case "!vstop":
-    case "!vpause":
-    case "!vplay":
-    case "!vnext":
-    case "!vprev":
-
-    case "!vadd":
-
-    case "!vpclear":
-    case "!vreset":
-      if (tags.mod || tags.subscriber) {
-        await chatCommands.videoPassThrough(
-          command,
-          channel,
-          socket,
-          tags.username
-        );
-      }
-      break;
-
-    case "!vplayme":
-      if (tags.mod || tags.subscriber) {
-        await chatCommands.videoPlaylistFetcher(
-          command,
-          tags.username,
-          channel,
-          message,
-          socket
-        );
-      }
-      break;
-    // VIDEO REQUEST OVERLAY
-    // VIDEO REQUEST OVERLAY
-    // VIDEO REQUEST OVERLAY
-
-    case "!d1":
-    case "!d2":
-    case "!d3":
-    case "!d4":
-    case "!v1":
-    case "!v2":
-    case "!v3":
-    case "!v4":
-      await chatCommands.overlayVoting(
-        command,
-        tags.username,
-        channel,
-        socket,
-        client
-      );
-      break;
-
-    case "!sv1":
-    case "!sv2":
-    case "!sv3":
-    case "!sv4":
-      if (!tags.subscriber) {
-        client.action(
-          channel,
-          `@${tags.username}, you must be a subscriber to use super votes!`
-        );
-        return;
-      }
-      await chatCommands.overlayVoting(
-        command,
-        tags.username,
-        channel,
-        socket,
-        client
-      );
-      break;
-
-    case "!1":
-    case "!2":
-    case "!true":
-    case "!false":
-    case "!yes":
-    case "!no":
-      await chatCommands.overlayVoting(
-        command,
-        tags.username,
-        channel,
-        socket,
-        client
-      );
-      break;
-
-    case "!rank":
-      await chatCommands.getRankByUser(tags.username, client, channel);
-      break;
-
-    case "!topic":
-      await chatCommands.getTopic(tags.username, client, channel);
-      break;
-
-    default:
-      console.log("chatCommandParser.ts", "No command found");
-      break;
+  function handleSubscriberCommand(callback: Function) {
+    if (!tags.subscriber) {
+      client?.action(channel, `@${tags.username}, you must be a subscriber to use super votes!`);
+      return;
+    }
+    callback();
   }
 }
