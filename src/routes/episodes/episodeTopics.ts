@@ -3,11 +3,11 @@ import mongoose from "mongoose";
 import { verifyToken } from "../../middleware/verifyToken";
 import { EpisodeModel } from "../../models/episodes.model";
 import { IEpisode } from "../../models/episodes.model";
-import { deleteFromS3 } from "../fileUpload/s3Delete";
 const ObjectId = mongoose.Types.ObjectId;
 
 import _sortBy from "lodash/sortBy";
 import { topicContentParser } from "../show/utils/contentParser";
+import { s3Functions } from "../../utils";
 
 const router = express.Router();
 router.use(verifyToken);
@@ -182,7 +182,7 @@ router.delete("/:episodeId/:topicId", async (req: Request, res: Response) => {
     });
 
     if (documentBeforeUpdate?.topics[0].img) {
-      await deleteFromS3(documentBeforeUpdate?.topics[0].img);
+      await s3Functions.delete(documentBeforeUpdate?.topics[0].img);
     }
 
     await MODEL.updateMany(

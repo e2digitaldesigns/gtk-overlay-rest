@@ -1,8 +1,8 @@
 import axios from "axios";
 import { EpisodeModel } from "../../../models/episodes.model";
 import mongoose from "mongoose";
-import { deleteFromS3Multi } from "../s3Delete";
 const ObjectId = mongoose.Types.ObjectId;
+import { s3Functions } from "../../../utils";
 
 export const youtubeUpload = async (episodeId: string, topicId: string, videoUrl: string) => {
   try {
@@ -38,7 +38,7 @@ export const youtubeUpload = async (episodeId: string, topicId: string, videoUrl
     const currentTopic = episode?.topics?.find((topic: any) => topic._id.toString() === topicId);
 
     if (currentTopic?.video) {
-      await deleteFromS3Multi(
+      await s3Functions.deleteMulti(
         [currentTopic.video.split("/").pop() as string],
         "videos/user-videos"
       );

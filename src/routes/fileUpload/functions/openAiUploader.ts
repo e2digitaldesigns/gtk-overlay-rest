@@ -1,8 +1,7 @@
-import { pushToS3 } from "../../_utils";
 import { v4 } from "uuid";
 import mongoose from "mongoose";
 const ObjectId = mongoose.Types.ObjectId;
-import { deleteFromS3 } from "../s3Delete";
+import { s3Functions } from "../../../utils";
 import { getTemplateImageSize } from "../utils";
 import sharp from "sharp";
 import { EpisodeModel } from "../../../models";
@@ -29,7 +28,7 @@ export const openAiUploader = async (
 
     const imageBufferData = data;
 
-    const s3Push = await pushToS3(imageBufferData, `images/user-images/${fileName}`);
+    const s3Push = await s3Functions.push(imageBufferData, `images/user-images/${fileName}`);
     if (!s3Push) throw new Error("S3 Push failed");
 
     const episodeTopics = await EpisodeModel.findOneAndUpdate(
@@ -49,7 +48,7 @@ export const openAiUploader = async (
     );
 
     if (episodeTopics?.topics?.[0].img) {
-      await deleteFromS3(episodeTopics?.topics?.[0].img);
+      await s3Functions.delete(episodeTopics?.topics?.[0].img);
     }
 
     return {
@@ -70,7 +69,7 @@ export const openAiUploader = async (
       resultStatus: {
         success: false,
         errors: error,
-        responseCode: 404,
+        responseCode: 400,
         resultMessage: "Your request failed."
       }
     };

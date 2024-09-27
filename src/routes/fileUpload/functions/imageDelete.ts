@@ -1,6 +1,6 @@
 import { EpisodeModel } from "../../../models/episodes.model";
 import mongoose from "mongoose";
-import { deleteFromS3 } from "../../_utils";
+import { s3Functions } from "../../../utils";
 const ObjectId = mongoose.Types.ObjectId;
 
 export const imageDelete = async (episodeId: string, imageId: string, imageType: string) => {
@@ -78,7 +78,7 @@ export const imageDelete = async (episodeId: string, imageId: string, imageType:
       throw new Error("No AWS S3 Bucket");
     }
     if (fileToDelete) {
-      deleteFromS3(fileToDelete, isImage ? "image" : "video");
+      s3Functions.delete(fileToDelete, isImage ? "images/user-images" : "videos/user-videos");
     }
 
     return {
@@ -95,7 +95,7 @@ export const imageDelete = async (episodeId: string, imageId: string, imageType:
       resultStatus: {
         success: false,
         errors: error,
-        responseCode: 404,
+        responseCode: 400,
         resultMessage: "Your request failed."
       }
     };

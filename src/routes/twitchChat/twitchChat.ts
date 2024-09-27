@@ -189,7 +189,7 @@ router.patch("/channelUpdate", verifyToken, async (req: Request, res: Response) 
     res.status(404).json({
       success: false,
       errors: error,
-      responseCode: 404,
+      responseCode: 400,
       resultMessage: "Your request failed."
     });
   }

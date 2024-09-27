@@ -1,8 +1,7 @@
-import { s3ObjectCopy } from "../../../utils/imageCopy";
 import { EpisodeModel } from "../../../models";
-import { deleteFromS3 } from "../s3Delete";
 
 import mongoose from "mongoose";
+import { s3Functions } from "../../../utils";
 const ObjectId = mongoose.Types.ObjectId;
 
 export const transparentUploader = async (episodeId: string, topicId: string) => {
@@ -10,9 +9,7 @@ export const transparentUploader = async (episodeId: string, topicId: string) =>
     const clouds = process.env.S3_CLOUD_IMAGES;
     const type = "image";
 
-    const fileName = s3ObjectCopy("blank.png");
-    console.log("fileName", fileName);
-
+    const fileName = await s3Functions.copy("blank.png");
     if (!fileName) throw new Error("S3 Copy failed");
 
     const episodeContentTopics = await EpisodeModel.findOneAndUpdate(
@@ -38,7 +35,7 @@ export const transparentUploader = async (episodeId: string, topicId: string) =>
     const deleteFile = episodeContentTopics?.topics?.[0].video;
 
     if (deleteFile) {
-      await deleteFromS3(deleteFile);
+      await s3Functions.delete(deleteFile);
     }
 
     return {
@@ -59,7 +56,7 @@ export const transparentUploader = async (episodeId: string, topicId: string) =>
       resultStatus: {
         success: false,
         errors: error,
-        responseCode: 404,
+        responseCode: 400,
         resultMessage: "Your request failed."
       }
     };

@@ -1,9 +1,8 @@
 import mongoose from "mongoose";
 const ObjectId = mongoose.Types.ObjectId;
 import { EpisodeModel } from "../../../models/episodes.model";
-import { pushToS3 } from "../../_utils";
-import { deleteFromS3 } from "../s3Delete";
 import { generateFileName, getTemplateImageSize, imageSizeParser } from "../utils";
+import { s3Functions } from "../../../utils";
 
 export const imageUploader = async (
   episodeId: string,
@@ -19,7 +18,7 @@ export const imageUploader = async (
     const { width, height } = await getTemplateImageSize(episodeId, userId, imageType);
 
     const data = await imageSizeParser(file, width, height);
-    const s3Push = await pushToS3(data, `images/user-images/${fileName}`);
+    const s3Push = await s3Functions.push(data, `images/user-images/${fileName}`);
     if (!s3Push) throw new Error("S3 Push failed");
     const imageId = new ObjectId() as unknown as string;
 
@@ -56,7 +55,7 @@ export const imageUploader = async (
       resultStatus: {
         success: false,
         errors: error,
-        responseCode: 404,
+        responseCode: 400,
         resultMessage: "Your request failed."
       }
     };
@@ -81,7 +80,7 @@ async function updateTopicImage(episodeId: string, fileName: string, topicId: st
   );
 
   if (episodeTopics?.topics?.[0].img) {
-    await deleteFromS3(episodeTopics?.topics?.[0].img);
+    await s3Functions.delete(episodeTopics?.topics?.[0].img);
   }
 }
 
@@ -91,7 +90,7 @@ async function updateLogoImage(episodeId: string, fileName: string) {
   }).select({ logo: 1 });
 
   if (episode?.logo) {
-    await deleteFromS3(episode.logo);
+    await s3Functions.delete(episode.logo);
   }
 
   await EpisodeModel.findOneAndUpdate(

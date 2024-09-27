@@ -1,11 +1,5 @@
-import S3 from "aws-sdk/clients/s3";
 import axios from "axios";
 import sharp from "sharp";
-
-const s3bucket = new S3({
-  accessKeyId: process.env.AWS_ACCESS_KEY_ID || "",
-  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || ""
-});
 
 export async function getBufferFromUrl(url: string): Promise<Buffer> {
   const response = await axios.get(url, { responseType: "arraybuffer" });
@@ -49,11 +43,7 @@ export async function imageSizeParser(req: Request | any, template: any) {
   return data;
 }
 
-export async function imageSizeParserManual(
-  buffer: Buffer,
-  width: number,
-  height: number
-) {
+export async function imageSizeParserManual(buffer: Buffer, width: number, height: number) {
   const { data } = await sharp(buffer)
     .resize(width, height, {
       fit: sharp.fit.cover,
@@ -65,52 +55,4 @@ export async function imageSizeParserManual(
     });
 
   return data;
-}
-
-const s3BucketsObj: { [key: string]: string } = {
-  image: "images/user-images/",
-  video: "videos/user-videos/"
-};
-
-export function pushToS3(
-  fileBuffer: Buffer | File | undefined,
-  fileName: string
-) {
-  return new Promise((resolve, reject) => {
-    const contentParams = {
-      Bucket: process.env.AWS_SECRET_S3_BUCKET || "",
-      Key: fileName,
-      ContentType: fileBuffer instanceof File ? fileBuffer.type : "image/png",
-      Body: fileBuffer,
-      ACL: "public-read"
-    };
-
-    s3bucket.upload(
-      contentParams,
-      function (err: unknown, data: S3.ManagedUpload.SendData) {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(data);
-        }
-      }
-    );
-  });
-}
-
-export function deleteFromS3(fileName: string, bucketKey: string = "image") {
-  return new Promise((resolve, reject) => {
-    const imgParams = {
-      Bucket: process.env.AWS_SECRET_S3_BUCKET || "",
-      Key: `${s3BucketsObj[bucketKey]}${fileName}`
-    };
-
-    s3bucket.deleteObject(imgParams, function (err: unknown, data: any) {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(data);
-      }
-    });
-  });
 }

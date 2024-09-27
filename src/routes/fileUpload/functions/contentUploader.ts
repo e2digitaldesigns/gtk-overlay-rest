@@ -1,6 +1,5 @@
 import { EpisodeModel } from "../../../models";
-import { pushToS3 } from "../../_utils";
-import { deleteFromS3 } from "../s3Delete";
+import { s3Functions } from "../../../utils";
 import { generateFileName } from "../utils";
 
 import mongoose from "mongoose";
@@ -21,7 +20,7 @@ export const contentUploader = async (
     const type = videoArray.includes(fileExtension) ? "video" : "image";
     const clouds = type === "video" ? process.env.S3_CLOUD_VIDEOS : process.env.S3_CLOUD_IMAGES;
 
-    const s3Push = await pushToS3(formFile.buffer, `${dir}/${fileName}`);
+    const s3Push = await s3Functions.push(formFile.buffer, `${dir}/${fileName}`);
     if (!s3Push) throw new Error("S3 Push failed");
 
     const episodeContentTopics = await EpisodeModel.findOneAndUpdate(
@@ -47,7 +46,7 @@ export const contentUploader = async (
     const deleteFile = episodeContentTopics?.topics?.[0]?.video;
 
     if (deleteFile) {
-      await deleteFromS3(deleteFile);
+      await s3Functions.delete(deleteFile);
     }
 
     return {
@@ -63,12 +62,12 @@ export const contentUploader = async (
         url: clouds + fileName
       }
     };
-  } catch (error) {
+  } catch (error: unknown) {
     return {
       resultStatus: {
         success: false,
         errors: error,
-        responseCode: 404,
+        responseCode: 400,
         resultMessage: "Your request failed."
       }
     };

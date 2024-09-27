@@ -4,9 +4,9 @@ import { verifyToken } from "../../middleware/verifyToken";
 import { EpisodeModel, IEpisodeTopic, SponsorImages } from "../../models/episodes.model";
 import { ITemplate } from "../../models/templates.model";
 import { IEpisode } from "./../../models/episodes.model";
-import { s3ObjectCopy, s3ObjectCopyVideo } from "../../utils/imageCopy";
-import { deleteFromS3Multi } from "../fileUpload/s3Delete";
 import { logoImageParser, sponsorImageParser } from "../show/utils/imageParsers";
+import { s3Functions } from "../../utils";
+
 const ObjectId = mongoose.Types.ObjectId;
 
 const router = express.Router();
@@ -229,15 +229,27 @@ router.post("/", async (req: Request, res: Response) => {
       : null;
 
     const newSponsorImages: SponsorImages[] = [];
-    currentState?.sponsors &&
-      lastEpisode?.sponsorImages?.map((item: SponsorImages) => {
-        const newItem = s3ObjectCopy(item.url);
-        newItem &&
-          newSponsorImages.push({
-            _id: new ObjectId(),
-            url: newItem
-          });
+
+    if (currentState?.sponsors && lastEpisode?.sponsorImages) {
+      const copyPromises = lastEpisode.sponsorImages.map(async (item: SponsorImages) => {
+        const newItem = await s3Functions.copy(item.url);
+
+        return newItem
+          ? {
+              _id: new ObjectId(),
+              url: newItem
+            }
+          : null;
       });
+
+      const results = await Promise.all(copyPromises);
+
+      results.forEach(result => {
+        if (result) {
+          newSponsorImages.push(result);
+        }
+      });
+    }
 
     const episode = {
       userId: new ObjectId(res.locals.userId),
@@ -245,7 +257,7 @@ router.post("/", async (req: Request, res: Response) => {
       active: false,
       current: lastEpisode ? false : true,
       hosts: currentState.hosts && lastEpisode?.hosts ? lastEpisode.hosts : [],
-      logo: currentState.logo && lastEpisode?.logo ? s3ObjectCopy(lastEpisode.logo) : "",
+      logo: currentState.logo && lastEpisode?.logo ? await s3Functions.copy(lastEpisode.logo) : "",
       number: lastEpisode?.number ? Number(lastEpisode.number) + 1 : 1,
       socialNetworks:
         currentState.socialNetworks && lastEpisode?.socialNetworks
@@ -321,7 +333,7 @@ router.delete("/:_id", async (req: Request, res: Response) => {
     episode?.topics?.map((item: IEpisodeTopic) => item?.img && imageArray.push(item.img));
 
     if (imageArray.length) {
-      deleteFromS3Multi(imageArray, "images/user-images");
+      s3Functions.deleteMulti(imageArray, "images/user-images");
     }
 
     const videoArray: string[] = [];
@@ -333,7 +345,7 @@ router.delete("/:_id", async (req: Request, res: Response) => {
     });
 
     if (videoArray.length) {
-      deleteFromS3Multi(videoArray, "videos/user-videos");
+      s3Functions.deleteMulti(videoArray, "videos/user-videos");
     }
 
     const result = await MODEL.deleteOne({
@@ -352,17 +364,18 @@ export const episodes = router;
 
 const lastEpisodeTopicParser = async (useCurrent: boolean, topics?: IEpisodeTopic[]) => {
   if (useCurrent && topics) {
-    const newTopics = topics.map((item: IEpisodeTopic) => {
-      const newItem = {
-        ...item,
-        img: item?.img ? s3ObjectCopy(item.img) : "",
-        video: item?.video ? s3ObjectCopyVideo(item.video) : ""
-      };
+    const newTopics = await Promise.all(
+      topics.map(async (item: IEpisodeTopic) => {
+        const newItem = {
+          ...item,
+          img: item?.img ? await s3Functions.copy(item.img) : ""
+        };
 
-      return newItem;
-    });
+        return newItem;
+      })
+    );
 
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise(resolve => setTimeout(resolve, 1000)); // This can be removed if not needed
     return newTopics;
   }
 

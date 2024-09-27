@@ -35,7 +35,7 @@ router.get("/:uid/:socket/:action", async (req: Request, res: Response) => {
     res.status(404).json({
       success: false,
       errors: error,
-      responseCode: 404,
+      responseCode: 400,
       resultMessage: "Your request failed."
     });
   }
@@ -67,7 +67,7 @@ router.post("/", async (req: Request, res: Response) => {
     res.status(404).json({
       success: false,
       errors: error,
-      responseCode: 404,
+      responseCode: 400,
       resultMessage: "Your request failed."
     });
   }
@@ -105,7 +105,7 @@ router.post("/hostVote", async (req: Request, res: Response) => {
     res.status(404).json({
       success: false,
       errors: error,
-      responseCode: 404,
+      responseCode: 400,
       resultMessage: "Your request failed."
     });
   }

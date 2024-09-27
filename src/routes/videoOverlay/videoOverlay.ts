@@ -20,13 +20,10 @@ router.post("/updateAllVideoVideos", async (req: Request, res: Response) => {
     const updatedVideos = await Promise.all(
       videos.map(async (video: any) => {
         if (video.videoExpire > Date.now()) return video;
-        const videoData = await ytmp4(
-          `https://www.youtube.com/watch?v=${video.videoId}`
-        );
+        const videoData = await ytmp4(`https://www.youtube.com/watch?v=${video.videoId}`);
 
         video.videoUrl = videoData.urls.sd;
-        video.videoExpire =
-          videoData.urls.sd.match(/expire=([0-9]+)/).pop() * 1000;
+        video.videoExpire = videoData.urls.sd.match(/expire=([0-9]+)/).pop() * 1000;
         return video;
       })
     );
@@ -46,7 +43,7 @@ router.post("/updateAllVideoVideos", async (req: Request, res: Response) => {
     res.status(404).json({
       success: false,
       errors: error,
-      responseCode: 404,
+      responseCode: 400,
       resultMessage: "Your request failed."
     });
   }
@@ -54,9 +51,7 @@ router.post("/updateAllVideoVideos", async (req: Request, res: Response) => {
 
 router.get("/updateVideo/:ytId", async (req: Request, res: Response) => {
   try {
-    const video = await ytmp4(
-      `https://www.youtube.com/watch?v=${req.params.ytId}`
-    );
+    const video = await ytmp4(`https://www.youtube.com/watch?v=${req.params.ytId}`);
 
     res.status(200).json({
       resultStatus: {
@@ -74,7 +69,7 @@ router.get("/updateVideo/:ytId", async (req: Request, res: Response) => {
     res.status(404).json({
       success: false,
       errors: error,
-      responseCode: 404,
+      responseCode: 400,
       resultMessage: "Your request failed."
     });
   }
@@ -149,7 +144,7 @@ router.get("/settings/:userId", async (req: Request, res: Response) => {
     res.status(404).json({
       success: false,
       errors: error,
-      responseCode: 404,
+      responseCode: 400,
       resultMessage: "Your request failed."
     });
   }
