@@ -1,11 +1,13 @@
 import express, { Request, Response } from "express";
 import { verifyToken } from "../../middleware/verifyToken";
 import multer from "multer";
+const youtuber = require("youtube-dl-exec");
 
 import * as uploaders from "./functions";
+import { s3Functions } from "../../utils";
 
 const router = express.Router();
-router.use(verifyToken);
+// router.use(verifyToken);
 
 const storage = multer.memoryStorage();
 const uploadSingle = multer({ storage: storage }).single("file");
@@ -71,6 +73,33 @@ router.post("/youtube-video", uploadSingle, async (req: Request, res: Response) 
   );
 
   res.status(data.resultStatus.responseCode).send(data);
+});
+
+router.post("/youtube-video-2", async (req: Request, res: Response) => {
+  const videoUrl = "https://www.youtube.com/watch?v=0T-owlnvWBg";
+
+  const buffer = await youtuber(videoUrl, {
+    addHeader: ["referer:youtube.com", "user-agent:googlebot"],
+    format: "18",
+    noCheckCertificates: true,
+    noWarnings: true,
+    preferFreeFormats: true,
+    output: "-"
+  })
+    .then(async (output: any) => {
+      const videoBuffer = Buffer.from(output, "binary");
+      console.log("Downloaded video buffer:", videoBuffer);
+      await s3Functions.push(videoBuffer, `videos/user-videos-testing/${new Date().getTime()}.mp4`);
+      return videoBuffer;
+      // Use videoBuffer as needed
+
+      //send to s3
+    })
+    .catch((error: unknown) => {
+      console.error("Error downloading video:", error);
+    });
+
+  res.status(200).send({ message: "success", buffer });
 });
 
 export const fileUpload = router;
